@@ -67,6 +67,20 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
     _entry?.markNeedsBuild();
   }
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
+  double _inputRadius(BuildContext context) {
+    final border = Theme.of(context).inputDecorationTheme.border;
+    if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
+    return 10;
+  }
+
   Widget _buildOverlay(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Stack(children: [
@@ -80,7 +94,7 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
           offset: const Offset(0, 6),
           child: Material(
             elevation: 8,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(_cardRadius(context)),
             color: scheme.surface,
             child: ConstrainedConstraints(
               maxHeight: widget.maxHeight,
@@ -96,7 +110,7 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
                       prefixIcon: const Icon(Icons.search, size: 20),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(_inputRadius(context))),
                     ),
                   ),
                 ),

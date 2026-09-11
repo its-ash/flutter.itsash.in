@@ -37,9 +37,18 @@ class ThemeIconPicker extends StatelessWidget {
     );
   }
 
+  double _buttonRadius(BuildContext context) {
+    final shape = Theme.of(context).filledButtonTheme.style?.shape?.resolve({});
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final radius = _buttonRadius(context);
 
     return GridView.builder(
       shrinkWrap: true,
@@ -54,13 +63,13 @@ class ThemeIconPicker extends StatelessWidget {
         final icon = icons[index];
         final isSelected = icon == selected;
         return InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radius),
           onTap: () => onSelected?.call(icon),
           child: Container(
             decoration: BoxDecoration(
               color: isSelected ? scheme.primary.withValues(alpha: 0.15) : Colors.transparent,
               border: Border.all(color: isSelected ? scheme.primary : scheme.outline),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(radius),
             ),
             alignment: Alignment.center,
             child: Icon(icon, size: iconSize, color: isSelected ? scheme.primary : scheme.onSurface),

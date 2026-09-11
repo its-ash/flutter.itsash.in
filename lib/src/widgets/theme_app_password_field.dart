@@ -41,6 +41,14 @@ class _ThemeAppPasswordFieldState extends State<ThemeAppPasswordField> {
     return PasswordStrength.values[score];
   }
 
+  double _buttonRadius(BuildContext context) {
+    final shape = Theme.of(context).filledButtonTheme.style?.shape?.resolve({});
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 2;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -78,7 +86,7 @@ class _ThemeAppPasswordFieldState extends State<ThemeAppPasswordField> {
                 margin: EdgeInsets.only(right: i < 3 ? 4 : 0),
                 decoration: BoxDecoration(
                   color: i < _strength.index ? _strengthColor(scheme) : scheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(_buttonRadius(context).clamp(0, 2)),
                 ),
               )),
             const SizedBox(width: 8),

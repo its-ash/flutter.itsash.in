@@ -5,12 +5,16 @@ class ThemeShimmer extends StatefulWidget {
     super.key,
     this.width,
     this.height = 16,
-    this.borderRadius = 8,
+    this.borderRadius,
   });
 
   final double? width;
   final double height;
-  final double borderRadius;
+
+  /// Corner radius for the shimmer block. Defaults to the active theme's
+  /// card radius (`Theme.of(context).cardTheme.shape`) — pass an explicit
+  /// value to opt out.
+  final double? borderRadius;
 
   @override
   State<ThemeShimmer> createState() => _ThemeShimmerState();
@@ -28,6 +32,15 @@ class _ThemeShimmerState extends State<ThemeShimmer> with SingleTickerProviderSt
     super.dispose();
   }
 
+  double _radius(BuildContext context) {
+    if (widget.borderRadius != null) return widget.borderRadius!;
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -35,7 +48,7 @@ class _ThemeShimmerState extends State<ThemeShimmer> with SingleTickerProviderSt
     final highlight = scheme.onSurface.withValues(alpha: 0.16);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius),
+      borderRadius: BorderRadius.circular(_radius(context)),
       child: SizedBox(
         width: widget.width,
         height: widget.height,
@@ -77,7 +90,7 @@ class ThemeShimmerList extends StatelessWidget {
       padding: EdgeInsets.zero,
       itemCount: itemCount,
       separatorBuilder: (_, __) => SizedBox(height: spacing),
-      itemBuilder: (_, __) => ThemeShimmer(width: double.infinity, height: itemHeight, borderRadius: 12),
+      itemBuilder: (_, __) => ThemeShimmer(width: double.infinity, height: itemHeight),
     );
   }
 }

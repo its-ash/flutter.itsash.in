@@ -38,6 +38,33 @@ class LayoutSection extends StatelessWidget {
             ],
           ),
         ),
+        ShowcaseTile(
+          title: 'ThemeSplitPanel',
+          description: 'Drag the divider to resize',
+          child: SizedBox(
+            height: 160,
+            child: ThemeSplitPanel(
+              first: ColoredBox(color: Theme.of(context).colorScheme.primaryContainer),
+              second: ColoredBox(color: Theme.of(context).colorScheme.secondaryContainer),
+            ),
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeMasonryGrid',
+          child: ThemeMasonryGrid(
+            crossAxisCount: 3,
+            children: [
+              for (final h in const [60.0, 100.0, 80.0, 120.0, 70.0, 90.0])
+                Container(
+                  height: h,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ],
     );
   }

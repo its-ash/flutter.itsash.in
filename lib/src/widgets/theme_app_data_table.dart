@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:theme/src/shadows/app_shadow_theme.dart';
+
 class ThemeAppDataTable extends StatefulWidget {
   const ThemeAppDataTable({
     super.key,
@@ -57,20 +59,27 @@ class _ThemeAppDataTableState extends State<ThemeAppDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final shadows = theme.extension<AppShadowTheme>() ?? const AppShadowTheme();
     final stripe = Color.alphaBlend(
         scheme.onSurface.withValues(alpha: 0.035), scheme.surface);
     final visible = _visibleRows;
     final total = widget.rows.length;
     final pageStart = widget.pageSize != null ? _page * widget.pageSize! : 0;
 
-    final radius = BorderRadius.circular(12);
+    final radius = BorderRadius.circular(_cardRadius(theme));
 
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: radius,
-        border: Border.all(color: scheme.outline.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: shadows.borderWidth > 0
+              ? (shadows.borderColor ?? scheme.outline)
+              : scheme.outline.withValues(alpha: 0.5),
+          width: shadows.borderWidth > 0 ? shadows.borderWidth : 1,
+        ),
       ),
       // DataTable paints per-row/heading backgrounds via nested Material/Ink
       // layers that a Container's clipBehavior alone won't round at the
@@ -147,6 +156,14 @@ class _ThemeAppDataTableState extends State<ThemeAppDataTable> {
         ]),
       ),
     );
+  }
+
+  double _cardRadius(ThemeData theme) {
+    final shape = theme.cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
   }
 }
 

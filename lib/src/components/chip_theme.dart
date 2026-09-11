@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 class AppChipTheme {
   AppChipTheme._();
 
-  static ChipThemeData theme(ColorScheme scheme, TextTheme textTheme) => ChipThemeData(
+  static ChipThemeData theme(
+    ColorScheme scheme,
+    TextTheme textTheme, {
+    double radius = 8,
+    BorderSide? side,
+  }) => ChipThemeData(
     backgroundColor: Color.alphaBlend(
       scheme.onSurface.withValues(alpha: 0.05),
       scheme.surface,
@@ -20,8 +25,8 @@ class AppChipTheme {
       color: scheme.onPrimary,
       fontSize: 12,
     ),
-    side: BorderSide(color: scheme.outline),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    side: side ?? BorderSide(color: scheme.outline),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
     labelPadding: const EdgeInsets.symmetric(horizontal: 4),
     iconTheme: const IconThemeData(size: 16),

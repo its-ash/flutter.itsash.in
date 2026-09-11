@@ -10,7 +10,7 @@ class ThemeLazyImage extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.placeholder,
     this.errorWidget,
-    this.borderRadius = 12,
+    this.borderRadius,
     this.cacheWidth,
     this.cacheHeight,
     this.fadeDuration = const Duration(milliseconds: 300),
@@ -22,7 +22,12 @@ class ThemeLazyImage extends StatefulWidget {
   final BoxFit fit;
   final Widget? placeholder;
   final Widget? errorWidget;
-  final double borderRadius;
+
+  /// Corner radius for the image and its placeholder/error states.
+  /// Defaults to the active theme's card radius (`Theme.of(context)
+  /// .cardTheme.shape`) so images go square in brutalism/maximalism-style
+  /// presets along with everything else — pass an explicit value to opt out.
+  final double? borderRadius;
   final int? cacheWidth;
   final int? cacheHeight;
   final Duration fadeDuration;
@@ -59,21 +64,31 @@ class _ThemeLazyImageState extends State<ThemeLazyImage>
     return ResizeImage(base, width: widget.cacheWidth, height: widget.cacheHeight);
   }
 
+  double _radius(BuildContext context) {
+    if (widget.borderRadius != null) return widget.borderRadius!;
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final radius = _radius(context);
     final placeholder = widget.placeholder ??
         Container(
           decoration: BoxDecoration(
             color: scheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderRadius: BorderRadius.circular(radius),
           ),
         );
 
     if (_errored) {
       return widget.errorWidget ??
           ClipRRect(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderRadius: BorderRadius.circular(radius),
             child: Container(
               width: widget.width,
               height: widget.height,
@@ -121,7 +136,7 @@ class _ThemeLazyImageState extends State<ThemeLazyImage>
     );
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius),
+      borderRadius: BorderRadius.circular(radius),
       child: widget.width == null && widget.height == null
           ? image
           : SizedBox(width: widget.width, height: widget.height, child: image),

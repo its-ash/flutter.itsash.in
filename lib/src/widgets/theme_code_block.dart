@@ -7,13 +7,26 @@ class ThemeCodeBlock extends StatelessWidget {
     required this.code,
     this.language,
     this.showCopyButton = true,
-    this.borderRadius = 12,
+    this.borderRadius,
   });
 
   final String code;
   final String? language;
   final bool showCopyButton;
-  final double borderRadius;
+
+  /// Corner radius for the code block surface. Defaults to the active
+  /// theme's card radius (`Theme.of(context).cardTheme.shape`) — pass an
+  /// explicit value to opt out.
+  final double? borderRadius;
+
+  double _radius(BuildContext context) {
+    if (borderRadius != null) return borderRadius!;
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +38,7 @@ class ThemeCodeBlock extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(_radius(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(

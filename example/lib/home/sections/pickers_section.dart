@@ -55,6 +55,25 @@ class _PickersSectionState extends State<PickersSection> {
             ],
           ),
         ),
+        ShowcaseTile(
+          title: 'ThemeContextMenu<T>',
+          description: 'Right-click, or long-press on touch devices',
+          child: ThemeContextMenu<String>(
+            onSelected: (_) {},
+            items: const [
+              PopupMenuItem(value: 'copy', child: Text('Copy')),
+              PopupMenuItem(value: 'rename', child: Text('Rename')),
+              PopupMenuItem(value: 'delete', child: Text('Delete')),
+            ],
+            child: ThemeCard(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text('Right-click or long-press me'),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

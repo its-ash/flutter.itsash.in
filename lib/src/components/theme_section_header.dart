@@ -18,6 +18,9 @@ class ThemeSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shadows = Theme.of(context).extension<AppShadowTheme>() ?? const AppShadowTheme();
+    final displayTitle =
+        shadows.textTransform == ThemeTextTransform.uppercase ? title.toUpperCase() : title;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -25,7 +28,7 @@ class ThemeSectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.headlineSmall),
+              Text(displayTitle, style: AppTypography.headlineSmall),
               if (subtitle != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -53,6 +56,14 @@ class ThemeBannerCarousel extends StatelessWidget {
   final List<ThemeBannerCarouselItem> banners;
   final ValueChanged<int>? onTap;
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 20;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -73,7 +84,7 @@ class ThemeBannerCarousel extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(_cardRadius(context)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +111,7 @@ class ThemeBannerCarousel extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(_cardRadius(context)),
                     ),
                     child: Text(
                       banner.ctaLabel,

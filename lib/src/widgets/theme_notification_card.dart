@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:theme/src/shadows/app_shadow_theme.dart';
+
 enum ThemeNotificationType { info, success, warning, error, default_ }
 
 class ThemeNotificationCard extends StatelessWidget {
@@ -24,16 +26,36 @@ class ThemeNotificationCard extends StatelessWidget {
   final String? timestamp;
   final EdgeInsetsGeometry margin;
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
+  double _buttonRadius(BuildContext context) {
+    final shape = Theme.of(context).filledButtonTheme.style?.shape?.resolve({});
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final shadows = Theme.of(context).extension<AppShadowTheme>() ?? const AppShadowTheme();
     final (bg, fg, icon) = _colors(scheme);
     return Container(
       margin: margin,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: fg.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(_cardRadius(context)),
+        border: Border.all(
+          color: shadows.borderWidth > 0 ? (shadows.borderColor ?? fg) : fg.withValues(alpha: 0.2),
+          width: shadows.borderWidth > 0 ? shadows.borderWidth : 1,
+        ),
         boxShadow: [BoxShadow(color: scheme.shadow.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Padding(
@@ -41,7 +63,7 @@ class ThemeNotificationCard extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: fg.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: fg.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(_buttonRadius(context))),
             child: leading ?? Icon(icon, color: fg, size: 20),
           ),
           const SizedBox(width: 10),

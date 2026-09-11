@@ -18,8 +18,24 @@ class ThemeStylesSection extends StatelessWidget {
           valueListenable: controller,
           builder: (context, state, _) {
             return ShowcaseTile(
+              title: 'ThemeCustomizer',
+              description: 'Any theme + any color + any font, all independently — pick a color and/or font here, or a style below, in any order',
+              child: ThemeCustomizer(
+                seedColor: state.customization?.seedColor ?? Theme.of(context).colorScheme.primary,
+                pairing: state.customization?.pairing,
+                headingFont: state.customization?.headingFont,
+                bodyFont: state.customization?.bodyFont,
+                onChanged: controller.setGenerated,
+              ),
+            );
+          },
+        ),
+        ValueListenableBuilder<ThemeControllerState>(
+          valueListenable: controller,
+          builder: (context, state, _) {
+            return ShowcaseTile(
               title: 'ThemeStyleSwitcher',
-              description: 'Tap any card to live-switch the entire app theme',
+              description: 'Tap any card to switch the base style — your color/font pick above carries over',
               child: ThemeStyleSwitcher(
                 selectedId: state.styleId,
                 brightness: brightness,

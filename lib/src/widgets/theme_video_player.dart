@@ -14,7 +14,7 @@ class ThemeVideoPlayer extends StatefulWidget {
     this.looping = false,
     this.showControls = true,
     this.aspectRatio,
-    this.borderRadius = 12,
+    this.borderRadius,
   });
 
   final String source;
@@ -23,7 +23,11 @@ class ThemeVideoPlayer extends StatefulWidget {
   final bool looping;
   final bool showControls;
   final double? aspectRatio;
-  final double borderRadius;
+
+  /// Corner radius for the player surface. Defaults to the active theme's
+  /// card radius (`Theme.of(context).cardTheme.shape`) — pass an explicit
+  /// value to opt out.
+  final double? borderRadius;
 
   @override
   State<ThemeVideoPlayer> createState() => _ThemeVideoPlayerState();
@@ -54,11 +58,20 @@ class _ThemeVideoPlayerState extends State<ThemeVideoPlayer> {
     super.dispose();
   }
 
+  double _radius(BuildContext context) {
+    if (widget.borderRadius != null) return widget.borderRadius!;
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius),
+      borderRadius: BorderRadius.circular(_radius(context)),
       child: FutureBuilder<void>(
         future: _initialize,
         builder: (context, snapshot) {

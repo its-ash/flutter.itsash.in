@@ -26,6 +26,12 @@ class ThemeDropdown<T> extends StatelessWidget {
   /// entries (48px each) so short lists don't open an oversized menu.
   final double? menuHeight;
 
+  double _inputRadius(BuildContext context) {
+    final border = Theme.of(context).inputDecorationTheme.border;
+    if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
+    return 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     final resolvedMenuHeight =
@@ -38,7 +44,7 @@ class ThemeDropdown<T> extends StatelessWidget {
         constraints: BoxConstraints.tight(const Size.fromHeight(
             40)), // Shrinks total height of the anchor box
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(_inputRadius(context)),
         ),
       ),
       dropdownMenuEntries: items,

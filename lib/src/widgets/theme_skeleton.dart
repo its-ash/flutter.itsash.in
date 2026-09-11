@@ -12,12 +12,17 @@ enum ThemeSkeletonType {
 }
 
 class ThemeSkeleton extends StatelessWidget {
-  const ThemeSkeleton({super.key, this.type = ThemeSkeletonType.textLine, this.width, this.height, this.borderRadius = 8});
+  const ThemeSkeleton({super.key, this.type = ThemeSkeletonType.textLine, this.width, this.height, this.borderRadius});
 
   final ThemeSkeletonType type;
   final double? width;
   final double? height;
-  final double borderRadius;
+
+  /// Corner radius for the underlying shimmer block(s). Defaults to the
+  /// active theme's card radius — pass an explicit value to opt out.
+  /// `circleAvatar` (and the listTile leading avatar) ignore this: they're
+  /// inherently circular by design, not a theme radius bug.
+  final double? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -30,33 +35,33 @@ class ThemeSkeleton extends StatelessWidget {
         return SizedBox(
           width: width ?? double.infinity,
           height: height ?? 120,
-          child: ThemeShimmer(borderRadius: 12),
+          child: ThemeShimmer(borderRadius: borderRadius),
         );
       case ThemeSkeletonType.listTile:
         return Row(children: [
           ThemeShimmer(width: 48, height: 48, borderRadius: 24),
           const SizedBox(width: 12),
-          const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ThemeShimmer(width: 140, height: 14),
-            SizedBox(height: 8),
-            ThemeShimmer(height: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            ThemeShimmer(width: 140, height: 14, borderRadius: borderRadius),
+            const SizedBox(height: 8),
+            ThemeShimmer(height: 12, borderRadius: borderRadius),
           ])),
         ]);
       case ThemeSkeletonType.gridTile:
         return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          ThemeShimmer(width: width ?? double.infinity, height: height ?? 120, borderRadius: 12),
+          ThemeShimmer(width: width ?? double.infinity, height: height ?? 120, borderRadius: borderRadius),
           const SizedBox(height: 8),
-          const ThemeShimmer(width: 100, height: 12),
+          ThemeShimmer(width: 100, height: 12, borderRadius: borderRadius),
         ]);
       case ThemeSkeletonType.banner:
-        return ThemeShimmer(width: width ?? double.infinity, height: height ?? 80, borderRadius: 12);
+        return ThemeShimmer(width: width ?? double.infinity, height: height ?? 80, borderRadius: borderRadius);
       case ThemeSkeletonType.paragraph:
         return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           ThemeShimmer(width: width ?? double.infinity, height: 14, borderRadius: borderRadius),
           const SizedBox(height: 6),
-          const ThemeShimmer(width: 240, height: 14),
+          ThemeShimmer(width: 240, height: 14, borderRadius: borderRadius),
           const SizedBox(height: 6),
-          const ThemeShimmer(height: 14),
+          ThemeShimmer(height: 14, borderRadius: borderRadius),
         ]);
     }
   }

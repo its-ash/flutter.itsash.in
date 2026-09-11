@@ -39,15 +39,24 @@ class _ThemeDraggableListState<T> extends State<ThemeDraggableList<T>> {
     setState(() {});
   }
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final radius = _cardRadius(context);
     return ReorderableListView.builder(
       buildDefaultDragHandles: false,
       onReorder: _onReorder,
       proxyDecorator: (child, _, __) => Material(
         elevation: 8,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radius),
         color: Colors.transparent,
         child: child,
       ),
@@ -59,7 +68,7 @@ class _ThemeDraggableListState<T> extends State<ThemeDraggableList<T>> {
           margin: EdgeInsets.only(bottom: widget.spacing),
           decoration: BoxDecoration(
             color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: scheme.outline.withValues(alpha: 0.4)),
           ),
           child: Row(children: [

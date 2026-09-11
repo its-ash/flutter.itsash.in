@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:theme/theme.dart';
 import '../showcase_tile.dart';
 
-class FormsSection extends StatelessWidget {
+class FormsSection extends StatefulWidget {
   const FormsSection({super.key});
+
+  @override
+  State<FormsSection> createState() => _FormsSectionState();
+}
+
+class _FormsSectionState extends State<FormsSection> {
+  double _rating = 3.5;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +88,24 @@ class FormsSection extends StatelessWidget {
             label: 'Country',
             hint: 'Select a country',
             items: const ['United States', 'India', 'United Kingdom', 'Germany', 'Japan', 'Brazil'],
+            onChanged: (_) {},
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeRatingInput',
+          description: 'Tap-to-rate, with half-star support',
+          child: ThemeRatingInput(
+            rating: _rating,
+            allowHalfRating: true,
+            onChanged: (r) => setState(() => _rating = r),
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeTagInput',
+          description: 'Enter or comma to add a tag',
+          child: ThemeTagInput(
+            initialTags: const ['flutter', 'dart'],
+            hintText: 'Add a tag…',
             onChanged: (_) {},
           ),
         ),

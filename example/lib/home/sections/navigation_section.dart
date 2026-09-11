@@ -14,7 +14,9 @@ class _NavigationSectionState extends State<NavigationSection> with SingleTicker
   int _bottomNavIndex = 0;
   int _navBarIndex = 0;
   int _railIndex = 0;
+  int _paginationPage = 4;
   late final TabController _tabController = TabController(length: 3, vsync: this);
+  final _tourTargetKey = GlobalKey();
 
   static const _destinations = [
     ThemeNavigationDestinationItem(icon: Icons.home_outlined, selectedIcon: Icons.home, label: 'Home'),
@@ -127,6 +129,47 @@ class _NavigationSectionState extends State<NavigationSection> with SingleTicker
                 ListTile(leading: const Icon(Icons.settings_outlined), title: const Text('Settings'), onTap: () {}),
               ],
             ),
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemePagination',
+          child: ThemePagination(
+            currentPage: _paginationPage,
+            totalPages: 12,
+            onPageChanged: (p) => setState(() => _paginationPage = p),
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeBreadcrumbs',
+          child: ThemeBreadcrumbs(
+            items: [
+              ThemeBreadcrumbItem(label: 'Home', onTap: () {}),
+              ThemeBreadcrumbItem(label: 'Settings', onTap: () {}),
+              const ThemeBreadcrumbItem(label: 'Profile'),
+            ],
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeOnboardingTour',
+          description: 'Spotlight coachmarks that advance through a list of steps',
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ThemeButton(
+                key: _tourTargetKey,
+                label: 'Start tour',
+                onPressed: () => ThemeOnboardingTour.show(
+                  context,
+                  steps: [
+                    ThemeOnboardingStep(
+                      key: _tourTargetKey,
+                      title: 'Start here',
+                      description: 'This button kicks off the guided tour.',
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -31,6 +31,14 @@ class ThemeEmojiPicker extends StatelessWidget {
     );
   }
 
+  double _buttonRadius(BuildContext context) {
+    final shape = Theme.of(context).filledButtonTheme.style?.shape?.resolve({});
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -41,7 +49,7 @@ class ThemeEmojiPicker extends StatelessWidget {
       itemBuilder: (context, index) {
         final emoji = emojis[index];
         return InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(_buttonRadius(context)),
           onTap: () => onSelected?.call(emoji),
           child: Center(child: Text(emoji, style: TextStyle(fontSize: emojiSize))),
         );

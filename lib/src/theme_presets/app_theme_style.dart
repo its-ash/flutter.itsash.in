@@ -107,13 +107,14 @@ class AppThemeStyle {
     shadowTwo: BoxShadow(color: Color(0x99FFD60A), blurRadius: 24, offset: Offset(6, 12)),
     shadowThree: BoxShadow(color: Color(0x993A86FF), blurRadius: 36, offset: Offset(12, 18)),
     cardShadows: [
-      BoxShadow(color: Color(0xFFFF006E), offset: Offset(4, 4)),
-      BoxShadow(color: Color(0x66FFD60A), blurRadius: 20, offset: Offset(0, 10)),
-      BoxShadow(color: Color(0x663A86FF), blurRadius: 28, offset: Offset(8, 14)),
+      BoxShadow(color: Color(0xFFFF006E), offset: Offset(5, 5)),
+      BoxShadow(color: Color(0x77FFD60A), blurRadius: 22, offset: Offset(0, 12)),
+      BoxShadow(color: Color(0x773A86FF), blurRadius: 32, offset: Offset(10, 16)),
     ],
     buttonShadows: [
-      BoxShadow(color: Color(0xFFFF006E), offset: Offset(3, 3)),
-      BoxShadow(color: Color(0x99FFD60A), blurRadius: 16, offset: Offset(0, 6)),
+      BoxShadow(color: Color(0xFFFF006E), offset: Offset(4, 4)),
+      BoxShadow(color: Color(0xAAFFD60A), blurRadius: 18, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x773A86FF), blurRadius: 22, offset: Offset(6, 10)),
     ],
   );
 
@@ -123,13 +124,14 @@ class AppThemeStyle {
     shadowTwo: BoxShadow(color: Color(0xCCFFD60A), blurRadius: 28, offset: Offset(6, 12)),
     shadowThree: BoxShadow(color: Color(0xCC3A86FF), blurRadius: 40, offset: Offset(12, 18)),
     cardShadows: [
-      BoxShadow(color: Color(0xCCFF006E), offset: Offset(4, 4)),
-      BoxShadow(color: Color(0xCCFFD60A), blurRadius: 24, offset: Offset(0, 10)),
-      BoxShadow(color: Color(0xCC3A86FF), blurRadius: 32, offset: Offset(8, 14)),
+      BoxShadow(color: Color(0xCCFF006E), offset: Offset(5, 5)),
+      BoxShadow(color: Color(0xCCFFD60A), blurRadius: 26, offset: Offset(0, 12)),
+      BoxShadow(color: Color(0xCC3A86FF), blurRadius: 36, offset: Offset(10, 16)),
     ],
     buttonShadows: [
-      BoxShadow(color: Color(0xFFFF006E), offset: Offset(3, 3)),
-      BoxShadow(color: Color(0xCCFFD60A), blurRadius: 18, offset: Offset(0, 6)),
+      BoxShadow(color: Color(0xFFFF006E), offset: Offset(4, 4)),
+      BoxShadow(color: Color(0xEEFFD60A), blurRadius: 20, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0xCC3A86FF), blurRadius: 24, offset: Offset(6, 10)),
     ],
   );
 
@@ -320,6 +322,7 @@ class AppThemeStyle {
       shadows: _flat,
       cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFFBDBDBD), borderWidth: 1, forceFlat: true,
     ),
     darkPreset: AppThemePreset(
       id: 'flat', name: 'Flat', brightness: Brightness.dark,
@@ -335,6 +338,7 @@ class AppThemeStyle {
       shadows: _flat,
       cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFF424242), borderWidth: 1, forceFlat: true,
     ),
   );
 
@@ -383,11 +387,12 @@ class AppThemeStyle {
         secondaryContainer: Color(0xFFE0E8F0), onSecondaryContainer: Color(0xFF2A3A50),
         surface: Color(0xFFE0E5EC), onSurface: Color(0xFF333B47),
         surfaceContainerLow: Color(0xFFE8ECF2), surfaceContainer: Color(0xFFDEE3EA), surfaceContainerHigh: Color(0xFFD4D9E0),
-        outline: Color(0xFFC0C8D0),
+        outline: Color(0xFF8D97A6),
       ),
       shadows: _neuLight,
       cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 16, dialogRadius: 24,
-      inputFilled: false, inputBorderWidth: 0,
+      inputFilled: false, inputBorderWidth: 1,
+      cardBorderColor: Color(0x338D97A6), cardBorderWidth: 1,
     ),
     darkPreset: AppThemePreset(
       id: 'neumorphism', name: 'Neumorphism', brightness: Brightness.dark,
@@ -398,11 +403,12 @@ class AppThemeStyle {
         secondaryContainer: Color(0xFF2A3A50), onSecondaryContainer: Color(0xFFE0E8F0),
         surface: Color(0xFF2A2E35), onSurface: Color(0xFFD0D8E0),
         surfaceContainerLow: Color(0xFF32373E), surfaceContainer: Color(0xFF2A2E35), surfaceContainerHigh: Color(0xFF22262C),
-        outline: Color(0xFF505560),
+        outline: Color(0xFF7A8494),
       ),
       shadows: _neuDark,
       cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 16, dialogRadius: 24,
-      inputFilled: false, inputBorderWidth: 0,
+      inputFilled: false, inputBorderWidth: 1,
+      cardBorderColor: Color(0x407A8494), cardBorderWidth: 1,
     ),
   );
 
@@ -421,7 +427,8 @@ class AppThemeStyle {
       ),
       shadows: _glassLight,
       cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 16, dialogRadius: 28,
-      cardElevation: 0, buttonElevation: 0,
+      cardElevation: 0, buttonElevation: 0, cardBlur: 18,
+      cardBorderColor: Color(0x99FFFFFF), cardBorderWidth: 1,
     ),
     darkPreset: AppThemePreset(
       id: 'glassmorphism', name: 'Glassmorphism', brightness: Brightness.dark,
@@ -436,7 +443,8 @@ class AppThemeStyle {
       ),
       shadows: _glassDark,
       cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 16, dialogRadius: 28,
-      cardElevation: 0, buttonElevation: 0,
+      cardElevation: 0, buttonElevation: 0, cardBlur: 18,
+      cardBorderColor: Color(0xB3FFFFFF), cardBorderWidth: 1,
     ),
   );
 
@@ -457,6 +465,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 3,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFF111111), cardBorderWidth: 3,
+      borderColor: Color(0xFF111111), borderWidth: 3, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.8,
     ),
     darkPreset: AppThemePreset(
       id: 'brutalism', name: 'Brutalism', brightness: Brightness.dark,
@@ -473,6 +484,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 3,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFFFFFFFF), cardBorderWidth: 3,
+      borderColor: Color(0xFFFFFFFF), borderWidth: 3, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.8,
     ),
   );
 
@@ -491,8 +505,10 @@ class AppThemeStyle {
         outline: Color(0xFFFF006E),
       ),
       shadows: _maxiLight,
-      cardRadius: 32, cardMargin: 14, cardElevation: 4, buttonRadius: 28, buttonElevation: 3, inputRadius: 20, dialogRadius: 32, dialogElevation: 6,
-      inputBorderWidth: 2,
+      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 20, dialogRadius: 32, dialogElevation: 10,
+      inputBorderWidth: 3,
+      cardBorderColor: Color(0xFFFF006E), cardBorderWidth: 3,
+      borderColor: Color(0xFF1A0033), borderWidth: 3,
     ),
     darkPreset: AppThemePreset(
       id: 'maximalism', name: 'Maximalism', brightness: Brightness.dark,
@@ -507,8 +523,10 @@ class AppThemeStyle {
         outline: Color(0xFFFFD60A),
       ),
       shadows: _maxiDark,
-      cardRadius: 32, cardMargin: 14, cardElevation: 4, buttonRadius: 28, buttonElevation: 3, inputRadius: 20, dialogRadius: 32, dialogElevation: 6,
-      inputBorderWidth: 2,
+      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 20, dialogRadius: 32, dialogElevation: 10,
+      inputBorderWidth: 3,
+      cardBorderColor: Color(0xFFFFD60A), cardBorderWidth: 3,
+      borderColor: Color(0xFFFFD60A), borderWidth: 3,
     ),
   );
 
@@ -628,6 +646,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 2,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFF1A1A1A), cardBorderWidth: 2,
+      borderColor: Color(0xFF1A1A1A), borderWidth: 2, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.5,
     ),
     darkPreset: AppThemePreset(
       id: 'retro-8bit', name: 'Retro 8-bit', brightness: Brightness.dark,
@@ -645,6 +666,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 2,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFF00E5FF), cardBorderWidth: 2,
+      borderColor: Color(0xFF00E5FF), borderWidth: 2, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.5,
     ),
   );
 
@@ -665,6 +689,8 @@ class AppThemeStyle {
       shadows: _cyber,
       cardRadius: 4, buttonRadius: 2, inputRadius: 2, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFF00FFFF), borderWidth: 1.5,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.2,
     ),
     darkPreset: AppThemePreset(
       id: 'cyberpunk', name: 'Cyberpunk', brightness: Brightness.dark,
@@ -681,6 +707,8 @@ class AppThemeStyle {
       shadows: _cyber,
       cardRadius: 4, buttonRadius: 2, inputRadius: 2, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFF00FFFF), borderWidth: 1.5,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.2,
     ),
   );
 
@@ -738,6 +766,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 3,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFF1A1A1A), cardBorderWidth: 3,
+      borderColor: Color(0xFF1A1A1A), borderWidth: 2.5, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.6,
     ),
     darkPreset: AppThemePreset(
       id: 'bauhaus', name: 'Bauhaus', brightness: Brightness.dark,
@@ -755,6 +786,9 @@ class AppThemeStyle {
       cardRadius: 0, buttonRadius: 0, inputRadius: 0, dialogRadius: 0,
       inputFilled: false, inputBorderWidth: 3,
       splashFactory: NoSplash.splashFactory,
+      cardBorderColor: Color(0xFFF5F0E6), cardBorderWidth: 3,
+      borderColor: Color(0xFFF5F0E6), borderWidth: 2.5, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 0.6,
     ),
   );
 
@@ -808,6 +842,8 @@ class AppThemeStyle {
       shadows: _typo,
       cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFF111111), borderWidth: 1, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.5,
     ),
     darkPreset: AppThemePreset(
       id: 'typographic', name: 'Typographic', brightness: Brightness.dark,
@@ -823,6 +859,8 @@ class AppThemeStyle {
       shadows: _typo,
       cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
+      borderColor: Color(0xFFFFFFFF), borderWidth: 1, forceFlat: true,
+      textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.5,
     ),
   );
 
@@ -842,6 +880,7 @@ class AppThemeStyle {
       shadows: _mono,
       cardRadius: 8, buttonRadius: 8, inputRadius: 8, dialogRadius: 8,
       inputFilled: false, inputBorderWidth: 1,
+      forceFlat: true,
     ),
     darkPreset: AppThemePreset(
       id: 'minimalism-mono', name: 'Minimalism Mono', brightness: Brightness.dark,
@@ -857,6 +896,7 @@ class AppThemeStyle {
       shadows: _mono,
       cardRadius: 8, buttonRadius: 8, inputRadius: 8, dialogRadius: 8,
       inputFilled: false, inputBorderWidth: 1,
+      forceFlat: true,
     ),
   );
 
@@ -877,6 +917,7 @@ class AppThemeStyle {
       shadows: _paperLight,
       cardRadius: 4, cardMargin: 10, buttonRadius: 4, inputRadius: 4, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 2,
+      borderColor: Color(0xFF1D3557), borderWidth: 1,
     ),
     darkPreset: AppThemePreset(
       id: 'papercut', name: 'Papercut', brightness: Brightness.dark,
@@ -893,6 +934,7 @@ class AppThemeStyle {
       shadows: _paperDark,
       cardRadius: 4, cardMargin: 10, buttonRadius: 4, inputRadius: 4, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 2,
+      borderColor: Color(0xFFE63946), borderWidth: 1,
     ),
   );
 
@@ -936,5 +978,5 @@ class AppThemeStyle {
   ];
 
   static AppThemeStyle byId(String id) =>
-      all.firstWhere((s) => s.id == id, orElse: () => light);
+      all.firstWhere((s) => s.id == id, orElse: () => material);
 }

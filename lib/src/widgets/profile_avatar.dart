@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:theme/src/shadows/app_shadow_theme.dart';
+
 class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({
     super.key,
@@ -23,6 +25,7 @@ class ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final shadows = Theme.of(context).extension<AppShadowTheme>() ?? const AppShadowTheme();
 
     Widget avatar = CircleAvatar(
       radius: radius,
@@ -41,6 +44,19 @@ class ProfileAvatar extends StatelessWidget {
                 )
               : Icon(icon, size: radius, color: scheme.onPrimaryContainer)),
     );
+
+    if (shadows.borderWidth > 0) {
+      avatar = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: shadows.borderColor ?? scheme.outline,
+            width: shadows.borderWidth * 0.5,
+          ),
+        ),
+        child: avatar,
+      );
+    }
 
     if (showEditBadge) {
       avatar = Stack(

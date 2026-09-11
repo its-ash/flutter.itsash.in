@@ -35,6 +35,9 @@ class LightPresets {
     buttonRadius: 4,
     inputRadius: 4,
     dialogRadius: 4,
+    borderColor: Color(0xFFBDBDBD),
+    borderWidth: 1,
+    forceFlat: true,
   );
 
   static const material = AppThemePreset(
@@ -118,6 +121,11 @@ class LightPresets {
     buttonRadius: 0,
     inputRadius: 0,
     dialogRadius: 0,
+    borderColor: Color(0xFF111111),
+    borderWidth: 3,
+    forceFlat: true,
+    textTransform: ThemeTextTransform.uppercase,
+    letterSpacingBoost: 0.8,
   );
 
   static const maximalism = AppThemePreset(
@@ -140,6 +148,8 @@ class LightPresets {
     buttonRadius: 28,
     inputRadius: 20,
     dialogRadius: 32,
+    borderColor: Color(0xFF1A0033),
+    borderWidth: 3,
   );
 
   static final skeuomorphism = AppThemePreset(
@@ -184,6 +194,8 @@ class LightPresets {
     buttonRadius: 8,
     inputRadius: 8,
     dialogRadius: 12,
+    borderColor: Color(0xFFDADADA),
+    borderWidth: 1,
   );
 
   static const retro8bit = AppThemePreset(
@@ -206,6 +218,11 @@ class LightPresets {
     buttonRadius: 0,
     inputRadius: 0,
     dialogRadius: 0,
+    borderColor: Color(0xFF1A1A1A),
+    borderWidth: 3,
+    forceFlat: true,
+    textTransform: ThemeTextTransform.uppercase,
+    letterSpacingBoost: 0.5,
   );
 
   static const cyberpunk = AppThemePreset(
@@ -228,6 +245,10 @@ class LightPresets {
     buttonRadius: 2,
     inputRadius: 2,
     dialogRadius: 4,
+    borderColor: Color(0xFF00FFFF),
+    borderWidth: 1.5,
+    textTransform: ThemeTextTransform.uppercase,
+    letterSpacingBoost: 1.2,
   );
 
   static final claymorphism = AppThemePreset(
@@ -272,6 +293,11 @@ class LightPresets {
     buttonRadius: 0,
     inputRadius: 0,
     dialogRadius: 0,
+    borderColor: Color(0xFF1A1A1A),
+    borderWidth: 2.5,
+    forceFlat: true,
+    textTransform: ThemeTextTransform.uppercase,
+    letterSpacingBoost: 0.6,
   );
 
   static const organic = AppThemePreset(
@@ -316,6 +342,11 @@ class LightPresets {
     buttonRadius: 2,
     inputRadius: 2,
     dialogRadius: 2,
+    borderColor: Color(0xFF111111),
+    borderWidth: 1,
+    forceFlat: true,
+    textTransform: ThemeTextTransform.uppercase,
+    letterSpacingBoost: 1.5,
   );
 
   static const minimalismMono = AppThemePreset(
@@ -338,6 +369,7 @@ class LightPresets {
     buttonRadius: 8,
     inputRadius: 8,
     dialogRadius: 8,
+    forceFlat: true,
   );
 
   static const papercut = AppThemePreset(
@@ -360,6 +392,8 @@ class LightPresets {
     buttonRadius: 4,
     inputRadius: 4,
     dialogRadius: 4,
+    borderColor: Color(0xFF1D3557),
+    borderWidth: 1,
   );
 
   static const skeuomorphismClassic = AppThemePreset(

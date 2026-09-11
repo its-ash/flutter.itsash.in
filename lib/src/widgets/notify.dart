@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:theme/src/shadows/app_shadow_theme.dart';
+
 enum NotifyType { success, error, warning, info }
 
 class Notify {
@@ -13,6 +15,11 @@ class Notify {
     SnackBarAction? action,
   }) {
     final scheme = Theme.of(context).colorScheme;
+    final cardShape = Theme.of(context).cardTheme.shape;
+    final radius = cardShape is RoundedRectangleBorder
+        ? cardShape.borderRadius.resolve(TextDirection.ltr).topLeft.x
+        : 12.0;
+    final shadows = Theme.of(context).extension<AppShadowTheme>() ?? const AppShadowTheme();
     final (bg, fg, icon) = switch (type) {
       NotifyType.success => (Colors.green.shade600, Colors.white, Icons.check_circle_outline),
       NotifyType.error => (scheme.error, scheme.onError, Icons.error_outline),
@@ -28,7 +35,12 @@ class Notify {
           duration: duration,
           action: action,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+            side: shadows.borderWidth > 0
+                ? BorderSide(color: shadows.borderColor ?? fg, width: shadows.borderWidth * 0.5)
+                : BorderSide.none,
+          ),
           content: Row(
             children: [
               Icon(icon, color: fg),

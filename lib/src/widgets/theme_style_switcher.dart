@@ -21,7 +21,7 @@ class ThemeStyleSwitcher extends StatefulWidget {
   ThemeStyleSwitcher({
     super.key,
     List<AppThemeStyle>? styles,
-    this.selectedId = 'light',
+    this.selectedId = 'material',
     this.onSelected,
     this.brightness = Brightness.light,
     this.cardWidth = 140,
@@ -72,11 +72,11 @@ class _ThemeStyleSwitcherState extends State<ThemeStyleSwitcher> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: widget.cardHeight + _labelHeight(context),
+      height: widget.cardHeight + _labelHeight(context) + 8,
       child: ListView.separated(
         controller: _ctrl,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         itemCount: widget.styles.length,
         separatorBuilder: (_, __) => SizedBox(width: widget.spacing),
         itemBuilder: (_, i) {
@@ -139,23 +139,30 @@ class _StylePreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = preset.colorScheme;
     final shadows = preset.shadows;
+    final radius = preset.cardRadius.clamp(8, 20).toDouble();
+    final borderWidth = selected ? 2.5 : 1.0;
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(preset.cardRadius.clamp(8, 20)),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color:
               selected ? scheme.primary : scheme.outline.withValues(alpha: 0.3),
-          width: selected ? 2.5 : 1,
+          width: borderWidth,
         ),
         boxShadow: [
           shadows.shadowOne,
           if (selected) shadows.shadowTwo,
         ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: _StylePreview(preset: preset),
+      padding: EdgeInsets.all(borderWidth),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+          (radius - borderWidth).clamp(0, radius),
+        ),
+        child: _StylePreview(preset: preset),
+      ),
     );
   }
 }

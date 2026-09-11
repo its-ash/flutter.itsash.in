@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'package:theme/src/shadows/app_shadow_theme.dart';
@@ -39,24 +41,46 @@ class ThemeCard extends StatelessWidget {
     final cardColor = color ?? cardTheme.color ?? theme.colorScheme.surface;
     final radius = BorderRadius.circular(r);
 
+    Widget surface = Material(
+      color: cardColor,
+      borderRadius: radius,
+      clipBehavior: clipBehavior,
+      child: child,
+    );
+
+    if (shadows.cardBlur > 0) {
+      surface = ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: shadows.cardBlur,
+            sigmaY: shadows.cardBlur,
+          ),
+          child: surface,
+        ),
+      );
+    }
+
+    final border = selected
+        ? Border.all(
+            color: selectedColor ?? theme.colorScheme.primary,
+            width: selectedBorderWidth,
+          )
+        : (shadows.cardBorderWidth > 0
+            ? Border.all(
+                color: shadows.cardBorderColor ?? theme.colorScheme.outline,
+                width: shadows.cardBorderWidth,
+              )
+            : null);
+
     return Container(
       margin: m,
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: shadows.cardShadow,
-        border: selected
-            ? Border.all(
-                color: selectedColor ?? theme.colorScheme.primary,
-                width: selectedBorderWidth,
-              )
-            : null,
+        border: border,
       ),
-      child: Material(
-        color: cardColor,
-        borderRadius: radius,
-        clipBehavior: clipBehavior,
-        child: child,
-      ),
+      child: surface,
     );
   }
 

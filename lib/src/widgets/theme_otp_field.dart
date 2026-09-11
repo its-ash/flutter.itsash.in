@@ -50,9 +50,16 @@ class _ThemeOtpFieldState extends State<ThemeOtpField> {
     }
   }
 
+  double _inputRadius(BuildContext context) {
+    final border = Theme.of(context).inputDecorationTheme.border;
+    if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final radius = _inputRadius(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -75,11 +82,11 @@ class _ThemeOtpFieldState extends State<ThemeOtpField> {
                 counterText: '',
                 contentPadding: EdgeInsets.zero,
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(radius),
                   borderSide: BorderSide(color: scheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(radius),
                   borderSide: BorderSide(color: scheme.primary, width: 2),
                 ),
               ),

@@ -28,6 +28,7 @@ Widgets are named `ThemeX` (e.g. `ThemeButton`) to avoid clashing with Flutter's
 - [Cards & surfaces](#cards--surfaces)
 - [Notifications & feedback](#notifications--feedback)
 - [Navigation](#navigation)
+- [Navigation & wayfinding](#navigation--wayfinding)
 - [Inputs & selection](#inputs--selection)
 - [Lists & data](#lists--data)
 - [Pickers & menus](#pickers--menus)
@@ -47,7 +48,7 @@ Widgets are named `ThemeX` (e.g. `ThemeButton`) to avoid clashing with Flutter's
 ## Buttons & actions
 
 ### `ThemeButton`
-Standard button with 4 visual variants, optional icon.
+Standard button with 4 visual variants, optional icon, optional semantic status color.
 
 ```dart
 ThemeButton({
@@ -55,11 +56,14 @@ ThemeButton({
   VoidCallback? onPressed,
   ThemeButtonVariant variant = ThemeButtonVariant.filled, // elevated | filled | outlined | text
   IconData? icon,
+  ThemeButtonStatus? status, // success | error | warning | info — overrides the theme's primary color
 })
 ```
 ```dart
 ThemeButton(label: 'Checkout', onPressed: () {}, variant: ThemeButtonVariant.filled, icon: Icons.arrow_forward)
+ThemeButton(label: 'Delete', onPressed: () {}, status: ThemeButtonStatus.error)
 ```
+`status` reuses the same palette as `Notify`/`ThemeStatusPill` (`success` = green, `warning` = orange, `error` = `colorScheme.error`, `info` = `colorScheme.primary`) across all 4 variants — e.g. a `filled` status button fills with the status color, an `outlined` one uses it for the border/text instead of the border/fill being solid black or theme-primary.
 
 ### `ThemeIconButton`
 ```dart
@@ -159,6 +163,24 @@ Notify.success(context, 'Order placed successfully');
 Notify.error(context, 'Payment failed, please try again');
 ```
 Colors: success = green, error = `colorScheme.error`, warning = orange, info = `colorScheme.inverseSurface`. Requires a `Scaffold`/`ScaffoldMessenger` ancestor (standard Flutter requirement for SnackBars).
+
+### `ThemeToast`
+Like `Notify` but does not require a `Scaffold`/`ScaffoldMessenger` — inserts an `OverlayEntry` via `Overlay.of(context)` instead, so it works anywhere in the widget tree. Auto-dismisses after `duration`; repeated calls stack instead of overlapping.
+```dart
+ThemeToast.show(context, String message, {
+  ThemeToastType type = ThemeToastType.info, // success | error | warning | info
+  Duration duration = const Duration(seconds: 3),
+})
+
+// Shorthands
+ThemeToast.success(context, String message, {Duration? duration})
+ThemeToast.error(context, String message, {Duration? duration})
+ThemeToast.warning(context, String message, {Duration? duration})
+ThemeToast.info(context, String message, {Duration? duration})
+```
+```dart
+ThemeToast.success(context, 'Saved');
+```
 
 ### `ThemeSnackBar`
 Lower-level, unstyled snackbar (no type/color/icon) — use `Notify` instead unless you need a bare message.
@@ -260,6 +282,56 @@ ThemeDrawer({required List<Widget> children})
 Implements `PreferredSizeWidget` — use directly as a `Scaffold.appBar.bottom` or in a `TabBar` slot.
 ```dart
 ThemeTabBar({required List<String> tabs, TabController? controller})
+```
+
+---
+
+## Navigation & wayfinding
+
+### `ThemePagination`
+Page-number control with prev/next arrows, current page highlighted with `colorScheme.primary`, ellipsis for large page counts (e.g. `1 2 3 … 8 9 10`).
+```dart
+ThemePagination({
+  required int currentPage,
+  required int totalPages,
+  required ValueChanged<int> onPageChanged,
+  int maxVisiblePages = 7,
+  double? borderRadius,
+})
+```
+```dart
+ThemePagination(currentPage: _page, totalPages: 42, onPageChanged: (p) => setState(() => _page = p))
+```
+
+### `ThemeBreadcrumbs`
+Horizontal trail of tappable labels separated by a chevron (or custom icon); the last item is non-tappable and styled as the current location.
+```dart
+ThemeBreadcrumbItem({required String label, VoidCallback? onTap})
+
+ThemeBreadcrumbs({
+  required List<ThemeBreadcrumbItem> items,
+  IconData separatorIcon = Icons.chevron_right,
+})
+```
+```dart
+ThemeBreadcrumbs(items: [
+  ThemeBreadcrumbItem(label: 'Home', onTap: () {}),
+  ThemeBreadcrumbItem(label: 'Settings', onTap: () {}),
+  const ThemeBreadcrumbItem(label: 'Profile'),
+])
+```
+
+### `ThemeOnboardingTour`
+Spotlight/coachmark overlay: dims the screen and cuts a highlight around each step's target widget (located via its `GlobalKey`), with a tooltip-style card and Next/Skip/Done actions advancing through the steps. Self-contained — call the static method, no return value.
+```dart
+ThemeOnboardingStep({required GlobalKey key, required String title, required String description})
+
+ThemeOnboardingTour.show(BuildContext context, {required List<ThemeOnboardingStep> steps})
+```
+```dart
+ThemeOnboardingTour.show(context, steps: [
+  ThemeOnboardingStep(key: _fabKey, title: 'Add an item', description: 'Tap here to create a new entry.'),
+]);
 ```
 
 ---
@@ -392,6 +464,50 @@ Bordered, rounded container around Material's `DataTable`, with automatic zebra-
 ThemeDataTable({required List<DataColumn> columns, required List<DataRow> rows})
 ```
 
+### `ThemeTreeView<T>`
+Nested expandable tree list over generic node data — indent per depth, animated expand/collapse chevron, optional leading icon per node.
+```dart
+ThemeTreeNode<T>({
+  required T value,
+  required String label,
+  List<ThemeTreeNode<T>> children = const [],
+  IconData? icon,
+})
+
+ThemeTreeView<T>({
+  required List<ThemeTreeNode<T>> nodes,
+  ValueChanged<ThemeTreeNode<T>>? onNodeTap,
+  double indent = 20,
+})
+```
+```dart
+ThemeTreeView<String>(nodes: [
+  ThemeTreeNode(value: 'src', label: 'src', icon: Icons.folder_outlined, children: [
+    ThemeTreeNode(value: 'main.dart', label: 'main.dart', icon: Icons.description_outlined),
+  ]),
+])
+```
+
+### `ThemeTimeline`
+Vertical timeline: a connector line + dot per entry, with title/subtitle/timestamp and semantic dot coloring (success/error/warning/info, same palette as `ThemeStatusPill`).
+```dart
+ThemeTimelineEntry({
+  required String title,
+  String? description,
+  String? timestamp,
+  Color? dotColor,   // overrides the status-derived color
+  ThemeStatus? status,
+})
+
+ThemeTimeline({required List<ThemeTimelineEntry> entries})
+```
+```dart
+ThemeTimeline(entries: [
+  ThemeTimelineEntry(title: 'Order placed', timestamp: '9:02 AM', status: ThemeStatus.success),
+  ThemeTimelineEntry(title: 'Payment failed', timestamp: '9:05 AM', status: ThemeStatus.error),
+])
+```
+
 ### `ThemeScrollbar`
 ```dart
 ThemeScrollbar({required Widget child, ScrollController? controller, bool thumbVisibility = true})
@@ -430,6 +546,23 @@ ThemePopupMenu<T>({
 })
 ```
 
+### `ThemeContextMenu<T>`
+Right-click (secondary-tap) context menu wrapping a child, built on `showMenu` so it matches `ThemePopupMenu`'s styling; also triggers on long-press as a touch-device fallback.
+```dart
+ThemeContextMenu<T>({
+  required Widget child,
+  required List<PopupMenuEntry<T>> items,
+  ValueChanged<T>? onSelected,
+})
+```
+```dart
+ThemeContextMenu<String>(
+  items: const [PopupMenuItem(value: 'copy', child: Text('Copy')), PopupMenuItem(value: 'delete', child: Text('Delete'))],
+  onSelected: (v) => print(v),
+  child: const Card(child: Padding(padding: EdgeInsets.all(24), child: Text('Right-click me'))),
+)
+```
+
 ---
 
 ## Layout & misc
@@ -459,6 +592,37 @@ ThemeBannerCarousel({
   required List<ThemeBannerCarouselItem> banners,
   ValueChanged<int>? onTap, // index of tapped banner
 })
+```
+
+### `ThemeSplitPanel`
+Two-pane layout with a draggable divider that resizes both panes live.
+```dart
+ThemeSplitPanel({
+  required Widget first,
+  required Widget second,
+  Axis axis = Axis.horizontal,
+  double initialRatio = 0.5,
+  double minRatio = 0.15,
+  double maxRatio = 0.85,
+  ValueChanged<double>? onRatioChanged,
+  double dividerThickness = 8,
+})
+```
+```dart
+ThemeSplitPanel(first: const FileTree(), second: const Editor(), initialRatio: 0.3)
+```
+
+### `ThemeMasonryGrid`
+Staggered/Pinterest-style grid — items of varying height flow into N columns, each new item going to the shortest column.
+```dart
+ThemeMasonryGrid({
+  required List<Widget> children,
+  int crossAxisCount = 2,
+  double spacing = 8,
+})
+```
+```dart
+ThemeMasonryGrid(crossAxisCount: 3, children: [for (final photo in photos) PhotoCard(photo)])
 ```
 
 ---
@@ -556,6 +720,41 @@ ProfileAvatar({
 ProfileAvatar(radius: 40, initials: 'AR', showEditBadge: true, onTap: () => _editProfile())
 ```
 
+### `ThemeRatingInput`
+Interactive tappable star rating (contrast with the display-only `RatingStars` above) — tap a star to set the rating, or tap its left/right half when `allowHalfRating` is on.
+```dart
+ThemeRatingInput({
+  required double rating,
+  ValueChanged<double>? onChanged, // null = read-only
+  double size = 24,
+  int starCount = 5,
+  bool allowHalfRating = false,
+  Color color = const Color(0xFFFFA726),
+})
+```
+```dart
+ThemeRatingInput(rating: _rating, onChanged: (r) => setState(() => _rating = r), allowHalfRating: true)
+```
+
+### `ThemeAvatarGroup`
+Overlapping/stacked circular avatars (built on `ProfileAvatar`) with a "+N more" overflow indicator once the list exceeds `maxVisible`.
+```dart
+ThemeAvatarData({String? imageUrl, String? initials, Color? backgroundColor})
+
+ThemeAvatarGroup({
+  required List<ThemeAvatarData> avatars,
+  int maxVisible = 4,
+  double radius = 18,
+})
+```
+```dart
+ThemeAvatarGroup(avatars: [
+  const ThemeAvatarData(initials: 'AR'),
+  const ThemeAvatarData(initials: 'BK'),
+  const ThemeAvatarData(initials: 'CJ'),
+], maxVisible: 2)
+```
+
 ---
 
 ## State & status widgets
@@ -598,7 +797,7 @@ ThemeErrorState({
 ### `ThemeShimmer` / `ThemeShimmerList`
 Animated skeleton-loading placeholder (sweeping gradient). `ThemeShimmerList` is a preset vertical list of shimmer rows for list-loading states.
 ```dart
-ThemeShimmer({double? width, double height = 16, double borderRadius = 8})
+ThemeShimmer({double? width, double height = 16, double? borderRadius}) // borderRadius defaults to the active theme's card radius
 ThemeShimmerList({int itemCount = 6, double itemHeight = 64, double spacing = 12})
 ```
 ```dart
@@ -696,6 +895,20 @@ ThemePasswordField({
 })
 ```
 
+### `ThemeTagInput`
+Free-form chip/token input — pressing Enter or comma converts the current text into a themed `ThemeChip`, each individually removable.
+```dart
+ThemeTagInput({
+  List<String> initialTags = const [],
+  ValueChanged<List<String>>? onChanged,
+  int? maxTags,
+  String? hintText,
+})
+```
+```dart
+ThemeTagInput(initialTags: const ['flutter', 'dart'], onChanged: (tags) => print(tags), maxTags: 5)
+```
+
 ### `ThemeLabeledField`
 Generic label (+ optional required `*` marker) + field + helper text wrapper, for building form rows around any input widget (not just `ThemeTextField`).
 ```dart
@@ -745,7 +958,7 @@ ThemeVideoPlayer({
   bool looping = false,
   bool showControls = true,
   double? aspectRatio,   // defaults to the video's native aspect ratio once loaded
-  double borderRadius = 12,
+  double? borderRadius,  // defaults to the active theme's card radius
 })
 ```
 `sourceType: .file` uses `dart:io`'s `File` — don't use it on web builds.
@@ -765,7 +978,7 @@ ThemeMarkdown({
 ### `ThemeCodeBlock`
 Monospace code display with an optional language label and copy-to-clipboard button. No syntax highlighting (no highlighter dependency) — use `ThemeMarkdown` with fenced code blocks if you need that.
 ```dart
-ThemeCodeBlock({required String code, String? language, bool showCopyButton = true, double borderRadius = 12})
+ThemeCodeBlock({required String code, String? language, bool showCopyButton = true, double? borderRadius}) // borderRadius defaults to the active theme's card radius
 ```
 
 ### `ThemeExpandableText`
@@ -843,6 +1056,17 @@ Row/wrap of color swatches with a checkmark on the selected one (auto-contrasted
 ThemeColorPicker({required List<Color> colors, Color? selected, ValueChanged<Color>? onSelected, double swatchSize = 36, double spacing = 10})
 ```
 
+### `ThemeHuePicker`
+Free-form color picker: a saturation/value square plus a hue strip, built from `Container`/`GestureDetector`/`CustomPaint` — no extra package. Use this when the user needs to pick any color, not just one from a fixed list (`ThemeColorPicker` above).
+```dart
+ThemeHuePicker({
+  required Color color,
+  required ValueChanged<Color> onChanged,
+  double squareSize = 200,
+  double stripWidth = 28,
+})
+```
+
 ### `ThemeFileUploader`
 Dashed drop-zone-style picker button (wraps `file_picker`) with a picked-files list (name + remove button) below it.
 ```dart
@@ -895,7 +1119,7 @@ Beyond `google_fonts`, this package depends on `video_player` (`ThemeVideoPlayer
 ## Colors & shadows (advanced / theming internals)
 
 - `AppColors` — static light/dark palette constants and `lightColorScheme` / `darkColorScheme` getters. Pass a derived `ColorScheme` into `AppTheme.lightTheme(colorScheme: ...)` to rebrand. Defines full container roles (`primaryContainer`/`onPrimaryContainer`, `secondaryContainer`/`onSecondaryContainer`, `errorContainer`/`onErrorContainer`, `surfaceContainer(Low/High)`, `inverseSurface`/`onInverseSurface`) — not just the base `primary`/`secondary`/`surface`/`error` — so any widget that reads a container role from `ColorScheme` gets a color coherent with your brand instead of Flutter's unrelated hardcoded defaults.
-- `AppShadowTheme` — a `ThemeExtension` holding named `BoxShadow` values (`shadowOne`, `cardShadow`, etc.), retrieved via `Theme.of(context).extension<AppShadowTheme>()`. `ThemeCard` uses this automatically. `AppShadowTheme()` (default) is tuned for light backgrounds; `AppShadowTheme.dark()` uses higher-opacity, larger-blur shadows so elevation stays visible against near-black surfaces — `AppTheme.darkTheme()` uses `AppShadowTheme.dark()` by default. Cards, menus, and dropdowns also lift onto a `surfaceContainer`-toned background in dark mode so elevation reads from surface tint as well as shadow, matching Material 3 dark-theme conventions.
+- `AppShadowTheme` — a `ThemeExtension` holding named `BoxShadow` values (`shadowOne`, `cardShadow`, etc.), retrieved via `Theme.of(context).extension<AppShadowTheme>()`. `ThemeCard` uses this automatically. `AppShadowTheme()` (default) is tuned for light backgrounds; `AppShadowTheme.dark()` uses higher-opacity, larger-blur shadows so elevation stays visible against near-black surfaces — `AppTheme.darkTheme()` uses `AppShadowTheme.dark()` by default. Cards, menus, and dropdowns also lift onto a `surfaceContainer`-toned background in dark mode so elevation reads from surface tint as well as shadow, matching Material 3 dark-theme conventions. Also carries `cardBlur` (backdrop blur sigma, `0` = off) and `cardBorderColor`/`cardBorderWidth` (edge stroke, `cardBorderWidth == 0` = no border) — set via the owning `AppThemePreset` and consumed by `ThemeCard`. The `glassmorphism` preset is the only style that sets a nonzero `cardBlur` today, giving it a real frosted-glass backdrop (previously it only used translucent colors with no actual blur). `AppShadowTheme.hueShifted(double hueDelta)` returns a copy with every non-neutral shadow color rotated by `hueDelta` degrees, preserving each shadow's own saturation/lightness/alpha — used by `AppThemeGenerator.generate` to follow a picked seed color for styles with colorful shadows, without needing bespoke logic per style.
 - The `*_theme.dart` files under `lib/src/components/` (`button_theme.dart`, `card_theme.dart`, `app_bar_theme.dart`, etc.) are internal `ThemeData` factory builders consumed by `AppTheme` — you should not need to call them directly; override via `AppTheme.lightTheme(colorScheme:, textTheme:, shadows:)` instead.
 
 ---
@@ -922,7 +1146,7 @@ ThemeLazyImage({
   BoxFit fit = BoxFit.cover,
   Widget? placeholder,
   Widget? errorWidget,
-  double borderRadius = 12,
+  double? borderRadius, // defaults to the active theme's card radius
   int? cacheWidth,
   int? cacheHeight,
   Duration fadeDuration = const Duration(milliseconds: 300),
@@ -944,7 +1168,7 @@ ThemeSpinner({
 ### `ThemeSkeleton` / `ThemeSkeletonLoader`
 Loading skeletons built on `ThemeShimmer`. `ThemeSkeletonType`: `textLine`, `circleAvatar`, `card`, `listTile`, `gridTile`, `banner`, `paragraph`.
 ```dart
-ThemeSkeleton({ThemeSkeletonType type, double? width, double? height, double borderRadius = 8})
+ThemeSkeleton({ThemeSkeletonType type, double? width, double? height, double? borderRadius}) // borderRadius defaults to the active theme's card radius (circleAvatar/listTile leading avatar stay circular regardless)
 ThemeSkeletonLoader({ThemeSkeletonType type = ThemeSkeletonType.listTile, int count = 6, double spacing = 12})
 ```
 
@@ -1121,7 +1345,7 @@ Visual horizontal-scroll grid of theme-style preview cards. Each card is painted
 ```dart
 ThemeStyleSwitcher({
   List<AppThemeStyle>? styles, // defaults to AppThemeStyle.all
-  String selectedId = 'light',
+  String selectedId = 'material',
   ValueChanged<String>? onSelected,
   Brightness brightness = Brightness.light, // which variant to preview
   double cardWidth = 140,
@@ -1178,7 +1402,124 @@ AppThemePreset({
   double inputRadius = 12,
   double dialogRadius = 16,
   bool useMaterial3 = true,
+  double cardBlur = 0,        // backdrop blur sigma for glass-style surfaces
+  Color? cardBorderColor,     // card edge stroke (e.g. glassmorphism's rim)
+  double cardBorderWidth = 0, // 0 draws no border
+  Color? borderColor,         // shared stroke color for every other surface (buttons, chips, inputs, dialogs, menus, badges, tabs, nav, avatars, tooltips, tables...)
+  double borderWidth = 0,     // 0 draws no border; widgets may apply their own multiplier for scale (e.g. a thinner border on a small badge)
+  bool forceFlat = false,     // true = no backdrop blur/decorative translucency/gradient anywhere, package-wide
+  ThemeTextTransform textTransform = ThemeTextTransform.none, // none | uppercase — applied to headings and control labels (buttons/chips/tabs/badges), not body text
+  double letterSpacingBoost = 0, // extra tracking added on top of each text style's own letterSpacing
 })
+```
+`cardBlur`/`cardBorderColor`/`cardBorderWidth` flow into `AppShadowTheme` (see below) and are read by `ThemeCard`, which wraps its content in `BackdropFilter` when `cardBlur > 0` and draws a stroked edge when `cardBorderWidth > 0`.
+
+`borderColor`/`borderWidth`/`forceFlat`/`textTransform` also round-trip through the `AppShadowTheme` extension (so they're readable via `Theme.of(context).extension<AppShadowTheme>()` from any widget, the same way `cardBlur` is) and are additionally wired directly into `toThemeData()`'s button/card/dialog/dropdown/chip/segmented-button/FAB/input sub-themes as a `BorderSide`. Every widget that draws its own ad-hoc decoration (badges, pills, avatars, tooltips, toasts, data tables, notification cards) reads `borderWidth`/`borderColor`/`forceFlat`/`textTransform` from that same `AppShadowTheme` extension and renders accordingly — components stay theme-agnostic and never special-case a preset by id. Defaults (`borderWidth = 0`, `forceFlat = false`, `textTransform = ThemeTextTransform.none`) preserve prior behavior for every preset that doesn't opt in. The `brutalism`, `retro-8bit`, `bauhaus`, `typographic`, `minimalism-mono`, `cyberpunk`, `maximalism`, `flat`, and `papercut` styles are the ones that currently set these to push their own genre further (e.g. Brutalism: thick black borders everywhere, uppercase tracked labels, forced flat surfaces).
+
+`AppThemePreset.copyWith({...})` returns a copy with only the given fields replaced — used by `AppThemeGenerator.generate(baseStyle:)` to recolor a preset without touching its radii/shadows/elevation.
+
+---
+
+## Theme generator
+
+Beyond the 20 hand-designed styles, `AppThemeGenerator` builds a complete, coherent `AppThemeStyle` from a single seed color — pick one color, everything else (secondary/tertiary colors, containers, surfaces, a matching dark variant, and a font pairing) is derived automatically.
+
+- **Colors**: uses `ColorScheme.fromSeed` — Flutter's own Material 3 tonal-palette algorithm (the same one Android 12+ Material You uses) — for every role *except* `primary`/`onPrimary`, which are pinned to the exact color you picked (`fromSeed` normally snaps `primary` to the nearest tonal-palette value, which can visibly differ from the raw seed; buttons/accents should be exactly what was picked, so that one role bypasses the snap while everything else still derives from the tonal algorithm for a coherent, contrast-safe palette).
+- **Shadows**: any style with colorful (non-neutral) shadows — Maximalism's pink/yellow/blue stack, Cyberpunk's magenta/cyan, etc. — has them hue-shifted by the same delta the seed color moved from the base style's own primary (`AppShadowTheme.hueShifted`). A multi-color shadow stack keeps its relative hue spread (still reads as multi-tone) instead of staying hardcoded to the original style's palette or collapsing onto one flat color. Neutral shadows (blacks/whites/greys, low saturation) are left untouched.
+- **Fonts**: either pick a heading font and a body font independently from `AppFontCatalog` (any valid Google Fonts family name works, not just ones in the catalog), or pick one of `AppFontPairings`' curated heading+body pairs (`bold`, `classic`, `geometric`, `editorial`, `friendly`, `technical`), or omit both and let `AppThemeGenerator.suggestFontPairing` auto-pick a pairing from the seed color's HSL mood (saturated/dark → bold or technical, muted → classic, light/pastel → friendly, warm hues → editorial).
+- **Style**: pass `baseStyle` to layer color/font/shadow-tint on top of any existing `AppThemeStyle` (a built-in preset, or another generated one) — color, font, and base style are fully independent, so any combination works together.
+
+### `AppThemeGenerator`
+```dart
+AppThemeGenerator.generate({
+  required Color seed,
+  String? headingFont,         // any Google Fonts family name; wins over fontPairing's heading
+  String? bodyFont,            // any Google Fonts family name; wins over fontPairing's body
+  AppFontPairing? fontPairing, // used for any font slot headingFont/bodyFont didn't cover
+  AppThemeStyle? baseStyle,    // null = a plain rounded-corner default shape
+  String id = 'generated',
+  String name = 'Custom',
+}) // -> AppThemeStyle
+
+AppThemeGenerator.suggestFontPairing(Color seed) // -> AppFontPairing
+```
+Pass `baseStyle` to recolor/refont an existing style in place — every non-color, non-font aspect of it (radii, shadows, borders, elevation, blur) carries over unchanged, so picking a new seed color or font on top of e.g. Brutalism only changes that, keeping its square corners and thick borders instead of silently swapping in a different visual style. `ThemeController` in the example app does this by passing `AppThemeStyle.byId(value.styleId)` as `baseStyle`, and re-applies the same color/font when the style itself is switched — so theme, color, and font are three independent choices that combine freely.
+```dart
+final style = AppThemeGenerator.generate(
+  seed: Color(0xFF00897B),
+  headingFont: 'Space Grotesk',
+  bodyFont: 'Work Sans',
+  baseStyle: AppThemeStyle.byId('brutalism'),
+);
+MaterialApp(
+  theme: style.themeData(Brightness.light),
+  darkTheme: style.themeData(Brightness.dark),
+);
+```
+
+### `AppFontPairing` / `AppFontPairings`
+```dart
+class AppFontPairing {
+  final String name;   // e.g. 'Editorial'
+  final String heading; // Google Fonts family for headline/title styles
+  final String body;    // Google Fonts family for body/label styles
+}
+
+AppFontPairings.all // List<AppFontPairing>: bold, classic, geometric, editorial, friendly, technical
+```
+
+### `AppFontCatalog`
+A curated list of individually-pickable Google Fonts family names, grouped by category, for a free "any heading font + any body font" picker — as opposed to `AppFontPairings`' fixed pairs. Any valid Google Fonts family name works with `AppThemeGenerator.generate` even if it isn't in this list; the catalog just gives a picker UI something reasonable to show.
+```dart
+AppFontCatalog.byCategory // Map<String, List<String>>: 'Sans-serif', 'Display / geometric', 'Serif', 'Rounded / friendly', 'Monospace'
+AppFontCatalog.all        // List<String> — every font across all categories
+```
+
+### `AppSeedPalette`
+A spread of 12 predefined seed-color swatches (purple, blue, teal, green, orange, pink, red, brown, blue-grey, indigo, cyan, amber) for a quick-pick palette — each one produces a clean `ColorScheme.fromSeed` result.
+```dart
+AppSeedPalette.swatches // List<Color>
+```
+
+### `ThemeCustomizer`
+The end-to-end picker UI: a predefined-palette grid (`ThemeColorPicker` + `AppSeedPalette`), a free-form `ThemeHuePicker`, font-pairing chips (Auto + each `AppFontPairings` entry), and independent heading/body font dropdowns (`AppFontCatalog`) — all feeding `AppThemeGenerator` live via a `ThemeCustomizerResult`.
+```dart
+ThemeCustomizer({
+  required Color seedColor,
+  required ValueChanged<ThemeCustomizerResult> onChanged,
+  AppFontPairing? pairing,   // currently-selected curated pairing, if any
+  String? headingFont,       // currently-selected independent heading font, if any
+  String? bodyFont,          // currently-selected independent body font, if any
+  bool showHuePicker = true,
+})
+
+class ThemeCustomizerResult {
+  final Color seedColor;
+  final AppFontPairing? pairing;
+  final String? headingFont; // set (independently of bodyFont) wins over pairing.heading
+  final String? bodyFont;    // set (independently of headingFont) wins over pairing.body
+}
+```
+```dart
+ThemeCustomizer(
+  seedColor: _seed,
+  pairing: _pairing,
+  headingFont: _heading,
+  bodyFont: _body,
+  onChanged: (r) => setState(() {
+    _seed = r.seedColor;
+    _pairing = r.pairing;
+    _heading = r.headingFont;
+    _body = r.bodyFont;
+    _style = AppThemeGenerator.generate(
+      seed: r.seedColor,
+      fontPairing: r.pairing,
+      headingFont: r.headingFont,
+      bodyFont: r.bodyFont,
+      baseStyle: _currentStyle, // keep whatever style is already selected
+    );
+  }),
+)
 ```
 
 ---
@@ -1237,7 +1578,7 @@ AppThemePreset preset(Brightness brightness)
 ThemeData themeData(Brightness brightness)
 
 AppThemeStyle.all          // List<AppThemeStyle> (20)
-AppThemeStyle.byId(String) // lookup by id, falls back to 'light'
+AppThemeStyle.byId(String) // lookup by id, falls back to 'material'
 ```
 
 ### Static constants

@@ -109,6 +109,7 @@ export 'src/widgets/theme_app_dialog.dart';
 export 'src/widgets/theme_icon_picker.dart';
 export 'src/widgets/theme_emoji_picker.dart';
 export 'src/widgets/theme_color_picker.dart';
+export 'src/widgets/theme_hue_picker.dart';
 export 'src/widgets/theme_file_uploader.dart';
 
 // Commerce & access
@@ -116,8 +117,28 @@ export 'src/widgets/theme_discount_badge.dart';
 export 'src/widgets/theme_wishlist_button.dart';
 export 'src/widgets/theme_permission_selector.dart';
 
+// Navigation & wayfinding
+export 'src/widgets/theme_pagination.dart';
+export 'src/widgets/theme_breadcrumbs.dart';
+export 'src/widgets/theme_onboarding_tour.dart';
+
+// Interaction & layout widgets
+export 'src/widgets/theme_rating_input.dart';
+export 'src/widgets/theme_tree_view.dart';
+export 'src/widgets/theme_timeline.dart';
+export 'src/widgets/theme_avatar_group.dart';
+export 'src/widgets/theme_toast.dart';
+export 'src/widgets/theme_tag_input.dart';
+export 'src/widgets/theme_split_panel.dart';
+export 'src/widgets/theme_masonry_grid.dart';
+export 'src/widgets/theme_context_menu.dart';
+
 // Theme presets
 export 'src/theme_presets/app_theme_preset.dart';
 export 'src/theme_presets/light_presets.dart';
 export 'src/theme_presets/dark_presets.dart';
 export 'src/theme_presets/app_theme_style.dart';
+export 'src/theme_presets/app_theme_generator.dart';
+
+// Theme customizer
+export 'src/widgets/theme_customizer.dart';

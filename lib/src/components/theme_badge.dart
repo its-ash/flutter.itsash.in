@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:theme/src/shadows/app_shadow_theme.dart';
+
 class ThemeBadge extends StatelessWidget {
   const ThemeBadge({
     super.key,
@@ -14,8 +16,12 @@ class ThemeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shadows = Theme.of(context).extension<AppShadowTheme>() ?? const AppShadowTheme();
+    final text = shadows.textTransform == ThemeTextTransform.uppercase && label != null
+        ? label!.toUpperCase()
+        : label;
     return Badge(
-      label: label != null ? Text(label!) : null,
+      label: text != null ? Text(text) : null,
       isLabelVisible: isVisible,
       child: child,
     );

@@ -34,6 +34,64 @@ class _ButtonsSectionState extends State<ButtonsSection> {
           ),
         ),
         ShowcaseTile(
+          title: 'ThemeButton — status colors',
+          description: 'success | error | warning | info, across all variants',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              ThemeButton(
+                label: 'Success',
+                onPressed: () {},
+                icon: Icons.check_circle_outline,
+                status: ThemeButtonStatus.success,
+              ),
+              ThemeButton(
+                label: 'Error',
+                onPressed: () {},
+                icon: Icons.error_outline,
+                status: ThemeButtonStatus.error,
+              ),
+              ThemeButton(
+                label: 'Warning',
+                onPressed: () {},
+                icon: Icons.warning_amber_outlined,
+                status: ThemeButtonStatus.warning,
+              ),
+              ThemeButton(
+                label: 'Info',
+                onPressed: () {},
+                icon: Icons.info_outline,
+                status: ThemeButtonStatus.info,
+              ),
+              ThemeButton(
+                label: 'Success',
+                onPressed: () {},
+                variant: ThemeButtonVariant.outlined,
+                status: ThemeButtonStatus.success,
+              ),
+              ThemeButton(
+                label: 'Error',
+                onPressed: () {},
+                variant: ThemeButtonVariant.outlined,
+                status: ThemeButtonStatus.error,
+              ),
+              ThemeButton(
+                label: 'Warning',
+                onPressed: () {},
+                variant: ThemeButtonVariant.outlined,
+                status: ThemeButtonStatus.warning,
+              ),
+              ThemeButton(
+                label: 'Info',
+                onPressed: () {},
+                variant: ThemeButtonVariant.outlined,
+                status: ThemeButtonStatus.info,
+              ),
+            ],
+          ),
+        ),
+        ShowcaseTile(
           title: 'ThemeIconButton',
           child: Row(
             children: [

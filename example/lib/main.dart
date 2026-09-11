@@ -16,7 +16,7 @@ class ShowcaseRoot extends StatelessWidget {
     return ValueListenableBuilder<ThemeControllerState>(
       valueListenable: _themeController,
       builder: (context, state, _) {
-        final style = AppThemeStyle.byId(state.styleId);
+        final style = state.generated ?? AppThemeStyle.byId(state.styleId);
         return MaterialApp(
           title: 'Theme Showcase',
           debugShowCheckedModeBanner: false,

@@ -45,17 +45,20 @@ class AppMiscTheme {
         return states.contains(WidgetState.selected) ? active : inactive;
       });
 
-  static SegmentedButtonThemeData segmentedButtonTheme(ColorScheme scheme) =>
-      SegmentedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: _segmentedBackground(scheme.primary),
-          foregroundColor: _segmentedForeground(scheme.onPrimary, scheme.onSurface),
-          side: WidgetStatePropertyAll(BorderSide(color: scheme.outline)),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-      );
+  static SegmentedButtonThemeData segmentedButtonTheme(
+    ColorScheme scheme, {
+    double radius = 12,
+    BorderSide? side,
+  }) => SegmentedButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: _segmentedBackground(scheme.primary),
+      foregroundColor: _segmentedForeground(scheme.onPrimary, scheme.onSurface),
+      side: WidgetStatePropertyAll(side ?? BorderSide(color: scheme.outline)),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+      ),
+    ),
+  );
 
   static TextSelectionThemeData textSelectionTheme(ColorScheme scheme) =>
       TextSelectionThemeData(

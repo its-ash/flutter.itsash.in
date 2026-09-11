@@ -39,10 +39,18 @@ class _ThemeAccordionState extends State<ThemeAccordion>
     super.dispose();
   }
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 12;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(12);
+    final radius = BorderRadius.circular(_cardRadius(context));
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,

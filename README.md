@@ -84,7 +84,7 @@ Full list with signatures: **[COMPONENTS.md](COMPONENTS.md)**.
 
 ## Explore the components
 
-The `example/` app is a single showcase homepage — a sidebar/drawer covering every category (Home/README, Theme styles, Buttons, Cards, Feedback, Navigation, Inputs, Lists, Pickers, Layout, Typography, E-commerce widgets, State & status, Form helpers, Media & content, App shell & pickers), each rendering live, interactive instances of that category's widgets. A theme-mode menu in the app bar (light / dark / system) lets you preview every component in both themes instantly, and the Theme styles section lets you flip between all 20 visual styles live. Try it live at the [demo link above](https://its-ash.github.io/theme/), or run it locally:
+The `example/` app is a single showcase homepage — a sidebar/drawer covering every category (Home/README, Theme styles, Buttons, Cards, Feedback, Navigation, Inputs, Lists, Pickers, Layout, Typography, E-commerce widgets, State & status, Form helpers, Media & content, App shell & pickers), each rendering live, interactive instances of that category's widgets. A theme-mode menu in the app bar (light / dark / system) lets you preview every component in both themes instantly, and the Theme styles section lets you flip between all 20 visual styles live. Try it live at the [demo link above](https://flutter.itsash.in), or run it locally:
 
 ```bash
 cd example

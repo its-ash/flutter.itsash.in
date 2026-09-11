@@ -139,6 +139,49 @@ class _ListsSectionState extends State<ListsSection> {
           ),
         ),
         ShowcaseTile(
+          title: 'ThemeTreeView<T>',
+          child: ThemeTreeView<String>(
+            nodes: [
+              ThemeTreeNode(
+                value: 'src',
+                label: 'src',
+                icon: Icons.folder_outlined,
+                children: [
+                  ThemeTreeNode(value: 'widgets', label: 'widgets', icon: Icons.folder_outlined, children: [
+                    ThemeTreeNode(value: 'button.dart', label: 'button.dart', icon: Icons.description_outlined),
+                  ]),
+                  ThemeTreeNode(value: 'main.dart', label: 'main.dart', icon: Icons.description_outlined),
+                ],
+              ),
+              ThemeTreeNode(value: 'pubspec.yaml', label: 'pubspec.yaml', icon: Icons.description_outlined),
+            ],
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeTimeline',
+          child: ThemeTimeline(
+            entries: const [
+              ThemeTimelineEntry(title: 'Order placed', timestamp: '9:02 AM', status: ThemeStatus.info),
+              ThemeTimelineEntry(title: 'Payment confirmed', timestamp: '9:04 AM', status: ThemeStatus.success),
+              ThemeTimelineEntry(title: 'Payment failed retry', timestamp: '9:05 AM', status: ThemeStatus.error),
+              ThemeTimelineEntry(title: 'Out for delivery', description: 'Arriving tomorrow', status: ThemeStatus.neutral),
+            ],
+          ),
+        ),
+        ShowcaseTile(
+          title: 'ThemeAvatarGroup',
+          child: ThemeAvatarGroup(
+            avatars: const [
+              ThemeAvatarData(initials: 'AR'),
+              ThemeAvatarData(initials: 'BK'),
+              ThemeAvatarData(initials: 'CJ'),
+              ThemeAvatarData(initials: 'DL'),
+              ThemeAvatarData(initials: 'EM'),
+            ],
+            maxVisible: 3,
+          ),
+        ),
+        ShowcaseTile(
           title: 'ThemePullToRefresh',
           description: 'Pull down to trigger onRefresh',
           child: SizedBox(

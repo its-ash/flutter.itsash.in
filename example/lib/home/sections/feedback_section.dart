@@ -25,6 +25,20 @@ class FeedbackSection extends StatelessWidget {
           ),
         ),
         ShowcaseTile(
+          title: 'ThemeToast',
+          description: 'Like Notify, but needs no Scaffold — stacks on repeated calls',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              ThemeButton(label: 'Success', onPressed: () => ThemeToast.success(context, 'Order placed successfully')),
+              ThemeButton(label: 'Error', onPressed: () => ThemeToast.error(context, 'Payment failed, please try again')),
+              ThemeButton(label: 'Warning', onPressed: () => ThemeToast.warning(context, 'Low stock remaining')),
+              ThemeButton(label: 'Info', onPressed: () => ThemeToast.info(context, 'New update available')),
+            ],
+          ),
+        ),
+        ShowcaseTile(
           title: 'ThemeSnackBar',
           child: ThemeButton(
             label: 'Show snackbar',

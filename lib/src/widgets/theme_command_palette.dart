@@ -55,6 +55,20 @@ class _ThemeCommandPaletteState extends State<ThemeCommandPalette> {
     Navigator.pop(context, _filtered[i]);
   }
 
+  double _cardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    }
+    return 16;
+  }
+
+  double _inputRadius(BuildContext context) {
+    final border = Theme.of(context).inputDecorationTheme.border;
+    if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
+    return 10;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -67,7 +81,7 @@ class _ThemeCommandPaletteState extends State<ThemeCommandPalette> {
         constraints: const BoxConstraints(maxWidth: 560),
         decoration: BoxDecoration(
           color: scheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(_cardRadius(context)),
           boxShadow: [BoxShadow(color: scheme.shadow.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
         ),
         clipBehavior: Clip.antiAlias,
@@ -82,7 +96,7 @@ class _ThemeCommandPaletteState extends State<ThemeCommandPalette> {
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => Navigator.pop(context)),
                 isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(_inputRadius(context))),
               ),
               onSubmitted: (_) => _run(_sel),
             ),
