@@ -75,7 +75,7 @@ class LightPresets {
     ),
     cardRadius: 24,
     buttonRadius: 24,
-    inputRadius: 16,
+    inputRadius: 24,
     dialogRadius: 24,
   );
 
@@ -97,7 +97,7 @@ class LightPresets {
     ),
     cardRadius: 28,
     buttonRadius: 20,
-    inputRadius: 16,
+    inputRadius: 28,
     dialogRadius: 28,
   );
 
@@ -146,7 +146,7 @@ class LightPresets {
     ),
     cardRadius: 32,
     buttonRadius: 28,
-    inputRadius: 20,
+    inputRadius: 32,
     dialogRadius: 32,
     borderColor: Color(0xFF1A0033),
     borderWidth: 3,
@@ -170,7 +170,7 @@ class LightPresets {
     ),
     cardRadius: 12,
     buttonRadius: 10,
-    inputRadius: 8,
+    inputRadius: 12,
     dialogRadius: 14,
   );
 
@@ -192,7 +192,7 @@ class LightPresets {
     ),
     cardRadius: 12,
     buttonRadius: 8,
-    inputRadius: 8,
+    inputRadius: 12,
     dialogRadius: 12,
     borderColor: Color(0xFFDADADA),
     borderWidth: 1,
@@ -243,7 +243,7 @@ class LightPresets {
     ),
     cardRadius: 4,
     buttonRadius: 2,
-    inputRadius: 2,
+    inputRadius: 4,
     dialogRadius: 4,
     borderColor: Color(0xFF00FFFF),
     borderWidth: 1.5,
@@ -269,7 +269,7 @@ class LightPresets {
     ),
     cardRadius: 28,
     buttonRadius: 24,
-    inputRadius: 20,
+    inputRadius: 28,
     dialogRadius: 28,
   );
 
@@ -318,7 +318,7 @@ class LightPresets {
     ),
     cardRadius: 36,
     buttonRadius: 30,
-    inputRadius: 24,
+    inputRadius: 36,
     dialogRadius: 36,
   );
 
@@ -414,7 +414,7 @@ class LightPresets {
     ),
     cardRadius: 14,
     buttonRadius: 12,
-    inputRadius: 10,
+    inputRadius: 14,
     dialogRadius: 16,
   );
 

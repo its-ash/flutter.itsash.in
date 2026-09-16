@@ -320,7 +320,7 @@ class AppThemeStyle {
         outline: Color(0xFFBDBDBD),
       ),
       shadows: _flat,
-      cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
+      cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
       borderColor: Color(0xFFBDBDBD), borderWidth: 1, forceFlat: true,
     ),
@@ -336,7 +336,7 @@ class AppThemeStyle {
         outline: Color(0xFF424242),
       ),
       shadows: _flat,
-      cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
+      cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 1,
       borderColor: Color(0xFF424242), borderWidth: 1, forceFlat: true,
     ),
@@ -357,7 +357,7 @@ class AppThemeStyle {
         outline: Color(0xFF79747E),
       ),
       shadows: _soft,
-      cardRadius: 12, cardElevation: 1, buttonRadius: 20, inputRadius: 4, dialogRadius: 28,
+      cardRadius: 12, cardElevation: 1, buttonRadius: 20, inputRadius: 12, dialogRadius: 28,
     ),
     darkPreset: AppThemePreset(
       id: 'material', name: 'Material', brightness: Brightness.dark,
@@ -372,7 +372,7 @@ class AppThemeStyle {
         outline: Color(0xFF938F99),
       ),
       shadows: _softDark,
-      cardRadius: 12, cardElevation: 1, buttonRadius: 20, inputRadius: 4, dialogRadius: 28,
+      cardRadius: 12, cardElevation: 1, buttonRadius: 20, inputRadius: 12, dialogRadius: 28,
     ),
   );
 
@@ -390,7 +390,7 @@ class AppThemeStyle {
         outline: Color(0xFF8D97A6),
       ),
       shadows: _neuLight,
-      cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 16, dialogRadius: 24,
+      cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 24, dialogRadius: 24,
       inputFilled: false, inputBorderWidth: 1,
       cardBorderColor: Color(0x338D97A6), cardBorderWidth: 1,
     ),
@@ -406,7 +406,7 @@ class AppThemeStyle {
         outline: Color(0xFF7A8494),
       ),
       shadows: _neuDark,
-      cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 16, dialogRadius: 24,
+      cardRadius: 24, cardMargin: 12, buttonRadius: 24, inputRadius: 24, dialogRadius: 24,
       inputFilled: false, inputBorderWidth: 1,
       cardBorderColor: Color(0x407A8494), cardBorderWidth: 1,
     ),
@@ -426,7 +426,7 @@ class AppThemeStyle {
         outline: Color(0x6679747E),
       ),
       shadows: _glassLight,
-      cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 16, dialogRadius: 28,
+      cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 28, dialogRadius: 28,
       cardElevation: 0, buttonElevation: 0, cardBlur: 18,
       cardBorderColor: Color(0x99FFFFFF), cardBorderWidth: 1,
     ),
@@ -442,7 +442,7 @@ class AppThemeStyle {
         outline: Color(0x66938F99),
       ),
       shadows: _glassDark,
-      cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 16, dialogRadius: 28,
+      cardRadius: 28, cardMargin: 10, buttonRadius: 20, inputRadius: 28, dialogRadius: 28,
       cardElevation: 0, buttonElevation: 0, cardBlur: 18,
       cardBorderColor: Color(0xB3FFFFFF), cardBorderWidth: 1,
     ),
@@ -505,7 +505,7 @@ class AppThemeStyle {
         outline: Color(0xFFFF006E),
       ),
       shadows: _maxiLight,
-      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 20, dialogRadius: 32, dialogElevation: 10,
+      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 32, dialogRadius: 32, dialogElevation: 10,
       inputBorderWidth: 3,
       cardBorderColor: Color(0xFFFF006E), cardBorderWidth: 3,
       borderColor: Color(0xFF1A0033), borderWidth: 3,
@@ -523,7 +523,7 @@ class AppThemeStyle {
         outline: Color(0xFFFFD60A),
       ),
       shadows: _maxiDark,
-      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 20, dialogRadius: 32, dialogElevation: 10,
+      cardRadius: 32, cardMargin: 16, cardElevation: 6, buttonRadius: 28, buttonElevation: 5, inputRadius: 32, dialogRadius: 32, dialogElevation: 10,
       inputBorderWidth: 3,
       cardBorderColor: Color(0xFFFFD60A), cardBorderWidth: 3,
       borderColor: Color(0xFFFFD60A), borderWidth: 3,
@@ -544,7 +544,7 @@ class AppThemeStyle {
         outline: Color(0xFFC0B098),
       ),
       shadows: _skeuLight,
-      cardRadius: 14, cardElevation: 2, buttonRadius: 12, buttonElevation: 4, inputRadius: 8, dialogRadius: 16, dialogElevation: 8,
+      cardRadius: 14, cardElevation: 2, buttonRadius: 12, buttonElevation: 4, inputRadius: 14, dialogRadius: 16, dialogElevation: 8,
     ),
     darkPreset: AppThemePreset(
       id: 'skeuomorphism', name: 'Skeuomorphism', brightness: Brightness.dark,
@@ -558,7 +558,7 @@ class AppThemeStyle {
         outline: Color(0xFF605040),
       ),
       shadows: _skeuDark,
-      cardRadius: 14, cardElevation: 2, buttonRadius: 12, buttonElevation: 4, inputRadius: 8, dialogRadius: 16, dialogElevation: 8,
+      cardRadius: 14, cardElevation: 2, buttonRadius: 12, buttonElevation: 4, inputRadius: 14, dialogRadius: 16, dialogElevation: 8,
     ),
   );
 
@@ -576,7 +576,7 @@ class AppThemeStyle {
         outline: Color(0xFFCCCCCC),
       ),
       shadows: _skeuLight,
-      cardRadius: 12, cardElevation: 1, buttonRadius: 8, buttonElevation: 2, inputRadius: 8, dialogRadius: 12, dialogElevation: 4,
+      cardRadius: 12, cardElevation: 1, buttonRadius: 8, buttonElevation: 2, inputRadius: 12, dialogRadius: 12, dialogElevation: 4,
     ),
     darkPreset: AppThemePreset(
       id: 'skeuominimalism', name: 'Skeuominimalism', brightness: Brightness.dark,
@@ -590,7 +590,7 @@ class AppThemeStyle {
         outline: Color(0xFF555555),
       ),
       shadows: _skeuDark,
-      cardRadius: 12, cardElevation: 1, buttonRadius: 8, buttonElevation: 2, inputRadius: 8, dialogRadius: 12, dialogElevation: 4,
+      cardRadius: 12, cardElevation: 1, buttonRadius: 8, buttonElevation: 2, inputRadius: 12, dialogRadius: 12, dialogElevation: 4,
     ),
   );
 
@@ -608,7 +608,7 @@ class AppThemeStyle {
         outline: Color(0xFF000000),
       ),
       shadows: _hiContrast,
-      cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
+      cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 2,
     ),
     darkPreset: AppThemePreset(
@@ -623,7 +623,7 @@ class AppThemeStyle {
         outline: Color(0xFFFFFFFF),
       ),
       shadows: _hiContrast,
-      cardRadius: 2, buttonRadius: 2, inputRadius: 0, dialogRadius: 2,
+      cardRadius: 2, buttonRadius: 2, inputRadius: 2, dialogRadius: 2,
       inputFilled: false, inputBorderWidth: 2,
     ),
   );
@@ -687,7 +687,7 @@ class AppThemeStyle {
         outline: Color(0xFFFF00FF),
       ),
       shadows: _cyber,
-      cardRadius: 4, buttonRadius: 2, inputRadius: 2, dialogRadius: 4,
+      cardRadius: 4, buttonRadius: 2, inputRadius: 4, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 1,
       borderColor: Color(0xFF00FFFF), borderWidth: 1.5,
       textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.2,
@@ -705,7 +705,7 @@ class AppThemeStyle {
         outline: Color(0xFFFF00FF),
       ),
       shadows: _cyber,
-      cardRadius: 4, buttonRadius: 2, inputRadius: 2, dialogRadius: 4,
+      cardRadius: 4, buttonRadius: 2, inputRadius: 4, dialogRadius: 4,
       inputFilled: false, inputBorderWidth: 1,
       borderColor: Color(0xFF00FFFF), borderWidth: 1.5,
       textTransform: ThemeTextTransform.uppercase, letterSpacingBoost: 1.2,
@@ -727,7 +727,7 @@ class AppThemeStyle {
         outline: Color(0xFFD5B5C0),
       ),
       shadows: _clayLight,
-      cardRadius: 28, cardMargin: 12, cardElevation: 0, buttonRadius: 24, buttonElevation: 0, inputRadius: 20, dialogRadius: 28,
+      cardRadius: 28, cardMargin: 12, cardElevation: 0, buttonRadius: 24, buttonElevation: 0, inputRadius: 28, dialogRadius: 28,
       inputFilled: false, inputBorderWidth: 0,
     ),
     darkPreset: AppThemePreset(
@@ -743,7 +743,7 @@ class AppThemeStyle {
         outline: Color(0xFF60506A),
       ),
       shadows: _clayDark,
-      cardRadius: 28, cardMargin: 12, cardElevation: 0, buttonRadius: 24, buttonElevation: 0, inputRadius: 20, dialogRadius: 28,
+      cardRadius: 28, cardMargin: 12, cardElevation: 0, buttonRadius: 24, buttonElevation: 0, inputRadius: 28, dialogRadius: 28,
       inputFilled: false, inputBorderWidth: 0,
     ),
   );
@@ -807,7 +807,7 @@ class AppThemeStyle {
         outline: Color(0xFFB8A898),
       ),
       shadows: _organic,
-      cardRadius: 36, cardMargin: 14, buttonRadius: 30, inputRadius: 24, dialogRadius: 36,
+      cardRadius: 36, cardMargin: 14, buttonRadius: 30, inputRadius: 36, dialogRadius: 36,
     ),
     darkPreset: AppThemePreset(
       id: 'organic', name: 'Organic', brightness: Brightness.dark,
@@ -822,7 +822,7 @@ class AppThemeStyle {
         outline: Color(0xFF605548),
       ),
       shadows: _organic,
-      cardRadius: 36, cardMargin: 14, buttonRadius: 30, inputRadius: 24, dialogRadius: 36,
+      cardRadius: 36, cardMargin: 14, buttonRadius: 30, inputRadius: 36, dialogRadius: 36,
     ),
   );
 
@@ -952,7 +952,7 @@ class AppThemeStyle {
         outline: Color(0xFFA3B1C6),
       ),
       shadows: _skeuClassic,
-      cardRadius: 14, cardElevation: 3, buttonRadius: 12, buttonElevation: 5, inputRadius: 10, dialogRadius: 16, dialogElevation: 10,
+      cardRadius: 14, cardElevation: 3, buttonRadius: 12, buttonElevation: 5, inputRadius: 14, dialogRadius: 16, dialogElevation: 10,
     ),
     darkPreset: AppThemePreset(
       id: 'skeuomorphism-classic', name: 'Skeuomorphism Classic', brightness: Brightness.dark,
@@ -966,7 +966,7 @@ class AppThemeStyle {
         outline: Color(0xFF6080A0),
       ),
       shadows: _skeuClassic,
-      cardRadius: 14, cardElevation: 3, buttonRadius: 12, buttonElevation: 5, inputRadius: 10, dialogRadius: 16, dialogElevation: 10,
+      cardRadius: 14, cardElevation: 3, buttonRadius: 12, buttonElevation: 5, inputRadius: 14, dialogRadius: 16, dialogElevation: 10,
     ),
   );
 

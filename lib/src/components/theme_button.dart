@@ -156,6 +156,12 @@ class ThemeButton extends StatelessWidget {
     // a shadow, especially with the zero-blur offset shadows some styles
     // use. Darkening it (same hue, deeper) keeps it recognizably "this
     // button's shadow" while still looking like a shadow.
+    //
+    // Styles like Claymorphism use a two-tone embossed shadow: a bright
+    // top-light (negative offset) + a colored bottom-shadow. Tinting the
+    // top-light with the darkened status color would turn it into a dark
+    // blob on top of the button — so only the bottom (positive-offset)
+    // shadows are tinted; the top-light keeps its original color.
     final shadowStatusColor = statusColor == null
         ? null
         : HSLColor.fromColor(statusColor)
@@ -164,7 +170,11 @@ class ThemeButton extends StatelessWidget {
     final baseShadow = shadowStatusColor == null
         ? shadows.buttonShadow
         : shadows.buttonShadow
-            .map((s) => s.copyWith(color: shadowStatusColor.withValues(alpha: s.color.a)))
+            .map((s) {
+              final isLightShadow = s.offset.dy < 0 || (s.offset.dy == 0 && s.offset.dx < 0);
+              if (isLightShadow) return s;
+              return s.copyWith(color: shadowStatusColor.withValues(alpha: s.color.a));
+            })
             .toList();
 
     // Disabled buttons already dim their own text/fill via Material's

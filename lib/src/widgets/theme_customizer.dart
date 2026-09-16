@@ -168,8 +168,9 @@ class _FontDropdown extends StatelessWidget {
     final fonts = AppFontCatalog.all;
     return DropdownButtonFormField<String>(
       initialValue: fonts.contains(value) ? value : null,
+      isExpanded: true,
       decoration: InputDecoration(labelText: label, isDense: true),
-      hint: Text(value),
+      hint: Text(value, overflow: TextOverflow.ellipsis),
       items: [
         for (final entry in AppFontCatalog.byCategory.entries) ...[
           DropdownMenuItem<String>(

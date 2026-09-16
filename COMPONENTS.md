@@ -63,7 +63,7 @@ ThemeButton({
 ThemeButton(label: 'Checkout', onPressed: () {}, variant: ThemeButtonVariant.filled, icon: Icons.arrow_forward)
 ThemeButton(label: 'Delete', onPressed: () {}, status: ThemeButtonStatus.error)
 ```
-`status` reuses the same palette as `Notify`/`ThemeStatusPill` (`success` = green, `warning` = orange, `error` = `colorScheme.error`, `info` = `colorScheme.primary`) across all 4 variants — e.g. a `filled` status button fills with the status color, an `outlined` one uses it for the border/text instead of the border/fill being solid black or theme-primary.
+`status` reuses the same palette as `Notify`/`ThemeStatusPill` (`success` = green, `warning` = orange, `error` = `colorScheme.error`, `info` = `colorScheme.primary`) across all 4 variants — e.g. a `filled` status button fills with the status color, an `outlined` one uses it for the border/text instead of the border/fill being solid black or theme-primary. The stamped shadow on a status button is tinted with a darkened version of the status color (so a green button gets a green-tinted shadow, not the theme's default pink/blue), while embossed two-tone styles like Claymorphism preserve their white top-light and only tint the bottom shadow.
 
 ### `ThemeIconButton`
 ```dart
@@ -1173,7 +1173,7 @@ ThemeSkeletonLoader({ThemeSkeletonType type = ThemeSkeletonType.listTile, int co
 ```
 
 ### `ThemeSearchableDropdown<T>`
-Dropdown with an overlay search field. Generic over item type `T`; `itemLabel` extracts display text.
+Dropdown that searches directly inline — the collapsed field becomes the search input when focused, filtering the overlay list as you type (no separate search field inside the dropdown). Generic over item type `T`; `itemLabel` extracts display text.
 ```dart
 ThemeSearchableDropdown<T>({
   required List<T> items,
@@ -1399,7 +1399,7 @@ AppThemePreset({
   TextTheme? textTheme,
   double cardRadius = 16,
   double buttonRadius = 12,
-  double inputRadius = 12,
+  double inputRadius = 16,
   double dialogRadius = 16,
   bool useMaterial3 = true,
   double cardBlur = 0,        // backdrop blur sigma for glass-style surfaces

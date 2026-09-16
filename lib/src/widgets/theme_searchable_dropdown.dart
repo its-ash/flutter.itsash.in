@@ -33,22 +33,52 @@ class ThemeSearchableDropdown<T> extends StatefulWidget {
 class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>> {
   final LayerLink _link = LayerLink();
   final TextEditingController _searchCtrl = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   OverlayEntry? _entry;
   List<T> _filtered = const [];
   bool _open = false;
+  String _displayText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+    if (widget.value != null) _displayText = widget.itemLabel(widget.value as T);
+  }
+
+  @override
+  void didUpdateWidget(ThemeSearchableDropdown<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      _displayText = widget.value != null ? widget.itemLabel(widget.value as T) : '';
+      if (mounted) setState(() {});
+    }
+  }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange);
     _entry?.remove();
     _entry = null;
     _searchCtrl.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus && !_open) {
+      _openMenu();
+    } else if (!_focusNode.hasFocus && _open) {
+      _close();
+    }
   }
 
   void _openMenu() {
     if (!widget.enabled) return;
     _filtered = widget.items;
     _open = true;
+    _searchCtrl.clear();
+    _displayText = '';
     _entry = OverlayEntry(builder: _buildOverlay);
     Overlay.of(context).insert(_entry!);
     setState(() {});
@@ -58,13 +88,15 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
     _open = false;
     _entry?.remove();
     _entry = null;
-    _searchCtrl.clear();
+    _displayText = widget.value != null ? widget.itemLabel(widget.value as T) : '';
     if (mounted) setState(() {});
   }
 
   void _filter(String q) {
+    _displayText = q;
     _filtered = widget.items.where((i) => widget.itemLabel(i).toLowerCase().contains(q.toLowerCase())).toList();
     _entry?.markNeedsBuild();
+    setState(() {});
   }
 
   double _cardRadius(BuildContext context) {
@@ -72,13 +104,7 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
     if (shape is RoundedRectangleBorder) {
       return shape.borderRadius.resolve(TextDirection.ltr).topLeft.x;
     }
-    return 12;
-  }
-
-  double _inputRadius(BuildContext context) {
-    final border = Theme.of(context).inputDecorationTheme.border;
-    if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
-    return 10;
+    return 16;
   }
 
   Widget _buildOverlay(BuildContext context) {
@@ -98,44 +124,26 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
             color: scheme.surface,
             child: ConstrainedConstraints(
               maxHeight: widget.maxHeight,
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    autofocus: true,
-                    onChanged: _filter,
-                    decoration: InputDecoration(
-                      hintText: widget.hint ?? 'Search...',
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(_inputRadius(context))),
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.only(bottom: 8),
-                    itemCount: _filtered.length,
-                    itemBuilder: (_, i) {
-                      final item = _filtered[i];
-                      final selected = item == widget.value;
-                      return ListTile(
-                        dense: true,
-                        leading: widget.itemLeading?.call(item),
-                        title: Text(widget.itemLabel(item)),
-                        trailing: selected ? Icon(Icons.check, size: 18, color: scheme.primary) : null,
-                        onTap: () {
-                          widget.onChanged?.call(item);
-                          _close();
-                        },
-                      );
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: _filtered.length,
+                itemBuilder: (_, i) {
+                  final item = _filtered[i];
+                  final selected = item == widget.value;
+                  return ListTile(
+                    dense: true,
+                    leading: widget.itemLeading?.call(item),
+                    title: Text(widget.itemLabel(item)),
+                    trailing: selected ? Icon(Icons.check, size: 18, color: scheme.primary) : null,
+                    onTap: () {
+                      widget.onChanged?.call(item);
+                      _close();
+                      _focusNode.unfocus();
                     },
-                  ),
-                ),
-              ]),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -148,18 +156,17 @@ class _ThemeSearchableDropdownState<T> extends State<ThemeSearchableDropdown<T>>
     final scheme = Theme.of(context).colorScheme;
     return CompositedTransformTarget(
       link: _link,
-      child: GestureDetector(
-        onTap: _open ? _close : _openMenu,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: widget.label,
-            hintText: widget.value != null ? widget.itemLabel(widget.value as T) : (widget.hint ?? 'Select...'),
-            suffixIcon: Icon(_open ? Icons.arrow_drop_up : Icons.arrow_drop_down),
-            enabled: widget.enabled,
-          ),
-          child: SizedBox(height: 22, child: widget.value != null
-              ? Align(alignment: Alignment.centerLeft, child: Text(widget.itemLabel(widget.value as T), style: TextStyle(color: scheme.onSurface)))
-              : null),
+      child: TextField(
+        controller: _searchCtrl,
+        focusNode: _focusNode,
+        enabled: widget.enabled,
+        onChanged: _filter,
+        style: TextStyle(color: scheme.onSurface),
+        decoration: InputDecoration(
+          labelText: widget.label,
+          hintText: _open ? (widget.hint ?? 'Search...') : (widget.value != null ? _displayText : (widget.hint ?? 'Select...')),
+          suffixIcon: Icon(_open ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+          prefixIcon: _open ? const Icon(Icons.search, size: 20) : null,
         ),
       ),
     );

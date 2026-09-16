@@ -209,7 +209,7 @@ class AppThemeGenerator {
           shadows: AppShadowTheme(),
           cardRadius: 16,
           buttonRadius: 20,
-          inputRadius: 12,
+          inputRadius: 16,
           dialogRadius: 24,
         );
     final basePresetDark = baseStyle?.darkPreset ??
@@ -221,7 +221,7 @@ class AppThemeGenerator {
           shadows: AppShadowTheme.dark(),
           cardRadius: 16,
           buttonRadius: 20,
-          inputRadius: 12,
+          inputRadius: 16,
           dialogRadius: 24,
         );
 

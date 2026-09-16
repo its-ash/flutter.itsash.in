@@ -28,7 +28,7 @@ class AppThemePreset {
     this.cardColor,
     this.buttonRadius = 12,
     this.buttonElevation = 0,
-    this.inputRadius = 12,
+    this.inputRadius = 16,
     this.inputFilled = true,
     this.inputBorderWidth = 1,
     this.dialogRadius = 16,

@@ -29,7 +29,7 @@ class ThemeDropdown<T> extends StatelessWidget {
   double _inputRadius(BuildContext context) {
     final border = Theme.of(context).inputDecorationTheme.border;
     if (border is OutlineInputBorder) return border.borderRadius.topLeft.x;
-    return 8;
+    return 16;
   }
 
   @override

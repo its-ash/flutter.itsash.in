@@ -1,6 +1,6 @@
 name: theme
 description: "Flutter theme package: shared ThemeData, colors, typography, and a ThemeX component library."
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/its-ash/theme
 repository: https://github.com/its-ash/theme
 

@@ -6,27 +6,28 @@ class AppDropdownTheme {
   AppDropdownTheme._();
 
   static const double menuElevation = 8;
+  static const double radius = 16;
 
   static TextStyle textStyle(ColorScheme scheme) =>
       TextStyle(color: scheme.onSurface, fontSize: 14);
 
   static InputDecorationTheme inputDecorationTheme(ColorScheme scheme) =>
       InputDecorationTheme(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: scheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: scheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radius),
           borderSide: BorderSide(color: scheme.error, width: 2),
         ),
         filled: true,
@@ -39,7 +40,7 @@ class AppDropdownTheme {
     return MenuStyle(
       backgroundColor: WidgetStatePropertyAll(backgroundColor),
       shape: WidgetStatePropertyAll(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       ),
       elevation: const WidgetStatePropertyAll<double>(menuElevation),
       shadowColor: WidgetStatePropertyAll(shadows.shadowOne.color),

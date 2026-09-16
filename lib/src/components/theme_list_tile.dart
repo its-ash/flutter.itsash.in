@@ -22,8 +22,8 @@ class ThemeListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: leading,
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
+      title: Text(title, overflow: TextOverflow.ellipsis),
+      subtitle: subtitle != null ? Text(subtitle!, overflow: TextOverflow.ellipsis) : null,
       trailing: trailing,
       onTap: onTap,
       selected: selected,
