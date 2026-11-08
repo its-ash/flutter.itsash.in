@@ -1,0 +1,9 @@
+[
+  {"id": "s1", "author": "u1", "minutesAgo": 12, "text": "Morning 10k done before the rain. New shoes feel great.", "images": ["run"], "video": null, "likes": 128, "comments": 14},
+  {"id": "s2", "author": "u4", "minutesAgo": 95, "text": "Sunrise flow on the roof. Join the Thursday class if you are in town.", "images": ["yoga", "hero2"], "video": null, "likes": 342, "comments": 31},
+  {"id": "s3", "author": "u3", "minutesAgo": 240, "text": "Found this little guy in the garden today.", "images": [], "video": "butterfly", "likes": 911, "comments": 76},
+  {"id": "s4", "author": "u6", "minutesAgo": 600, "text": "Three days, two trains, one very good view.", "images": ["trip", "hero1", "hero3", "post1", "post2"], "video": null, "likes": 205, "comments": 9},
+  {"id": "s5", "author": "u5", "minutesAgo": 1440, "text": "New deadlift PR. Slow and steady.", "images": ["lift"], "video": null, "likes": 77, "comments": 5},
+  {"id": "s6", "author": "u2", "minutesAgo": 2880, "text": "The bees were busy at the market garden.", "images": [], "video": "bee", "likes": 154, "comments": 12},
+  {"id": "s7", "author": "u1", "minutesAgo": 4320, "text": "Studio corner, finally done.", "images": ["post3"], "video": null, "likes": 260, "comments": 22}
+]

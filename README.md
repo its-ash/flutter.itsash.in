@@ -1,129 +1,115 @@
 # theme
 
-Shared Flutter theming and component library: one `ThemeData` (light + dark), consistent colors/typography/shadows, 20 swappable visual styles (Material, Neumorphism, Glassmorphism, Brutalism, Cyberpunk, and more), and a 100+ widget `ThemeX` library so every app that uses this package looks and behaves consistently out of the box.
+A Flutter design system for every app you build: e-commerce, gym and workout, finance, health, food, travel, social, booking, education, and productivity.
 
-See **[COMPONENTS.md](COMPONENTS.md)** for the full component reference — every exported widget, its constructor, and a usage snippet.
+- One import: `package:theme/theme.dart`.
+- Light and dark mode from one brand preset.
+- Modern Material 3 look: filled pill tabs, rounded corners, card layouts, filled inputs.
+- More than 150 `Ui*` widgets. Each widget works with one to three arguments.
 
-**[Live demo →](https://flutter.itsash.in)** — the `example` app compiled to web and hosted on GitHub Pages. The demo app itself is also the best way to read this README: its **Home** section renders this file live, right inside the app.
+See **[COMPONENTS.md](COMPONENTS.md)** for the full reference.
+
+**[Live demo →](https://flutter.itsash.in)**
 
 ## Install
-
-This package isn't published to pub.dev — pull it in as a git dependency.
 
 ```yaml
 dependencies:
   theme:
     git:
       url: https://github.com/its-ash/theme.git
-      ref: main   # or pin to a tag, e.g. v0.0.1
+      ref: main
 ```
-
-Then:
 
 ```bash
 flutter pub get
 ```
 
-To pin to a specific commit or tag instead of tracking `main`, set `ref` to that commit SHA or tag name.
-
-## Usage
-
-Wrap your app root with the theme:
+## Quick start
 
 ```dart
+import 'package:flutter/material.dart';
 import 'package:theme/theme.dart';
 
+void main() => runApp(const UiApp(title: 'Shop', brand: UiBrand.commerce, home: HomePage()));
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) => UiScaffold(
+        title: 'Discover',
+        scrollable: false,
+        body: UiTabView(
+          tabs: const ['All', 'Shoes', 'Bags'],
+          children: [
+            for (var i = 0; i < 3; i++)
+              UiResponsiveGrid.builder(
+                itemCount: 8,
+                mainAxisExtent: 300,
+                itemBuilder: (_, i) => UiProductCard(
+                  title: 'Air Runner $i',
+                  price: 129,
+                  compareAt: 159,
+                  rating: 4.6,
+                  imageUrl: 'https://picsum.photos/seed/p$i/400',
+                ),
+              ),
+          ],
+        ),
+      );
+}
+```
+
+Use only the theme with your own `MaterialApp`:
+
+```dart
 MaterialApp(
-  theme: AppTheme.lightTheme(),
-  darkTheme: AppTheme.darkTheme(),
-  themeMode: ThemeMode.system,
-  home: const HomePage(),
+  theme: UiTheme.light(UiBrand.fitness),
+  darkTheme: UiTheme.dark(UiBrand.fitness),
 );
 ```
 
-Every `ThemeX` widget then automatically picks up colors and typography from `Theme.of(context)` — no per-widget setup needed:
+Make a custom brand from one color:
 
 ```dart
-ThemeButton(label: 'Checkout', onPressed: () {});
-Notify.success(context, 'Order placed successfully');
-AddToCartButton(onPressed: () => Notify.success(context, 'Added to cart'));
-ProfileAvatar(radius: 40, initials: 'AR', showEditBadge: true);
+final brand = UiBrand.neutral.copyWith(id: 'acme', name: 'Acme', seed: const Color(0xFF00897B));
 ```
 
-To rebrand for a specific app without touching any component, pass a custom `ColorScheme`:
+## What is included
 
-```dart
-AppTheme.lightTheme(colorScheme: myColorScheme)
-```
+| Group | Examples |
+|---|---|
+| Foundation | `UiTheme`, `UiBrand` (11 presets), `UiColors`, `UiTokens`, `UiSpace`, context shortcuts |
+| Primitives | `UiButton`, `UiIconButton`, `UiCard`, `UiImage`, `UiTag`, `UiAvatar`, `UiRatingStars` |
+| Controls | text, password, search, OTP, dropdown, chips, segmented, sliders, steppers, date/time, tags |
+| Layout | `UiApp`, `UiScaffold`, `UiSection`, `UiListGroup`, `UiResponsiveGrid`, accordion |
+| Navigation | `UiTabView`, `UiBottomNav`, `UiFloatingNavBar`, `UiAdaptiveShell`, steps, dots |
+| Feedback | toasts, dialogs, sheets, banners, empty/error states, skeletons, progress |
+| Display | stat cards, charts, timeline, carousel, image viewer, countdown |
+| Commerce | product cards, price, cart, order summary, coupon, checkout, order tracker, reviews |
+| Fitness | activity rings, workout cards, set tracker, rest timer, streaks, goals |
+| Finance | balance card, payment card, transactions, budgets, spending donut, amount keypad |
+| Booking | date strip, calendar, time slots, tickets, seat picker, guest counter |
+| Social | chat bubbles, composer, posts, comments, profile header, stories, notifications |
+| Auth | onboarding, login, signup, PIN pad, paywall, splash, error pages |
 
-### Prebuilt visual styles
-
-Beyond `AppTheme`, the package ships 20 complete, swappable visual styles — Material, Neumorphism, Glassmorphism, Brutalism, Cyberpunk, Claymorphism, Bauhaus, Organic, Retro 8-bit, and more — each a full light/dark pair (color scheme, shadows, corner radii, typography). Switch styles at runtime and every screen restyles at once:
-
-```dart
-final style = AppThemeStyle.byId('neumorphism');
-
-MaterialApp(
-  theme: style.themeData(Brightness.light),
-  darkTheme: style.themeData(Brightness.dark),
-  themeMode: ThemeMode.system,
-);
-```
-
-`ThemeStyleSwitcher` renders a live preview-card picker for all 20 styles — see the **Theme styles** section in the example app, or [COMPONENTS.md](COMPONENTS.md#theme-styles-light--dark-pairs) for the full list and API.
-
-## What's included
-
-- **Theming**: `AppTheme` (light/dark `ThemeData` factories), `AppColors`, `AppTypography`, `AppShadowTheme`, plus `AppThemePreset` / `AppThemeStyle` for the 20 swappable visual styles above.
-- **Component library**: buttons, cards, navigation (app bar, bottom nav, nav rail, drawer, tabs), inputs (text field, search, dropdown, chips, checkbox/radio/switch/slider), lists (incl. draggable, accordion), pickers (date/time/icon/emoji/color), and feedback (`Notify`, snackbar, banner, dialog, bottom sheet, progress indicator, spinners, skeleton loaders).
-- **Media widgets**: lazy/cached network images, a full-screen zoomable image viewer and gallery, a video player, markdown rendering, and a code block — see [Third-party dependencies](COMPONENTS.md#third-party-dependencies) for what these pull in.
-- **App-shell widgets**: splash screen, 404/403/500 error pages, a command palette, and a generic dialog shell.
-- **App-level widgets**: `AddToCartButton`, `PriceTag`, `RatingStars`, `ProfileAvatar`, `ThemeDiscountBadge`, `ThemeWishlistButton`, `ThemePermissionSelector`, and more.
-
-Full list with signatures: **[COMPONENTS.md](COMPONENTS.md)**.
-
-## Explore the components
-
-The `example/` app is a single showcase homepage — a sidebar/drawer covering every category (Home/README, Theme styles, Buttons, Cards, Feedback, Navigation, Inputs, Lists, Pickers, Layout, Typography, E-commerce widgets, State & status, Form helpers, Media & content, App shell & pickers), each rendering live, interactive instances of that category's widgets. A theme-mode menu in the app bar (light / dark / system) lets you preview every component in both themes instantly, and the Theme styles section lets you flip between all 20 visual styles live. Try it live at the [demo link above](https://flutter.itsash.in), or run it locally:
+## Run the showcase
 
 ```bash
-cd example
-flutter run
+make run         # iOS simulator
+make run-macos   # macOS desktop
+make docs        # build the web demo into docs/
+make deploy      # docs + commit + push
 ```
-
-Or use the Makefile from the repo root:
-
-```bash
-make run         # flutter run for the example app (iOS simulator)
-make run-macos   # flutter run for the example app (macOS desktop)
-make build-macos # flutter build macos --release
-make docs        # rebuild the web demo into docs/ for GitHub Pages
-make commit      # stage + commit, message generated by GitHub Copilot CLI
-make deploy      # docs + commit + push, in one go
-```
-
-### Updating the live demo
-
-The `docs/` folder is a committed, prebuilt `flutter build web` output — GitHub Pages serves it directly, no CI build step. After changing any component or the example app, run:
-
-```bash
-make deploy
-```
-
-This rebuilds `docs/` from `example/` (with `--no-tree-shake-icons`, since the showcase references far more `IconData` values than Flutter's web build can statically prove are "used" — see the note in `Makefile`), stages everything, asks the GitHub Copilot CLI (`gh copilot -p ...`) for a commit message covering the change, commits, and pushes to `main`. Requires the [GitHub CLI](https://cli.github.com) authenticated via `gh auth login` (the `gh copilot` command downloads the Copilot CLI on first use).
-
-GitHub Pages is configured to serve from the `docs/` folder on `main` (Settings → Pages → Source: Deploy from a branch → `main` / `docs`), with a custom domain at `flutter.itsash.in` via `docs/CNAME`. That file is preserved across rebuilds — `make docs` clears everything in `docs/` except `CNAME` before copying in the new build, so the custom domain never needs to be reconfigured in GitHub Pages settings.
-
-The web build fills the full viewport (no phone-frame chrome) — the showcase is a desktop-first nav-rail layout, not a phone-shaped demo, so it should render edge-to-edge on any screen size.
 
 ## Contributing
 
-- All theme/component source lives in `lib/`. See `CLAUDE.md` for repo conventions.
-- Preview and test any change against the `example` app before committing.
-- Add new public widgets to `lib/src/widgets/` (or `lib/src/components/` for thin Material wrappers), export them from `lib/theme.dart`, and document them in `COMPONENTS.md`.
-- If you add a section to the example app's showcase, wire it into `example/lib/home/showcase_home_page.dart`'s `_sections` list so it shows up in the nav rail / drawer.
-- `example/assets/README.md` is a symlink to this file (used by the app's Home section) — no separate copy to keep in sync.
+- Put all theme and component code in `lib/`. Read `CLAUDE.md`.
+- Put a new widget in the matching `lib/src/<group>/` folder. Export it from that folder's barrel file.
+- Document it in `doc/components/<group>.md`.
+- Show it in the `example` app.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

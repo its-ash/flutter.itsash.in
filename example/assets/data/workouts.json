@@ -1,0 +1,23 @@
+[
+  {"id": "w1", "title": "Easy 5k Run", "coach": "u1", "minutes": 30, "calories": 320, "level": "beginner", "image": "run", "exercises": [
+    {"name": "Warm-up walk", "sets": 1, "reps": 5, "unit": "min"},
+    {"name": "Easy run", "sets": 1, "reps": 20, "unit": "min"},
+    {"name": "Cool-down walk", "sets": 1, "reps": 5, "unit": "min"}
+  ]},
+  {"id": "w2", "title": "Morning Yoga Flow", "coach": "u4", "minutes": 25, "calories": 140, "level": "beginner", "image": "yoga", "exercises": [
+    {"name": "Sun salutation", "sets": 3, "reps": 5, "unit": "reps"},
+    {"name": "Warrior II", "sets": 2, "reps": 45, "unit": "s"},
+    {"name": "Child's pose", "sets": 1, "reps": 60, "unit": "s"}
+  ]},
+  {"id": "w3", "title": "Strength: Lower Body", "coach": "u5", "minutes": 45, "calories": 410, "level": "intermediate", "image": "lift", "exercises": [
+    {"name": "Back squat", "sets": 4, "reps": 8, "unit": "reps"},
+    {"name": "Romanian deadlift", "sets": 3, "reps": 10, "unit": "reps"},
+    {"name": "Walking lunge", "sets": 3, "reps": 12, "unit": "reps"},
+    {"name": "Calf raise", "sets": 3, "reps": 15, "unit": "reps"}
+  ]},
+  {"id": "w4", "title": "Hill Intervals", "coach": "u1", "minutes": 40, "calories": 520, "level": "advanced", "image": "hero2", "exercises": [
+    {"name": "Warm-up jog", "sets": 1, "reps": 10, "unit": "min"},
+    {"name": "Hill sprint", "sets": 8, "reps": 60, "unit": "s"},
+    {"name": "Cool-down jog", "sets": 1, "reps": 8, "unit": "min"}
+  ]}
+]
