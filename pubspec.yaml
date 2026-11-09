@@ -1,6 +1,6 @@
 name: theme
-description: "Flutter design system: brand-aware light/dark ThemeData and a Ui* component library for commerce, fitness, finance, social, booking, and general apps."
-version: 1.0.0
+description: "Flutter design system: one light and one dark ThemeData with an optional accent, and a Ui* component library."
+version: 2.0.0
 homepage: https://github.com/its-ash/theme
 repository: https://github.com/its-ash/theme
 

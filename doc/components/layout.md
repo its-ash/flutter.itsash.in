@@ -1,207 +1,167 @@
-# Layout and App Shell
+# Layout
 
-## Quick start
-Use `UiApp` in place of `MaterialApp`. It applies the light and dark theme for one brand.
-
-```dart
-void main() => runApp(const UiApp(title: 'Shop', brand: UiBrand.commerce, home: HomePage()));
-```
-
-To change the brand or the theme mode at runtime, give a `UiThemeController`:
-
-```dart
-final theme = UiThemeController(brand: UiBrand.fitness);
-
-UiApp(title: 'Gym', controller: theme, home: const HomePage());
-```
-
-### UiThemeController
-A `ValueNotifier<({ThemeMode mode, UiBrand brand})>`. It drives `UiApp`, `UiThemeModeSwitch`, and `UiBrandPicker`.
-
-```dart
-theme.setMode(ThemeMode.dark);
-theme.toggleMode();
-theme.setBrand(UiBrand.finance);
-```
-- `UiThemeController({ThemeMode mode = ThemeMode.system, UiBrand brand = UiBrand.neutral})`
-- Getters: `mode`, `brand`. Methods: `setMode`, `toggleMode([Brightness? current])`, `setBrand`.
-- `UiThemeScope.maybeOf(context)` gives the controller of the nearest `UiApp`.
-
-### UiApp
-Wraps `MaterialApp`. Default `debugShowCheckedModeBanner` is `false`.
-
-```dart
-UiApp(title: 'Shop', brand: UiBrand.commerce, home: const HomePage());
-UiApp.router(routerConfig: router, brand: UiBrand.travel);
-```
-- `brand` (default `UiBrand.neutral`), `themeMode` (default `ThemeMode.system`), `controller`.
-- Forwards: `home`, `routes`, `initialRoute`, `onGenerateRoute`, `onUnknownRoute`, `navigatorKey`, `navigatorObservers`, `scaffoldMessengerKey`, `locale`, `supportedLocales`, `localizationsDelegates`, `builder`.
-- `UiApp.messengerKey` and `UiApp.messenger`: global access to the `ScaffoldMessengerState`.
-- `UiApp.themeFor(brand, brightness)`: cached `ThemeData`.
-
-### UiThemeModeSwitch
-Compact segmented control for light, system, and dark mode.
-
-```dart
-const UiThemeModeSwitch();
-```
-- `controller` (default: the controller of `UiApp`), `showLabels` (default `false`).
-
-### UiBrandPicker
-Horizontal row of brand swatches. A tap sets the brand.
-
-```dart
-const UiBrandPicker();
-```
-- `controller`, `brands` (default `UiBrand.values`), `size` (40), `showLabels` (true), `padding` (`UiSpace.page`).
+Page scaffolds, content width, sections, dividers, gaps, responsive grids and split views. Import `package:theme/theme.dart`.
 
 ### UiScaffold
-Page shell. It adds an app bar, page padding, scroll, a back button, and max-width centering.
+Page scaffold with page padding, optional scrolling, optional centered max width, safe area, and tap outside to close the keyboard.
 
 ```dart
-UiScaffold(title: 'Cart', body: Column(children: items), bottomBar: UiButton('Checkout', expand: true, onPressed: pay));
+UiScaffold(appBar: const UiAppBar(title: 'Profile'), scrollable: true, maxWidth: 720, body: form);
 ```
-- `body` (required), `title`, `subtitle`, `actions`, `appBar` (custom bar).
-- `scrollable` (true): wraps `body` in a scroll view. Set `false` when `body` is a list.
-- `padding` (`UiSpace.page`), `maxWidth` (720), `backgroundColor`.
-- `onRefresh`: adds pull-to-refresh.
-- `large`: uses a collapsing `SliverAppBar.large` title.
-- `bottomBar`: sticky bottom content in a `UiStickyBottomBar`. `bottomNavigationBar`: raw bottom widget.
-- `floatingActionButton`, `drawer`, `extendBody`, `showBack` (default: automatic).
-- A tap outside a field closes the keyboard.
 
-### UiAppBar
-App bar with a tonal circle back button.
+- `body` (required).
+- `appBar`, `bottomBar`, `fab`, `drawer`, `endDrawer`, `backgroundColor`.
+- `padding`: default page padding on the sides (20 / 24 / 32 by width), 16 top, 24 bottom. `EdgeInsets.zero` for edge to edge.
+- `scrollable`: wrap the body in a scroll view. Default `false`.
+- `maxWidth`: center the body with this max width. Default `null` (full width).
+- `safeArea`: default `true`.
+- `dismissKeyboard`: tap outside closes the keyboard. Default `true`.
+- `onRefresh`: pull to refresh (when `scrollable`).
+
+### UiContent
+Centers its child with a max width and page padding. The child fills the width up to the max.
 
 ```dart
-UiAppBar(title: 'Orders', subtitle: '12 active', actions: [UiIconButton(Icons.search_rounded, onPressed: search)]);
+UiContent(child: Text('Readable on any screen'));
 ```
-- `title`, `titleWidget`, `subtitle`, `actions`, `leading`, `centerTitle`, `showBack`, `onBack`, `bottom`, `backgroundColor`.
 
-### UiBackButton
-Tonal circle back button. It shows a close icon on full-screen dialogs.
-
-```dart
-const UiBackButton();
-```
-- `onPressed` (default `Navigator.maybePop`), `icon`.
-
-### UiStickyBottomBar
-Bottom container for call-to-action buttons. It has a top divider, a soft shadow, and safe-area padding.
-
-```dart
-UiStickyBottomBar(child: UiButton('Book now', expand: true, onPressed: book));
-```
-- `child`, `padding`, `showDivider` (true), `maxWidth` (720), `color`.
-
-### UiMaxWidth
-Centers a child and limits its width on wide screens.
-
-```dart
-UiMaxWidth(maxWidth: 560, child: form);
-```
-- `child`, `maxWidth` (720).
+- `child` (required).
+- `maxWidth`: default `720`.
+- `padding`: default horizontal page padding.
+- `UiContent.pagePadding(context)`: the page padding for the current width (20, 24 or 32).
 
 ### UiSection
-Section with a title, an optional subtitle, and an optional "See all" action.
+A section header above its content.
 
 ```dart
-UiSection(title: 'Popular', onSeeAll: openAll, child: products);
+UiSection(title: 'Recent', actionLabel: 'See all', onAction: openAll, child: list);
 ```
-- `child`, `title`, `subtitle`, `onSeeAll`, `actionLabel` ('See all'), `trailing`, `headerPadding`, `spacing` (12), `margin` (bottom 24).
 
-### UiDividerText
-Horizontal divider with text in the middle.
+- `child` (required).
+- `title`: null shows no header.
+- `subtitle`, `actionLabel`, `onAction`, `action`: as in `UiSectionHeader`.
+- `padding`: space around the section. Default `EdgeInsets.zero`.
+- `gap`: space between header and content. Default `UiSpace.md` (12).
+
+### UiSectionHeader
+Title row with optional subtitle and trailing action.
 
 ```dart
-const UiDividerText();
+UiSectionHeader('Recent', actionLabel: 'See all', onAction: openAll);
 ```
-- `text` ('or').
 
-### UiListTile
-Row with a tonal icon square, a title, a subtitle, and a trailing widget. A chevron shows when `onTap` is set.
+- `title` (positional).
+- `subtitle`: second line.
+- `actionLabel` + `onAction`: trailing text button. Null `onAction` disables it.
+- `action`: custom trailing widget. Used instead of `actionLabel`.
+- `padding`: default `EdgeInsets.zero`.
+
+### UiDivider
+Hairline divider, horizontal or vertical, with an optional centered label.
 
 ```dart
-UiListTile(icon: Icons.person_rounded, title: 'Profile', onTap: openProfile);
+const UiDivider(label: 'or');
 ```
-- `title` (required), `subtitle`, `icon`, `iconColor`, `leading`, `trailing`, `onTap`, `onLongPress`, `destructive`, `dense`, `enabled`, `selected`, `padding`.
 
-### UiListGroup
-Grouped rounded card of tiles with inset dividers, as in iOS settings.
+- `label`: text in the middle (horizontal only).
+- `vertical`: default `false`.
+- `indent`: space before the line. Default `0`.
+- `endIndent`: space after the line. Default `indent`.
+- `space`: total height (or width when vertical). Default `1`.
+- `color`: default `colors.border`.
+
+### UiColumn
+`Column` with a gap between children.
 
 ```dart
-UiListGroup(header: 'Account', children: [tileA, tileB]);
+UiColumn(gap: UiSpace.lg, children: [title, body, actions]);
 ```
-- `children` (required), `header`, `footer`, `dividerIndent` (default: automatic), `margin` (bottom 20).
 
-### UiSettingsTile
-Settings rows with minimal input.
+- `children` (required).
+- `gap`: default `UiSpace.md` (12).
+- `mainAxisAlignment` (start), `crossAxisAlignment` (start), `mainAxisSize` (max).
+
+### UiRow
+`Row` with a gap between children.
 
 ```dart
-UiSettingsTile.nav(icon: Icons.lock_rounded, title: 'Privacy', onTap: openPrivacy);
-UiSettingsTile.toggle(icon: Icons.notifications_rounded, title: 'Alerts', checked: on, onChanged: setOn);
-UiSettingsTile.value(icon: Icons.language_rounded, title: 'Language', value: 'English', onTap: pick);
-UiSettingsTile.action(icon: Icons.logout_rounded, title: 'Sign out', onTap: signOut);
+UiRow(children: [const Icon(Icons.star), Expanded(child: Text(label))]);
 ```
-- All: `title`, `icon`, `subtitle`, `iconColor`.
-- `.nav`: `onTap`, `value`. `.toggle`: `checked`, `onChanged`. `.value`: `value`, `onTap`. `.action`: `onTap`, `destructive` (true).
+
+- `children` (required).
+- `gap`: default `UiSpace.sm` (8).
+- `mainAxisAlignment` (start), `crossAxisAlignment` (center), `mainAxisSize` (max).
 
 ### UiResponsiveGrid
-Grid. The column count comes from `minItemWidth`.
+Grid that picks its column count from the available width. Items are never narrower than `minItemWidth`, and nothing overflows. Not lazy.
 
 ```dart
-UiResponsiveGrid(children: cards);
-UiResponsiveGrid.builder(itemCount: items.length, itemBuilder: (c, i) => ProductCard(items[i]));
+UiResponsiveGrid(minItemWidth: 160, children: [for (final p in products) ProductCard(p)]);
 ```
-- `children` form: no scroll, natural item height. Set `childAspectRatio` for a fixed height.
-- `.builder` form: scrolls, lazy. `childAspectRatio` (0.75) or `mainAxisExtent`, `padding` (`UiSpace.page`), `controller`, `physics`, `shrinkWrap`.
-- Both: `minItemWidth` (160), `spacing` (12), `runSpacing`, `maxColumns`.
-- `UiResponsiveGrid.columnsFor(width)` gives the column count.
 
-### UiSliverGrid
-Sliver form of the responsive grid, for `CustomScrollView`.
+- `children` (required).
+- `minItemWidth`: default `160`. Always at least one column.
+- `spacing`: space between columns. Default `UiSpace.md` (12).
+- `runSpacing`: space between rows. Default `spacing`.
+- `maxColumns`: upper limit. Default none.
+- `equalHeight`: items in a row match the tallest. Default `false`.
+- `UiResponsiveGrid.columnsFor(width, ...)`: the column count for a width.
+
+### UiResponsiveLayout
+Shows a different widget per size class (compact, medium, expanded, large). Missing classes fall back to the next smaller one.
 
 ```dart
-UiSliverGrid(itemCount: items.length, itemBuilder: (c, i) => ProductCard(items[i]));
+UiResponsiveLayout(compact: const PhoneHome(), expanded: const TabletHome());
+UiResponsiveLayout.builder(builder: (context, bp) => bp == UiBreakpoint.compact ? list : grid);
 ```
-- `itemCount`, `itemBuilder`, `minItemWidth` (160), `spacing` (12), `runSpacing`, `childAspectRatio` (0.75), `mainAxisExtent`, `maxColumns`.
-- `UiGridDelegate` is the `SliverGridDelegate` that both grids use.
 
-### UiHorizontalList
-Horizontal scroller with page padding.
+- `compact` (required), `medium`, `expanded`, `large`.
+- `.builder(builder: (context, breakpoint) => ...)`: build from the breakpoint.
+- `local`: use the parent's width instead of the screen width. Default `false`.
+
+### UiSplitView
+Master-detail layout. Side by side on wide widths. One pane on narrow widths: `secondary` when set, otherwise `primary`.
 
 ```dart
-UiHorizontalList(children: categories);
-UiHorizontalList.builder(height: 220, itemCount: items.length, itemExtent: 160, itemBuilder: (c, i) => Card(items[i]));
+UiSplitView(primary: list, secondary: selected == null ? null : Details(selected), onCloseSecondary: clear);
 ```
-- `children` form: height comes from the tallest child.
-- `.builder` form: lazy, `height` is required.
-- `spacing` (12), `padding` (`UiSpace.page`), `itemExtent`, `controller`.
-- Inside a `UiScaffold` with page padding, set `padding: EdgeInsets.zero` on one of the two.
 
-### UiResponsive
-Shows a different widget for compact, medium, and expanded widths.
+- `primary` (required): the list pane. Keeps its state in both modes.
+- `secondary`: the detail pane. Null means nothing is selected.
+- `placeholder`: shown in the detail pane on wide widths when nothing is selected.
+- `breakpoint`: smallest size class that shows both panes. Default `UiBreakpoint.expanded` (840 px). Uses the widget's own width.
+- `primaryWidth`: default `360` (at most 45% of the width).
+- `onCloseSecondary`: called on system back while the detail fills a narrow screen.
+- `divider`: hairline between panes. Default `true`.
+
+### UiBottomBar
+Sticky bottom action area with a top hairline and surface fill. Stays above the home indicator and the keyboard.
 
 ```dart
-UiResponsive(compact: const PhoneView(), expanded: const DesktopView());
-UiResponsive.builder(builder: (context, size) => Text(size.name));
+UiScaffold(body: form, bottomBar: UiBottomBar(child: FilledButton(onPressed: save, child: const Text('Save'))));
 ```
-- `compact` (required), `medium`, `expanded`. Missing sizes fall back to the next smaller size.
-- `UiWindowSize { compact, medium, expanded }`, `UiWindowSize.of(width)`.
 
-### UiExpandableCard
-Card with a header that opens and closes the body with animation.
+- `child`: one widget, stretched to full width. Or `children`: equal-width row.
+- `gap`: space between `children`. Default `UiSpace.sm` (8).
+- `padding`: default 20 sides, 12 top and bottom (safe area added).
+- `maxWidth`: content max width on wide screens. Default `720`.
+- `border`: top hairline. Default `true`.
+- `keyboardAware`: moves above the keyboard. Default `true`.
+
+### UiSurface
+Generic container: surface fill, 1 px border, rounded corners, optional shadow, status tint and tap.
 
 ```dart
-UiExpandableCard(title: 'Shipping', child: Text(info));
+UiSurface(tone: UiStatus.success, child: Text('Saved'));
 ```
-- `title`, `child` (required), `subtitle`, `icon`, `initiallyExpanded`, `expanded` (controlled), `onChanged`, `variant`.
 
-### UiAccordion
-List of expandable cards. One card opens at a time, or many when `multiple` is true.
-
-```dart
-UiAccordion(items: [UiAccordionItem.text(title: 'Returns', body: '30 days.')]);
-```
-- `items` (required), `multiple` (false), `initialIndex`, `spacing` (8), `onChanged(Set<int>)`, `variant`.
-- `UiAccordionItem({title, child, subtitle, icon})`, `UiAccordionItem.text({title, body, subtitle, icon})`.
+- `child` (required).
+- `padding`: default `EdgeInsets.all(16)`.
+- `margin`: default none.
+- `radius`: default `UiRadius.lg` (18).
+- `color`: default `colors.surface` (or the tone's soft color).
+- `tone`: `UiStatus` tint for fill and border.
+- `border`: 1 px border. Default `true`. `borderColor` overrides the color.
+- `shadow`: such as `context.shadowMd`. Default none.
+- `onTap`: makes it tappable with a ripple.
+- `width`, `height`: fixed size.

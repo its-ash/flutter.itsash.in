@@ -1,125 +1,115 @@
 import 'package:flutter/material.dart';
 
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
+import 'package:theme/src/foundation/foundation.dart';
 
-class UiSection extends StatelessWidget {
-  const UiSection({
+/// Title row for a block of content, with an optional subtitle and a
+/// trailing action ("See all").
+///
+/// ```dart
+/// UiSectionHeader('Recent', actionLabel: 'See all', onAction: openAll);
+/// ```
+class UiSectionHeader extends StatelessWidget {
+  const UiSectionHeader(
+    this.title, {
     super.key,
-    required this.child,
-    this.title,
     this.subtitle,
-    this.onSeeAll,
-    this.actionLabel = 'See all',
-    this.trailing,
-    this.headerPadding = EdgeInsets.zero,
-    this.spacing = UiSpace.md,
-    this.margin = const EdgeInsets.only(bottom: UiSpace.xxl),
+    this.actionLabel,
+    this.onAction,
+    this.action,
+    this.padding = EdgeInsets.zero,
   });
 
-  final Widget child;
-  final String? title;
+  final String title;
   final String? subtitle;
-  final VoidCallback? onSeeAll;
-  final String actionLabel;
-  final Widget? trailing;
-  final EdgeInsetsGeometry headerPadding;
-  final double spacing;
-  final EdgeInsetsGeometry margin;
+
+  /// Text of a trailing text button.
+  final String? actionLabel;
+
+  /// Called by the [actionLabel] button. Null disables it.
+  final VoidCallback? onAction;
+
+  /// Custom trailing widget. Used instead of [actionLabel].
+  final Widget? action;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final hasHeader = title != null || subtitle != null || trailing != null || onSeeAll != null;
-    final action = trailing ??
-        (onSeeAll == null
-            ? null
-            : TextButton(
-                onPressed: onSeeAll,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(0, 36),
-                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(actionLabel),
-              ));
+    final t = context.text;
+    final trailing =
+        action ?? (actionLabel == null ? null : TextButton(onPressed: onAction, child: Text(actionLabel!)));
     return Padding(
-      padding: margin,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
+      padding: padding,
+      child: Row(
         children: [
-          if (hasHeader)
-            Padding(
-              padding: headerPadding,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (title != null)
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              title!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.text.titleLarge?.copyWith(fontSize: 19),
-                            ),
-                          ),
-                        if (subtitle != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: UiSpace.xxs),
-                            child: Text(
-                              subtitle!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  ?action,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.titleMedium),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: UiSpace.xxs),
+                  Text(subtitle!, maxLines: 2, overflow: TextOverflow.ellipsis, style: t.bodySmall),
                 ],
-              ),
+              ],
             ),
-          if (hasHeader) SizedBox(height: spacing),
-          child,
+          ),
+          if (trailing != null) ...[const SizedBox(width: UiSpace.sm), trailing],
         ],
       ),
     );
   }
 }
 
-class UiDividerText extends StatelessWidget {
-  const UiDividerText({super.key, this.text = 'or'});
+/// A [UiSectionHeader] above its content.
+///
+/// ```dart
+/// UiSection(title: 'Recent', actionLabel: 'See all', onAction: openAll, child: list);
+/// ```
+class UiSection extends StatelessWidget {
+  const UiSection({
+    super.key,
+    this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onAction,
+    this.action,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.gap = UiSpace.md,
+  });
 
-  final String text;
+  /// Header title. Null shows no header.
+  final String? title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final Widget? action;
+  final Widget child;
+
+  /// Space around the whole section.
+  final EdgeInsetsGeometry padding;
+
+  /// Space between header and content.
+  final double gap;
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    return Semantics(
-      label: text,
-      child: ExcludeSemantics(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: UiSpace.md),
-          child: Row(
-            children: [
-              const Expanded(child: Divider()),
-              if (text.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.md),
-                  child: Text(text, style: context.text.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
-                ),
-              const Expanded(child: Divider()),
-            ],
-          ),
-        ),
+    return Padding(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (title != null) ...[
+            UiSectionHeader(title!, subtitle: subtitle, actionLabel: actionLabel, onAction: onAction, action: action),
+            SizedBox(height: gap),
+          ],
+          child,
+        ],
       ),
     );
   }

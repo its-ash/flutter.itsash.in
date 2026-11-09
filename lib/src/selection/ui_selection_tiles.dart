@@ -1,315 +1,237 @@
-import 'package:flutter/material.dart';
+part of 'ui_selection.dart';
 
-import 'package:theme/src/chip/ui_chips.dart';
-import 'package:theme/src/input/ui_field_label.dart';
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
-
-class _TileShell extends StatelessWidget {
-  const _TileShell({
-    required this.title,
-    required this.control,
-    required this.onTap,
-    this.subtitle,
-    this.leading,
-    this.highlight = false,
-    this.controlFirst = false,
-  });
-
-  final String title;
-  final String? subtitle;
-  final IconData? leading;
-  final Widget control;
-  final VoidCallback? onTap;
-  final bool highlight;
-  final bool controlFirst;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.colors;
-    final enabled = onTap != null;
-    final r = context.tokens.md;
-    final fg = enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38);
-    final sub = enabled ? cs.onSurfaceVariant : cs.onSurfaceVariant.withValues(alpha: 0.38);
-    return AnimatedContainer(
-      duration: UiDuration.fast,
-      decoration: BoxDecoration(
-        color: highlight ? cs.primaryContainer.withValues(alpha: context.isDark ? 0.35 : 0.5) : cs.surfaceContainerLow,
-        borderRadius: r,
-        border: Border.all(
-          color: highlight ? cs.primary : cs.outlineVariant.withValues(alpha: 0.5),
-          width: highlight ? 1.4 : 1,
-        ),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: r,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.md),
-            child: Row(
-              children: [
-                if (controlFirst) ...[control, const SizedBox(width: UiSpace.md)],
-                if (leading != null) ...[
-                  Icon(leading, size: 22, color: highlight ? cs.primary : sub),
-                  const SizedBox(width: UiSpace.md),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(title, style: context.text.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: fg)),
-                      if (subtitle != null && subtitle!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: UiSpace.xxs),
-                          child: Text(subtitle!, style: context.text.bodyMedium?.copyWith(color: sub)),
-                        ),
-                    ],
-                  ),
-                ),
-                if (!controlFirst) ...[const SizedBox(width: UiSpace.md), control],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class UiCheckboxTile extends StatelessWidget {
-  const UiCheckboxTile(
-    this.title, {
-    super.key,
-    required this.value,
-    required this.onChanged,
-    this.subtitle,
-    this.leading,
-  });
-
-  final String title;
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-  final String? subtitle;
-  final IconData? leading;
-
-  @override
-  Widget build(BuildContext context) {
-    final cb = onChanged;
-    final tap = cb == null ? null : () => cb(!value);
-    return Semantics(
-      container: true,
-      checked: value,
-      enabled: cb != null,
-      label: title,
-      hint: subtitle,
-      onTap: tap,
-      child: ExcludeSemantics(
-        child: _TileShell(
-          title: title,
-          subtitle: subtitle,
-          leading: leading,
-          onTap: tap,
-          highlight: value,
-          control: Checkbox(value: value, onChanged: cb == null ? null : (v) => cb(v ?? false)),
-        ),
-      ),
-    );
-  }
-}
-
+/// Settings row with a switch on the end side. The whole row toggles.
+///
+/// ```dart
+/// UiSwitchTile('Notifications', value: on, icon: Icons.notifications_rounded, onChanged: (v) => setState(() => on = v))
+/// ```
 class UiSwitchTile extends StatelessWidget {
   const UiSwitchTile(
     this.title, {
     super.key,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     this.subtitle,
-    this.leading,
+    this.icon,
+    this.status = UiStatus.accent,
   });
 
   final String title;
   final bool value;
+
+  /// Called with the new value. Null disables the row.
   final ValueChanged<bool>? onChanged;
   final String? subtitle;
-  final IconData? leading;
+
+  /// Leading icon, shown in a tinted square.
+  final IconData? icon;
+
+  /// Tint of the icon square.
+  final UiStatus status;
 
   @override
   Widget build(BuildContext context) {
-    final cb = onChanged;
-    final tap = cb == null ? null : () => cb(!value);
-    return Semantics(
-      container: true,
-      toggled: value,
-      enabled: cb != null,
-      label: title,
-      hint: subtitle,
-      onTap: tap,
-      child: ExcludeSemantics(
-        child: _TileShell(
+    final enabled = onChanged != null;
+    return MergeSemantics(
+      child: Semantics(
+        toggled: value,
+        enabled: enabled,
+        child: _SelectionTile(
           title: title,
           subtitle: subtitle,
-          leading: leading,
-          onTap: tap,
-          control: Switch(value: value, onChanged: cb),
+          icon: icon,
+          status: status,
+          onTap: enabled ? () => onChanged!(!value) : null,
+          trailing: (state) => _SwitchTrack(value: value, state: state),
         ),
       ),
     );
   }
 }
 
-class _RadioDot extends StatelessWidget {
-  const _RadioDot({required this.selected, required this.enabled});
-
-  final bool selected;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.colors;
-    final c = !enabled ? cs.onSurface.withValues(alpha: 0.38) : (selected ? cs.primary : cs.outline);
-    return AnimatedContainer(
-      duration: UiDuration.fast,
-      width: 22,
-      height: 22,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: c, width: 2)),
-      child: AnimatedScale(
-        duration: UiDuration.fast,
-        curve: UiCurve.standard,
-        scale: selected ? 1 : 0,
-        child: Container(width: 11, height: 11, decoration: BoxDecoration(shape: BoxShape.circle, color: c)),
-      ),
-    );
-  }
-}
-
-enum UiRadioLayout { list, chips }
-
-class UiRadioGroup<T> extends StatelessWidget {
-  const UiRadioGroup({
+/// Settings row with a checkbox on the end side. The whole row toggles.
+///
+/// ```dart
+/// UiCheckboxTile('Remember me', value: remember, onChanged: (v) => setState(() => remember = v!))
+/// ```
+class UiCheckboxTile extends StatelessWidget {
+  const UiCheckboxTile(
+    this.title, {
     super.key,
-    required this.options,
     required this.value,
-    required this.onChanged,
-    this.labelBuilder,
-    this.subtitleBuilder,
-    this.iconBuilder,
-    this.layout = UiRadioLayout.list,
-    this.label,
-    this.spacing = UiSpace.sm,
+    this.onChanged,
+    this.subtitle,
+    this.icon,
+    this.status = UiStatus.accent,
+    this.tristate = false,
   });
 
-  final List<T> options;
-  final T? value;
-  final ValueChanged<T>? onChanged;
-  final String Function(T)? labelBuilder;
-  final String? Function(T)? subtitleBuilder;
-  final IconData? Function(T)? iconBuilder;
-  final UiRadioLayout layout;
-  final String? label;
-  final double spacing;
+  final String title;
+  final bool? value;
+
+  /// Called with the next value. Null disables the row.
+  final ValueChanged<bool?>? onChanged;
+  final String? subtitle;
+  final IconData? icon;
+  final UiStatus status;
+
+  /// When true, taps cycle false → true → null → false.
+  final bool tristate;
 
   @override
   Widget build(BuildContext context) {
-    if (options.isEmpty) return const SizedBox.shrink();
-    String lbl(T v) => labelBuilder?.call(v) ?? v.toString();
-    final cb = onChanged;
-    final Widget body = switch (layout) {
-      UiRadioLayout.chips => UiChoiceChips<T>(
-          options: options,
-          value: value,
-          onChanged: cb,
-          labelBuilder: lbl,
-          iconBuilder: iconBuilder,
+    final enabled = onChanged != null;
+    return MergeSemantics(
+      child: Semantics(
+        checked: value == true,
+        mixed: tristate && value == null,
+        enabled: enabled,
+        child: _SelectionTile(
+          title: title,
+          subtitle: subtitle,
+          icon: icon,
+          status: status,
+          onTap: enabled ? () => onChanged!(UiCheckbox.next(value, tristate: tristate)) : null,
+          trailing: (state) => _CheckboxMark(value: value, state: state),
         ),
-      UiRadioLayout.list => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final (i, o) in options.indexed) ...[
-              if (i > 0) SizedBox(height: spacing),
-              Semantics(
-                container: true,
-                inMutuallyExclusiveGroup: true,
-                checked: o == value,
-                enabled: cb != null,
-                label: lbl(o),
-                onTap: cb == null ? null : () => cb(o),
-                child: ExcludeSemantics(
-                  child: _TileShell(
-                    title: lbl(o),
-                    subtitle: subtitleBuilder?.call(o),
-                    leading: iconBuilder?.call(o),
-                    onTap: cb == null ? null : () => cb(o),
-                    highlight: o == value,
-                    controlFirst: true,
-                    control: _RadioDot(selected: o == value, enabled: cb != null),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-    };
-    return UiFieldLabel(label, child: body);
+      ),
+    );
   }
 }
 
-class UiCheckboxGroup<T> extends StatelessWidget {
-  const UiCheckboxGroup({
+/// Settings row with a radio on the end side. Tapping selects [value].
+///
+/// ```dart
+/// UiRadioTile('Dark', value: ThemeMode.dark, groupValue: mode, onChanged: (v) => setState(() => mode = v))
+/// ```
+class UiRadioTile<T> extends StatelessWidget {
+  const UiRadioTile(
+    this.title, {
     super.key,
-    required this.options,
-    required this.values,
-    required this.onChanged,
-    this.labelBuilder,
-    this.subtitleBuilder,
-    this.iconBuilder,
-    this.label,
-    this.max,
-    this.spacing = UiSpace.sm,
+    required this.value,
+    required this.groupValue,
+    this.onChanged,
+    this.subtitle,
+    this.icon,
+    this.status = UiStatus.accent,
   });
 
-  final List<T> options;
-  final List<T> values;
-  final ValueChanged<List<T>>? onChanged;
-  final String Function(T)? labelBuilder;
-  final String? Function(T)? subtitleBuilder;
-  final IconData? Function(T)? iconBuilder;
-  final String? label;
-  final int? max;
-  final double spacing;
+  final String title;
+  final T value;
+  final T? groupValue;
+
+  /// Called with [value] when tapped. Null disables the row.
+  final ValueChanged<T>? onChanged;
+  final String? subtitle;
+  final IconData? icon;
+  final UiStatus status;
 
   @override
   Widget build(BuildContext context) {
-    if (options.isEmpty) return const SizedBox.shrink();
-    final cb = onChanged;
-    final full = max != null && values.length >= max!;
-    void toggle(T o, bool on) {
-      if (cb == null) return;
-      final next = [for (final x in options) if (x == o ? on : values.contains(x)) x];
-      cb(next);
-    }
+    final enabled = onChanged != null;
+    final selected = value == groupValue;
+    return MergeSemantics(
+      child: Semantics(
+        checked: selected,
+        inMutuallyExclusiveGroup: true,
+        enabled: enabled,
+        child: _SelectionTile(
+          title: title,
+          subtitle: subtitle,
+          icon: icon,
+          status: status,
+          onTap: enabled ? () => onChanged!(value) : null,
+          trailing: (state) => _RadioMark(selected: selected, state: state),
+        ),
+      ),
+    );
+  }
+}
 
-    return UiFieldLabel(
-      label,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (i, o) in options.indexed) ...[
-            if (i > 0) SizedBox(height: spacing),
-            UiCheckboxTile(
-              labelBuilder?.call(o) ?? o.toString(),
-              subtitle: subtitleBuilder?.call(o),
-              leading: iconBuilder?.call(o),
-              value: values.contains(o),
-              onChanged: cb == null || (full && !values.contains(o)) ? null : (v) => toggle(o, v),
+class _SelectionTile extends StatelessWidget {
+  const _SelectionTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.status,
+    required this.onTap,
+    required this.trailing,
+  });
+
+  final String title;
+  final String? subtitle;
+  final IconData? icon;
+  final UiStatus status;
+  final VoidCallback? onTap;
+  final Widget Function(_Interaction state) trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final enabled = onTap != null;
+    final tone = c.tone(status);
+    return _Pressable(
+      onTap: onTap,
+      builder: (context, state) => AnimatedContainer(
+        duration: context.motion(UiMotion.fast),
+        curve: UiMotion.standard,
+        constraints: const BoxConstraints(minHeight: 56),
+        padding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.md),
+        decoration: BoxDecoration(
+          color: state.pressed
+              ? c.surfaceMuted
+              : state.hovered
+              ? c.surfaceMuted.withValues(alpha: 0.6)
+              : c.surfaceMuted.withValues(alpha: 0),
+        ),
+        foregroundDecoration: state.focused
+            ? BoxDecoration(
+                border: Border.all(color: c.accent, width: 2),
+                borderRadius: UiRadius.all(UiRadius.sm),
+              )
+            : null,
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: enabled ? tone.soft : c.surfaceMuted,
+                  borderRadius: UiRadius.all(UiRadius.sm),
+                ),
+                child: Icon(icon, size: 20, color: enabled ? tone.onSoft : c.textDisabled),
+              ),
+              const SizedBox(width: UiSpace.md),
+            ],
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: enabled ? c.text : c.textDisabled,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodySmall?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+                    ),
+                ],
+              ),
             ),
+            const SizedBox(width: UiSpace.md),
+            Opacity(opacity: enabled ? 1 : _kDisabledOpacity, child: trailing(state)),
           ],
-        ],
+        ),
       ),
     );
   }

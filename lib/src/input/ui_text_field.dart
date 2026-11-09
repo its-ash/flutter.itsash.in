@@ -1,293 +1,248 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/field_style.dart';
 import 'package:theme/src/input/ui_field_label.dart';
 
-enum _Kind { text, email, phone, number, multiline, name }
-
-final _emailRe = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$');
-
-class UiTextField extends StatelessWidget {
-  const UiTextField(
-    this.label, {
+/// Single-line (or multi-line) text input with its label above the field,
+/// helper or error text below, and an optional character counter.
+///
+/// It is a [FormField], so [validator] works inside a [Form].
+///
+/// ```dart
+/// UiTextField(label: 'Email', hint: 'you@example.com', validator: UiValidators.email())
+/// ```
+class UiTextField extends FormField<String> {
+  UiTextField({
     super.key,
+    this.label,
     this.hint,
+    this.helper,
+    this.error,
     this.controller,
-    this.initialValue,
+    String? initialValue,
     this.onChanged,
     this.onSubmitted,
-    this.validator,
+    super.validator,
+    super.onSaved,
+    super.autovalidateMode,
     this.prefixIcon,
     this.suffix,
     this.keyboardType,
     this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.obscure = false,
     this.maxLines = 1,
     this.minLines,
-    this.enabled = true,
+    this.maxLength,
     this.readOnly = false,
+    super.enabled = true,
     this.autofocus = false,
-    this.onTap,
-    this.helper,
-    this.error,
+    this.focusNode,
     this.inputFormatters,
-    this.maxLength,
-    this.obscureText = false,
+    this.size = UiSize.md,
+    this.onTap,
     this.autofillHints,
-    this.textCapitalization = TextCapitalization.none,
-    this.focusNode,
     this.isRequired = false,
-  })  : _kind = _Kind.text,
-        decimal = false;
+    this.labelTrailing,
+  }) : assert(initialValue == null || controller == null, 'Pass either initialValue or controller'),
+       super(initialValue: controller?.text ?? initialValue ?? '', builder: _build);
 
-  const UiTextField.email({
-    super.key,
-    this.label = 'Email',
-    this.hint = 'name@example.com',
-    this.controller,
-    this.initialValue,
-    this.onChanged,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon = Icons.mail_outline_rounded,
-    this.suffix,
-    this.textInputAction = TextInputAction.next,
-    this.enabled = true,
-    this.autofocus = false,
-    this.helper,
-    this.error,
-    this.focusNode,
-    this.isRequired = false,
-  })  : _kind = _Kind.email,
-        keyboardType = TextInputType.emailAddress,
-        maxLines = 1,
-        minLines = null,
-        readOnly = false,
-        onTap = null,
-        inputFormatters = null,
-        maxLength = null,
-        obscureText = false,
-        autofillHints = const [AutofillHints.email],
-        textCapitalization = TextCapitalization.none,
-        decimal = false;
-
-  const UiTextField.phone({
-    super.key,
-    this.label = 'Phone',
-    this.hint,
-    this.controller,
-    this.initialValue,
-    this.onChanged,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon = Icons.phone_outlined,
-    this.suffix,
-    this.textInputAction = TextInputAction.next,
-    this.enabled = true,
-    this.autofocus = false,
-    this.helper,
-    this.error,
-    this.focusNode,
-    this.isRequired = false,
-    this.maxLength,
-  })  : _kind = _Kind.phone,
-        keyboardType = TextInputType.phone,
-        maxLines = 1,
-        minLines = null,
-        readOnly = false,
-        onTap = null,
-        inputFormatters = null,
-        obscureText = false,
-        autofillHints = const [AutofillHints.telephoneNumber],
-        textCapitalization = TextCapitalization.none,
-        decimal = false;
-
-  const UiTextField.number({
-    super.key,
-    this.label,
-    this.hint,
-    this.controller,
-    this.initialValue,
-    this.onChanged,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon,
-    this.suffix,
-    this.textInputAction = TextInputAction.next,
-    this.enabled = true,
-    this.autofocus = false,
-    this.helper,
-    this.error,
-    this.focusNode,
-    this.isRequired = false,
-    this.maxLength,
-    this.decimal = false,
-  })  : _kind = _Kind.number,
-        keyboardType = null,
-        maxLines = 1,
-        minLines = null,
-        readOnly = false,
-        onTap = null,
-        inputFormatters = null,
-        obscureText = false,
-        autofillHints = null,
-        textCapitalization = TextCapitalization.none;
-
-  const UiTextField.multiline(
-    this.label, {
-    super.key,
-    this.hint,
-    this.controller,
-    this.initialValue,
-    this.onChanged,
-    this.validator,
-    this.enabled = true,
-    this.autofocus = false,
-    this.helper,
-    this.error,
-    this.focusNode,
-    this.isRequired = false,
-    this.maxLength,
-    this.maxLines = 6,
-    this.minLines = 3,
-  })  : _kind = _Kind.multiline,
-        onSubmitted = null,
-        prefixIcon = null,
-        suffix = null,
-        keyboardType = TextInputType.multiline,
-        textInputAction = TextInputAction.newline,
-        readOnly = false,
-        onTap = null,
-        inputFormatters = null,
-        obscureText = false,
-        autofillHints = null,
-        textCapitalization = TextCapitalization.sentences,
-        decimal = false;
-
-  const UiTextField.name({
-    super.key,
-    this.label = 'Full name',
-    this.hint,
-    this.controller,
-    this.initialValue,
-    this.onChanged,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon = Icons.person_outline_rounded,
-    this.suffix,
-    this.textInputAction = TextInputAction.next,
-    this.enabled = true,
-    this.autofocus = false,
-    this.helper,
-    this.error,
-    this.focusNode,
-    this.isRequired = false,
-    this.maxLength,
-  })  : _kind = _Kind.name,
-        keyboardType = TextInputType.name,
-        maxLines = 1,
-        minLines = null,
-        readOnly = false,
-        onTap = null,
-        inputFormatters = null,
-        obscureText = false,
-        autofillHints = const [AutofillHints.name],
-        textCapitalization = TextCapitalization.words,
-        decimal = false;
-
+  /// Text above the field.
   final String? label;
+
+  /// Placeholder inside the empty field.
   final String? hint;
+
+  /// Text below the field.
+  final String? helper;
+
+  /// Error text below the field. Overrides the [validator] message.
+  final String? error;
+
+  /// Optional external controller. Not disposed by this widget.
   final TextEditingController? controller;
-  final String? initialValue;
+
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
-  final FormFieldValidator<String>? validator;
+
+  /// Icon at the start of the field.
   final IconData? prefixIcon;
+
+  /// Widget at the end of the field, e.g. an icon button.
   final Widget? suffix;
+
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+
+  /// Hides the text (passwords).
+  final bool obscure;
+
+  /// Maximum visible lines. `null` grows without limit.
   final int? maxLines;
   final int? minLines;
-  final bool enabled;
+
+  /// Maximum characters. Shows a `n / max` counter below the field.
+  final int? maxLength;
+
   final bool readOnly;
   final bool autofocus;
-  final VoidCallback? onTap;
-  final String? helper;
-  final String? error;
-  final List<TextInputFormatter>? inputFormatters;
-  final int? maxLength;
-  final bool obscureText;
-  final Iterable<String>? autofillHints;
-  final TextCapitalization textCapitalization;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
+  final UiSize size;
+  final GestureTapCallback? onTap;
+  final Iterable<String>? autofillHints;
+
+  /// Adds a `*` after the label.
   final bool isRequired;
-  final bool decimal;
-  final _Kind _kind;
 
-  String? _validate(String? raw) {
-    final v = raw?.trim() ?? '';
-    if (v.isEmpty) return isRequired ? '${label?.trim().isNotEmpty == true ? label!.trim() : 'This field'} is required' : validator?.call(raw);
-    final err = switch (_kind) {
-      _Kind.email when !_emailRe.hasMatch(v) => 'Enter a valid email',
-      _Kind.phone when !_validPhone(v) => 'Enter a valid phone number',
-      _Kind.number when num.tryParse(v) == null => 'Enter a valid number',
-      _Kind.name when v.length < 2 => 'Enter a valid name',
-      _ => null,
-    };
-    return err ?? validator?.call(raw);
-  }
+  /// Widget at the end of the label row, e.g. a "Forgot?" link.
+  final Widget? labelTrailing;
 
-  static bool _validPhone(String v) {
-    final d = v.replaceAll(RegExp(r'\D'), '').length;
-    return d >= 7 && d <= 15;
+  static Widget _build(FormFieldState<String> field) => (field as _UiTextFieldState)._buildField();
+
+  @override
+  FormFieldState<String> createState() => _UiTextFieldState();
+}
+
+class _UiTextFieldState extends FormFieldState<String> {
+  TextEditingController? _ownController;
+
+  @override
+  UiTextField get widget => super.widget as UiTextField;
+
+  TextEditingController get _controller => widget.controller ?? _ownController!;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) _ownController = TextEditingController(text: widget.initialValue);
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final fmt = [
-      ...?inputFormatters,
-      ...switch (_kind) {
-        _Kind.phone => [FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s()]'))],
-        _Kind.number => [FilteringTextInputFormatter.allow(decimal ? RegExp(r'^-?\d*\.?\d*') : RegExp(r'^-?\d*'))],
-        _Kind.email => [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
-        _ => const <TextInputFormatter>[],
-      },
-    ];
-    final lines = obscureText ? 1 : (maxLines == null ? null : (maxLines! < 1 ? 1 : maxLines));
-    final minL = minLines == null || minLines! < 1 ? null : (lines != null && minLines! > lines ? lines : minLines);
+  void didUpdateWidget(UiTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller == oldWidget.controller) return;
+    (oldWidget.controller ?? _ownController)?.removeListener(_onControllerChanged);
+    if (oldWidget.controller != null && widget.controller == null) {
+      _ownController = TextEditingController(text: oldWidget.controller!.text);
+    }
+    if (widget.controller != null) {
+      setValue(widget.controller!.text);
+      if (oldWidget.controller == null) {
+        _ownController?.dispose();
+        _ownController = null;
+      }
+    }
+    _controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _ownController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChange(String? value) {
+    super.didChange(value);
+    if (_controller.text != value) _controller.text = value ?? '';
+  }
+
+  @override
+  void reset() {
+    _controller.text = widget.initialValue ?? '';
+    super.reset();
+  }
+
+  void _onControllerChanged() {
+    if (_controller.text != value) didChange(_controller.text);
+  }
+
+  Widget _buildField() {
+    final w = widget;
+    final err = w.error ?? errorText;
+    final hasError = err != null && err.isNotEmpty;
+    final multiline = w.maxLines == null || w.maxLines! > 1;
     return UiFieldLabel(
-      label,
-      isRequired: isRequired,
-      child: TextFormField(
-        controller: controller,
-        initialValue: controller == null ? initialValue : null,
-        focusNode: focusNode,
-        onChanged: onChanged,
-        onFieldSubmitted: onSubmitted,
-        validator: _validate,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        keyboardType: _kind == _Kind.number ? TextInputType.numberWithOptions(decimal: decimal, signed: true) : keyboardType,
-        textInputAction: textInputAction,
-        maxLines: lines,
-        minLines: minL,
-        enabled: enabled,
-        readOnly: readOnly,
-        autofocus: autofocus,
-        onTap: onTap,
-        inputFormatters: fmt.isEmpty ? null : fmt,
-        maxLength: maxLength != null && maxLength! > 0 ? maxLength : null,
-        obscureText: obscureText,
-        autofillHints: enabled && !readOnly ? autofillHints : null,
-        textCapitalization: textCapitalization,
-        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-        decoration: InputDecoration(
-          hintText: hint,
-          helperText: helper,
-          errorText: error,
-          prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, size: 20),
-          suffixIcon: suffix,
-          alignLabelWithHint: true,
+      label: w.label,
+      isRequired: w.isRequired,
+      trailing: w.labelTrailing,
+      helper: w.helper,
+      error: err,
+      enabled: w.enabled,
+      counter: w.maxLength == null ? null : '${value?.characters.length ?? 0} / ${w.maxLength}',
+      child: TextField(
+        controller: _controller,
+        focusNode: w.focusNode,
+        decoration: fieldDecoration(
+          context,
+          hint: w.hint,
+          prefixIcon: w.prefixIcon,
+          suffix: w.suffix,
+          size: w.size,
+          hasError: hasError,
+          enabled: w.enabled,
+          multiline: multiline,
         ),
+        style: fieldTextStyle(context, w.size, enabled: w.enabled),
+        keyboardType: w.keyboardType ?? (multiline ? TextInputType.multiline : null),
+        textInputAction: w.textInputAction,
+        textCapitalization: w.textCapitalization,
+        textAlignVertical: multiline ? TextAlignVertical.top : TextAlignVertical.center,
+        obscureText: w.obscure,
+        obscuringCharacter: '•',
+        maxLines: w.obscure ? 1 : w.maxLines,
+        minLines: w.obscure ? null : w.minLines,
+        readOnly: w.readOnly,
+        enabled: w.enabled,
+        autofocus: w.autofocus,
+        inputFormatters: [
+          ...?w.inputFormatters,
+          if (w.maxLength != null) LengthLimitingTextInputFormatter(w.maxLength),
+        ],
+        onChanged: w.onChanged,
+        onSubmitted: w.onSubmitted,
+        onTap: w.onTap,
+        autofillHints: w.enabled ? w.autofillHints : null,
       ),
     );
   }
+}
+
+/// Multi-line text input with a growing height and an optional counter.
+///
+/// ```dart
+/// UiTextArea(label: 'Bio', maxLength: 200)
+/// ```
+class UiTextArea extends UiTextField {
+  UiTextArea({
+    super.key,
+    super.label,
+    super.hint,
+    super.helper,
+    super.error,
+    super.controller,
+    super.initialValue,
+    super.onChanged,
+    super.validator,
+    super.onSaved,
+    super.autovalidateMode,
+    super.maxLength,
+    super.readOnly,
+    super.enabled,
+    super.autofocus,
+    super.focusNode,
+    super.inputFormatters,
+    super.size,
+    super.isRequired,
+    super.labelTrailing,
+    super.textCapitalization = TextCapitalization.sentences,
+    super.minLines = 3,
+    super.maxLines = 6,
+  }) : super(keyboardType: TextInputType.multiline, textInputAction: TextInputAction.newline);
 }

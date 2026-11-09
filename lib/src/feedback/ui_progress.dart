@@ -2,142 +2,206 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
+import 'package:theme/src/foundation/foundation.dart';
 
-double _norm(double v) => v.isFinite ? v.clamp(0.0, 1.0) : 0.0;
+String _percent(double v) => '${(v * 100).round()}%';
 
-String _pct(double v) => '${(v * 100).round()}%';
+Color _fill(UiColors c, UiStatus status) => c.tone(status).color;
 
+/// Horizontal progress bar. A null [value] shows an indeterminate bar.
+///
+/// Value changes animate smoothly.
+///
+/// ```dart
+/// UiProgressBar(0.4, label: 'Uploading', showPercent: true)
+/// ```
 class UiProgressBar extends StatelessWidget {
   const UiProgressBar(
     this.value, {
     super.key,
+    this.status = UiStatus.accent,
     this.label,
-    this.trailing,
     this.showPercent = false,
-    this.status,
-    this.color,
-    this.height = 8,
-    this.animate = true,
+    this.height = 6,
   });
 
-  final double value;
+  /// Same as `UiProgressBar(null)`.
+  const UiProgressBar.indeterminate({super.key, this.status = UiStatus.accent, this.label, this.height = 6})
+    : value = null,
+      showPercent = false;
+
+  /// Progress from 0 to 1, or null for indeterminate.
+  final double? value;
+
+  /// Fill color. Defaults to [UiStatus.accent].
+  final UiStatus status;
+
+  /// Text above the bar, on the left.
   final String? label;
-  final String? trailing;
+
+  /// Shows the percent above the bar, on the right.
   final bool showPercent;
-  final UiStatus? status;
-  final Color? color;
+
+  /// Bar thickness.
   final double height;
-  final bool animate;
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final v = _norm(value);
-    final fill = color ?? (status == null ? cs.primary : context.tone(status!).color);
-    final end = trailing ?? (showPercent ? _pct(v) : null);
-    final h = height <= 0 ? 8.0 : height;
-    final bar = TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: v),
-      duration: animate ? UiDuration.slow : Duration.zero,
-      curve: UiCurve.standard,
-      builder: (_, x, _) => Container(
-        height: h,
-        decoration: BoxDecoration(color: cs.surfaceContainerHighest, borderRadius: BorderRadius.circular(h)),
-        alignment: AlignmentDirectional.centerStart,
-        child: FractionallySizedBox(
-          widthFactor: x,
-          child: Container(decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(h))),
-        ),
-      ),
-    );
-    return Semantics(
-      label: label,
-      value: _pct(v),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (label != null || end != null) ...[
-            Row(
-              children: [
-                if (label != null)
-                  Expanded(child: Text(label!, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.labelLarge))
-                else
-                  const Spacer(),
-                if (end != null)
-                  Text(end, style: context.text.labelLarge?.copyWith(color: cs.onSurfaceVariant, fontWeight: FontWeight.w700)),
-              ],
+    final c = context.colors;
+    final t = context.text;
+    final v = value?.clamp(0.0, 1.0);
+    final color = _fill(c, status);
+    final radius = UiRadius.all(UiRadius.full);
+
+    final Widget bar = v == null
+        ? LinearProgressIndicator(
+            minHeight: height,
+            color: color,
+            backgroundColor: c.surfaceMuted,
+            borderRadius: radius,
+          )
+        : TweenAnimationBuilder<double>(
+            tween: Tween(end: v),
+            duration: context.motion(UiMotion.slow),
+            curve: UiMotion.standard,
+            builder: (context, x, _) => ClipRRect(
+              borderRadius: radius,
+              child: SizedBox(
+                height: height,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ColoredBox(color: c.surfaceMuted),
+                    FractionallySizedBox(
+                      alignment: AlignmentDirectional.centerStart,
+                      widthFactor: x,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(color: color, borderRadius: radius),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const UiGap.sm(),
+          );
+
+    final showHeader = label != null || (showPercent && v != null);
+    return Semantics(
+      label: label ?? 'Progress',
+      value: v == null ? null : _percent(v),
+      child: ExcludeSemantics(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (showHeader) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.labelMedium?.copyWith(color: c.textMuted),
+                    ),
+                  ),
+                  if (showPercent && v != null)
+                    Text(
+                      _percent(v),
+                      style: t.labelMedium?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                    ),
+                ],
+              ),
+              const SizedBox(height: UiSpace.sm),
+            ],
+            bar,
           ],
-          ExcludeSemantics(child: bar),
-        ],
+        ),
       ),
     );
   }
 }
 
+/// Circular progress ring. A null [value] spins indeterminately.
+///
+/// ```dart
+/// UiProgressRing(0.72, showPercent: true, size: 64)
+/// ```
 class UiProgressRing extends StatelessWidget {
   const UiProgressRing(
     this.value, {
     super.key,
-    this.size = 72,
-    this.stroke = 8,
-    this.child,
-    this.label,
-    this.showPercent = true,
-    this.status,
-    this.color,
-    this.trackColor,
-    this.animate = true,
+    this.size = 44,
+    this.stroke = 4,
+    this.status = UiStatus.accent,
+    this.center,
+    this.showPercent = false,
   });
 
-  final double value;
+  /// Progress from 0 to 1, or null for indeterminate.
+  final double? value;
+
+  /// Outer diameter.
   final double size;
+
+  /// Ring thickness.
   final double stroke;
-  final Widget? child;
-  final String? label;
+  final UiStatus status;
+
+  /// Widget in the middle of the ring.
+  final Widget? center;
+
+  /// Shows the percent in the middle when [center] is null.
   final bool showPercent;
-  final UiStatus? status;
-  final Color? color;
-  final Color? trackColor;
-  final bool animate;
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final v = _norm(value);
-    final fill = color ?? (status == null ? cs.primary : context.tone(status!).color);
-    final s = size <= 0 ? 72.0 : size;
-    final w = stroke.clamp(1.0, s / 3);
-    final center = child ??
-        (showPercent || label != null
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showPercent)
-                    Text(_pct(v), style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w800, fontSize: s * 0.22)),
-                  if (label != null)
-                    Text(label!, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
-                ],
-              )
-            : null);
-    return Semantics(
-      label: label,
-      value: _pct(v),
-      child: SizedBox.square(
-        dimension: s,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: v),
-          duration: animate ? UiDuration.slow : Duration.zero,
-          curve: UiCurve.standard,
-          builder: (_, x, c) => CustomPaint(
-            painter: _RingPainter(x, w, trackColor ?? cs.surfaceContainerHighest, fill),
-            child: c,
+    final c = context.colors;
+    final v = value?.clamp(0.0, 1.0);
+    final color = _fill(c, status);
+
+    Widget? middle = center;
+    if (middle == null && showPercent && v != null) {
+      middle = Padding(
+        padding: EdgeInsets.all(stroke + 2),
+        child: FittedBox(
+          child: Text(
+            _percent(v),
+            style: context.text.labelMedium?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
           ),
-          child: center == null ? null : Center(child: Padding(padding: EdgeInsets.all(w + 2), child: FittedBox(fit: BoxFit.scaleDown, child: center))),
+        ),
+      );
+    }
+
+    final ring = v == null
+        ? CircularProgressIndicator(
+            strokeWidth: stroke,
+            color: color,
+            backgroundColor: c.surfaceMuted,
+            strokeCap: StrokeCap.round,
+          )
+        : TweenAnimationBuilder<double>(
+            tween: Tween(end: v),
+            duration: context.motion(UiMotion.slow),
+            curve: UiMotion.standard,
+            builder: (context, x, _) => CustomPaint(
+              painter: _RingPainter(value: x, color: color, track: c.surfaceMuted, stroke: stroke),
+            ),
+          );
+
+    return Semantics(
+      label: 'Progress',
+      value: v == null ? null : _percent(v),
+      child: ExcludeSemantics(
+        child: SizedBox.square(
+          dimension: size,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ring,
+              if (middle != null) Center(child: middle),
+            ],
+          ),
         ),
       ),
     );
@@ -145,167 +209,60 @@ class UiProgressRing extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  const _RingPainter(this.v, this.w, this.track, this.fill);
+  _RingPainter({required this.value, required this.color, required this.track, required this.stroke});
 
-  final double v;
-  final double w;
+  final double value;
+  final Color color;
   final Color track;
-  final Color fill;
+  final double stroke;
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final r = rect.deflate(w / 2);
-    final p = Paint()
+    final arcRect = rect.deflate(stroke / 2);
+    final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = w
+      ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
-    canvas.drawArc(r, 0, math.pi * 2, false, p..color = track);
-    if (v > 0) canvas.drawArc(r, -math.pi / 2, math.pi * 2 * v, false, p..color = fill);
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter o) => o.v != v || o.w != w || o.track != track || o.fill != fill;
-}
-
-class UiStatusDot extends StatefulWidget {
-  const UiStatusDot({super.key, this.status = UiStatus.success, this.size = 10, this.pulse = false, this.label, this.color});
-
-  final UiStatus status;
-  final double size;
-  final bool pulse;
-  final String? label;
-  final Color? color;
-
-  @override
-  State<UiStatusDot> createState() => _UiStatusDotState();
-}
-
-class _UiStatusDotState extends State<UiStatusDot> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.pulse) _c.repeat();
-  }
-
-  @override
-  void didUpdateWidget(UiStatusDot old) {
-    super.didUpdateWidget(old);
-    if (widget.pulse && !_c.isAnimating) {
-      _c.repeat();
-    } else if (!widget.pulse && _c.isAnimating) {
-      _c
-        ..stop()
-        ..value = 0;
+    canvas.drawArc(arcRect, 0, math.pi * 2, false, paint..color = track);
+    if (value > 0) {
+      canvas.drawArc(arcRect, -math.pi / 2, math.pi * 2 * value, false, paint..color = color);
     }
   }
 
   @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
+  bool shouldRepaint(_RingPainter old) =>
+      old.value != value || old.color != color || old.track != track || old.stroke != stroke;
+}
+
+/// Small indeterminate loading spinner.
+///
+/// ```dart
+/// const UiSpinner()
+/// ```
+class UiSpinner extends StatelessWidget {
+  const UiSpinner({super.key, this.size = 20, this.color, this.strokeWidth});
+
+  final double size;
+
+  /// Defaults to the accent color.
+  final Color? color;
+
+  /// Defaults to a tenth of [size].
+  final double? strokeWidth;
 
   @override
   Widget build(BuildContext context) {
-    final c = widget.color ?? context.tone(widget.status).color;
-    final s = widget.size <= 0 ? 10.0 : widget.size;
-    final dot = SizedBox.square(
-      dimension: widget.pulse ? s * 2 : s,
-      child: AnimatedBuilder(
-        animation: _c,
-        builder: (_, _) => Stack(
-          alignment: Alignment.center,
-          children: [
-            if (widget.pulse)
-              Container(
-                width: s + s * _c.value,
-                height: s + s * _c.value,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: c.withValues(alpha: 0.45 * (1 - _c.value))),
-              ),
-            Container(width: s, height: s, decoration: BoxDecoration(shape: BoxShape.circle, color: c)),
-          ],
+    return Semantics(
+      label: 'Loading',
+      child: SizedBox.square(
+        dimension: size,
+        child: CircularProgressIndicator(
+          strokeWidth: strokeWidth ?? (size / 10).clamp(1.5, 4.0),
+          color: color ?? context.colors.accent,
+          strokeCap: StrokeCap.round,
         ),
       ),
-    );
-    final body = widget.label == null
-        ? dot
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              dot,
-              const SizedBox(width: UiSpace.xs),
-              Text(widget.label!, style: context.text.labelMedium?.copyWith(color: context.colors.onSurfaceVariant, fontWeight: FontWeight.w600)),
-            ],
-          );
-    return Semantics(label: widget.label ?? widget.status.name, child: ExcludeSemantics(child: body));
-  }
-}
-
-class UiBadge extends StatelessWidget {
-  const UiBadge({
-    super.key,
-    required this.child,
-    this.count,
-    this.dot = false,
-    this.max = 99,
-    this.status = UiStatus.danger,
-    this.show = true,
-    this.offset,
-  });
-
-  final Widget child;
-  final int? count;
-  final bool dot;
-  final int max;
-  final UiStatus status;
-  final bool show;
-  final Offset? offset;
-
-  @override
-  Widget build(BuildContext context) {
-    final n = count ?? 0;
-    final visible = show && (dot || n > 0);
-    final t = context.tone(status);
-    final text = n > max ? '$max+' : '$n';
-    return Semantics(
-      label: visible ? (dot ? 'New' : '$text new') : null,
-      child: Badge(
-        isLabelVisible: visible,
-        backgroundColor: t.color,
-        textColor: t.onColor,
-        smallSize: 9,
-        offset: offset,
-        label: dot ? null : Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
-        child: child,
-      ),
-    );
-  }
-}
-
-class UiTooltip extends StatelessWidget {
-  const UiTooltip(this.message, {super.key, required this.child, this.tap = false});
-
-  final String message;
-  final Widget child;
-  final bool tap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.colors;
-    if (message.trim().isEmpty) return child;
-    return Tooltip(
-      message: message,
-      triggerMode: tap ? TooltipTriggerMode.tap : null,
-      waitDuration: const Duration(milliseconds: 400),
-      showDuration: const Duration(seconds: 3),
-      padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
-      margin: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
-      decoration: BoxDecoration(color: cs.inverseSurface, borderRadius: context.tokens.sm),
-      textStyle: context.text.bodySmall?.copyWith(color: cs.onInverseSurface, fontWeight: FontWeight.w500),
-      child: child,
     );
   }
 }

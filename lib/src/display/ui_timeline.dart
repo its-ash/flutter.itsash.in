@@ -1,133 +1,165 @@
 import 'package:flutter/material.dart';
 
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
+import 'package:theme/src/foundation/foundation.dart';
 
+/// One event of a [UiTimeline].
 class UiTimelineItem {
   const UiTimelineItem(
     this.title, {
-    this.subtitle,
     this.time,
-    this.done = false,
-    this.current = false,
+    this.description,
     this.icon,
-    this.status,
+    this.status = UiStatus.neutral,
     this.content,
   });
 
   final String title;
-  final String? subtitle;
+
+  /// Short time text on the right, e.g. "2h" or "09:41".
   final String? time;
-  final bool done;
-  final bool current;
+  final String? description;
+
+  /// Icon in a tinted circle instead of a dot.
   final IconData? icon;
-  final UiStatus? status;
+
+  /// Color of the dot or icon.
+  final UiStatus status;
+
+  /// Extra content under the description (card, buttons, images).
   final Widget? content;
 }
 
+/// A vertical list of events joined by a line.
+///
+/// ```dart
+/// UiTimeline(items: [UiTimelineItem('Order placed', time: '09:41', status: UiStatus.success)])
+/// ```
 class UiTimeline extends StatelessWidget {
-  const UiTimeline(this.items, {super.key, this.dense = false});
+  const UiTimeline({super.key, required this.items});
 
   final List<UiTimelineItem> items;
-  final bool dense;
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox.shrink();
-    final cs = context.colors;
-    final dot = dense ? 20.0 : 28.0;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, it) in items.indexed)
-          Builder(
-            builder: (c) {
-              final last = i == items.length - 1;
-              final accent = it.status == null ? cs.primary : c.tone(it.status!).color;
-              final onAccent = it.status == null ? cs.onPrimary : c.tone(it.status!).onColor;
-              final active = it.done || it.current;
-              final lineColor = it.done ? accent : cs.outlineVariant;
-              final marker = Container(
-                width: dot,
-                height: dot,
+      children: [for (var i = 0; i < items.length; i++) _TimelineRow(item: items[i], last: i == items.length - 1)],
+    );
+  }
+}
+
+class _TimelineRow extends StatelessWidget {
+  const _TimelineRow({required this.item, required this.last});
+
+  final UiTimelineItem item;
+  final bool last;
+
+  static const double _rail = 24;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final text = context.text;
+    final tone = colors.tone(item.status);
+    final neutral = item.status == UiStatus.neutral;
+    final hasIcon = item.icon != null;
+
+    final Widget marker = hasIcon
+        ? Container(
+            width: _rail,
+            height: _rail,
+            decoration: BoxDecoration(
+              color: neutral ? colors.surfaceMuted : tone.soft,
+              shape: BoxShape.circle,
+              border: Border.all(color: neutral ? colors.border : tone.soft),
+            ),
+            child: Icon(item.icon, size: 13, color: neutral ? colors.textMuted : tone.onSoft),
+          )
+        : SizedBox(
+            width: _rail,
+            height: 20,
+            child: Center(
+              child: Container(
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(
+                  color: neutral ? colors.borderStrong : tone.color,
                   shape: BoxShape.circle,
-                  color: it.done ? accent : (it.current ? accent.withValues(alpha: 0.15) : cs.surface),
-                  border: Border.all(color: active ? accent : cs.outlineVariant, width: 2),
-                ),
-                child: it.done || it.icon != null
-                    ? Icon(it.icon ?? Icons.check_rounded, size: dot * 0.55, color: it.done ? onAccent : (it.current ? accent : cs.onSurfaceVariant))
-                    : it.current
-                        ? Center(child: Container(width: dot * 0.35, height: dot * 0.35, decoration: BoxDecoration(color: accent, shape: BoxShape.circle)))
-                        : null,
-              );
-              return Semantics(
-                container: true,
-                child: Semantics(
-                  label: it.done ? 'Completed' : (it.current ? 'Current' : 'Pending'),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(
-                          width: dot,
-                          child: Column(
-                            children: [
-                              marker,
-                              if (!last)
-                                Expanded(
-                                  child: Container(
-                                    width: 2,
-                                    margin: const EdgeInsets.symmetric(vertical: UiSpace.xs),
-                                    decoration: BoxDecoration(color: lineColor, borderRadius: c.tokens.full),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const UiGap.md(),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: dense ? 0 : 3, bottom: last ? 0 : (dense ? UiSpace.md : UiSpace.xl)),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        it.title,
-                                        style: (dense ? c.text.bodyMedium : c.text.titleSmall)?.copyWith(
-                                          fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                                          color: active ? cs.onSurface : cs.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                    if (it.time != null) ...[
-                                      const UiGap.sm(),
-                                      Text(it.time!, style: c.text.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
-                                    ],
-                                  ],
-                                ),
-                                if (it.subtitle != null) ...[
-                                  const SizedBox(height: UiSpace.xxs),
-                                  Text(it.subtitle!, style: c.text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
-                                ],
-                                if (it.content != null) ...[const UiGap.sm(), it.content!],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  border: Border.all(
+                    color: neutral ? colors.surfaceMuted : tone.soft,
+                    width: 3,
+                    strokeAlign: BorderSide.strokeAlignOutside,
                   ),
                 ),
-              );
-            },
+              ),
+            ),
+          );
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: _rail,
+            child: Column(
+              children: [
+                marker,
+                if (!last)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: UiSpace.xs),
+                      child: Container(width: 2, color: colors.border),
+                    ),
+                  ),
+              ],
+            ),
           ),
-      ],
+          const SizedBox(width: UiSpace.md),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: hasIcon ? 2 : 0, bottom: last ? 0 : UiSpace.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.titleSmall?.copyWith(height: 1.4),
+                        ),
+                      ),
+                      if (item.time != null) ...[
+                        const SizedBox(width: UiSpace.sm),
+                        Text(
+                          item.time!,
+                          maxLines: 1,
+                          style: text.bodySmall?.copyWith(color: colors.textSubtle, height: 1.6),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (item.description != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: UiSpace.xxs),
+                      child: Text(item.description!, style: text.bodySmall?.copyWith(color: colors.textMuted)),
+                    ),
+                  if (item.content != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: UiSpace.sm),
+                      child: item.content,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

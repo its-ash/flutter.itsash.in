@@ -1,142 +1,256 @@
-# Feedback
+# Feedback, overlays, loading & states
 
-Widgets and helpers that tell the user about status, progress, and results. All colors come from the theme. Light and dark mode work.
+Alerts, toasts, dialogs, sheets, menus, popovers, progress, skeletons and empty/error states. Import `package:theme/theme.dart`.
 
-### Toast
-Shows a card at the top of the screen. It closes after 3 seconds. Tap or swipe it to close it. A new toast replaces the old toast.
-
+### UiAlert
+Inline callout box with a soft status tint.
 ```dart
-context.showToast('Saved', status: UiStatus.success);
+UiAlert('Your trial ends in 3 days.', title: 'Heads up', status: UiStatus.warning)
 ```
-- `context.showToast(String message, {UiStatus status, String? title, IconData? icon, Duration duration = 3s, VoidCallback? onTap})`
-- `UiToast.show(context, message, ...)`, `UiToast.dismiss()`
-
-### Snack
-Shows a floating snackbar. It hides the current snackbar first.
-
-```dart
-context.showSnack('Item removed', actionLabel: 'Undo', onAction: restore);
-```
-- `context.showSnack(String message, {String? actionLabel, VoidCallback? onAction, Duration duration = 4s})`
-
-### UiDialog
-Static helpers that open rounded dialogs and return a `Future`.
-
-```dart
-final ok = await UiDialog.confirm(context, title: 'Delete item?', confirmLabel: 'Delete', destructive: true);
-final name = await UiDialog.input(context, title: 'Rename', validator: (v) => v.isEmpty ? 'Required' : null);
-await UiDialog.success(context, message: 'Payment complete');
-```
-- `confirm(context, {required title, message, confirmLabel, cancelLabel, destructive, icon})` → `Future<bool>`
-- `alert(context, {required title, message, buttonLabel, status, icon})` → `Future<void>`
-- `input(context, {required title, message, hint, initialValue, confirmLabel, cancelLabel, validator, keyboardType, maxLength, obscure})` → `Future<String?>`
-- `success(context, {title, message, buttonLabel})` → `Future<void>`
-- `show<T>(context, {required title, message, icon, status, child, actions, dismissible})` → `Future<T?>`
-
-### UiSheet
-Opens a modal bottom sheet. The sheet scrolls, stays above the keyboard, and is not taller than 90% of the screen.
-
-```dart
-await UiSheet.show(context, title: 'Filters', child: const FilterForm());
-final i = await UiSheet.actions(context, actions: const [
-  UiSheetAction('Share', icon: Icons.share_rounded),
-  UiSheetAction('Delete', icon: Icons.delete_rounded, destructive: true),
-]);
-final size = await UiSheet.select(context, options: ['S', 'M', 'L'], selected: 'M');
-```
-- `show<T>(context, {required child, title, scrollable, dismissible, padding})` → `Future<T?>`
-- `actions(context, {required actions, title})` → `Future<int?>` (index of the action)
-- `select<T>(context, {required options, label, selected, title, icon})` → `Future<T?>`
-- `UiSheetAction(label, {icon, subtitle, destructive, enabled})`
+- `message` (positional) — body text.
+- `title` — bold first line. Default none.
+- `status` — `UiStatus`. Default `info`.
+- `icon` — leading icon. Default `status.icon`.
+- `showIcon` — default `true`.
+- `action` — widget under the message (e.g. a `TextButton`). Default none.
+- `onClose` — shows a close button when set.
 
 ### UiBanner
-Inline status message with an optional action and close button.
-
+Full-width strip for app-wide messages; slides in and out when `visible` changes.
 ```dart
-UiBanner('Your card expires soon.', status: UiStatus.warning, actionLabel: 'Update', onAction: edit);
+UiBanner("You're offline", visible: offline, status: UiStatus.warning, actionLabel: 'Retry', onAction: retry)
 ```
-- `UiBanner(message, {status = info, title, icon, actionLabel, onAction, onClose})`
+- `message` (positional).
+- `visible` — default `true`.
+- `status` — default `info`.
+- `icon` — default `status.icon`.
+- `actionLabel` + `onAction` — trailing text action.
+- `onDismiss` — shows a close button when set.
 
-### UiEmptyState
-Shows an icon or illustration, a title, a message, and an optional button.
-
+### UiToast
+Floating notification cards on the app overlay. They slide in, stack (max 3), auto-dismiss and can be swiped away. Returns a `Future` that completes on dismiss.
 ```dart
-UiEmptyState(title: 'No orders yet', message: 'Your orders show here.', actionLabel: 'Shop now', onAction: shop);
+UiToast.show(context, 'Saved', status: UiStatus.success);
+context.showToast('Deleted', actionLabel: 'Undo', onAction: undo);
+UiToast.dismissAll();
 ```
-- `UiEmptyState({required title, message, icon, illustration, actionLabel, onAction, compact, status})`
+- `message` (positional).
+- `title` — bold first line. Default none.
+- `status` — default `neutral` (no icon). Other statuses show `status.icon`.
+- `icon` — custom leading icon.
+- `duration` — default 4 s. `null` keeps it until dismissed. Hover pauses the timer.
+- `actionLabel` + `onAction` — small button; tapping it also closes the toast.
+- `position` — `UiToastPosition.top` (default) or `bottom`.
+- `replace` — close all other toasts first. Default `false`.
+- `UiToast.maxVisible` — default `3`; older toasts close first.
 
-### UiErrorState
-Empty state with default error text and a retry button.
+### context.showSnack
+`context.showToast` and `context.showSnack` come from the `UiFeedbackContext` extension on `BuildContext`.
 
+Themed `SnackBar` helper. Hides the current snackbar first. Returns `Future<SnackBarClosedReason>`.
 ```dart
-UiErrorState(onRetry: reload);
+context.showSnack('Archived', action: 'Undo', onAction: undo, status: UiStatus.success);
 ```
-- `UiErrorState({onRetry, title, message, retryLabel, icon, compact})`
+- `message` (positional).
+- `action` + `onAction` — action label and callback.
+- `status` / `icon` — leading status icon. Default none.
+- `duration` — default 4 s.
+- `persist` — Flutter default (stays open when it has an action).
 
-### UiLoader
-Centered spinner with an optional message. `UiLoader.overlay` blocks the UI while a `Future` runs and returns its result.
-
+### UiDialog
+Centered modal dialogs. Icon in a tinted circle, centered title and message. Buttons sit in a row when they fit, else stack full width with the main action on top.
 ```dart
-const UiLoader(message: 'Loading');
-final user = await UiLoader.overlay(context, api.save(), message: 'Saving');
+final ok = await UiDialog.confirm(context, title: 'Delete note?', destructive: true);
+final name = await UiDialog.prompt(context, title: 'Rename', initialValue: note.title);
 ```
-- `UiLoader({message, size = 32, color})`
-- `UiLoader.overlay<T>(context, Future<T> future, {message})` → `Future<T>`
+`UiDialog.show<T>(context, {title, message, content, actions, icon, status, dismissible}) → Future<T?>`
+- `actions` — `List<UiDialogAction<T>>`. Default none.
+- `icon` — shown in a circle tinted by `status` (default `accent`). Default none.
+- `content` — any widget under the message.
+- `dismissible` — barrier tap and back button close it. Default `true`.
 
-### UiShimmer and UiSkeleton
-Loading placeholders with a shimmer animation. One `UiShimmer` runs one animation for all skeletons below it.
+`UiDialog.confirm(context, {title, message, confirmLabel, cancelLabel, destructive, icon}) → Future<bool>`
+- `confirmLabel` default `'Confirm'`, `cancelLabel` default `'Cancel'`.
+- `destructive` — danger button and warning icon. Default `false`.
+- Returns `false` when dismissed.
 
+`UiDialog.alert(context, {title, message, okLabel, status, icon}) → Future<void>`
+- `okLabel` default `'OK'`, `status` default `info`, icon default `status.icon`.
+
+`UiDialog.prompt(context, {title, message, label, hint, initialValue, validator, confirmLabel, cancelLabel, keyboardType, obscureText}) → Future<String?>`
+- `validator` — returns an error text or null. Runs on Save.
+- `confirmLabel` default `'Save'`. Returns `null` when cancelled.
+
+### UiDialogAction
+One dialog button that closes the dialog with `value`.
 ```dart
-UiSkeleton.list(count: 4);
-UiShimmer(child: Column(children: [UiSkeleton.box(height: 160), UiSkeleton.line(width: 120)]));
+const UiDialogAction('Discard', value: 'discard', destructive: true)
 ```
-- `UiShimmer({required child, enabled = true, label = 'Loading'})`
-- `UiSkeleton.box({width, height = 80, radius})`, `.line({width, height = 12})`, `.circle({size = 44})`
-- `UiSkeleton.listTile({avatar, lines, trailing})`, `UiSkeleton.card({imageHeight, lines})`, `UiSkeleton.list({count, avatar})`
+- `label` (positional), `value`, `primary` (filled, default `false`), `destructive` (default `false`), `onPressed` (extra callback).
 
-### UiProgressBar
-Rounded linear progress. The value is clamped to 0..1. It animates on change.
-
+### UiSheet
+Modal bottom sheet with a header, scrollable body and sticky action footer. Moves above the keyboard.
 ```dart
-UiProgressBar(0.62, label: 'Storage', showPercent: true);
+final applied = await UiSheet.show<bool>(context, title: 'Filters', child: const FiltersForm(), actions: [applyButton]);
 ```
-- `UiProgressBar(value, {label, trailing, showPercent, status, color, height = 8, animate})`
+- `child` — required body. Close with `Navigator.pop(context, value)`.
+- `title`, `subtitle` — header text.
+- `actions` — widgets (usually buttons) pinned at the bottom. Row when ≤ 2 and they fit, else stacked.
+- `scrollable` — wrap body in a scroll view. Default `true`.
+- `expand` — take the full available height. Default `false` (max 90 %).
+- `isDismissible` — drag, barrier and back close it. Default `true`.
+- `padding` — body padding. Default `fromLTRB(24, 0, 24, 16)`.
 
-### UiProgressRing
-Circular progress with a center percent, label, or child.
-
+### UiActionSheet
+Bottom sheet listing actions plus Cancel. Returns the chosen value or `null`.
 ```dart
-UiProgressRing(0.75, label: 'Goal', status: UiStatus.success);
+final v = await UiActionSheet.show<String>(context, actions: [
+  const UiSheetAction('Delete', value: 'delete', icon: Icons.delete_outline_rounded, destructive: true),
+]);
 ```
-- `UiProgressRing(value, {size = 72, stroke = 8, child, label, showPercent = true, status, color, animate})`
+- `actions` — `List<UiSheetAction<T>>`, required.
+- `title`, `message` — small centered header.
+- `cancelLabel` — default `'Cancel'`. `showCancel` — default `true`.
 
-### UiStatusDot
-Small status dot. It can pulse.
-
+### UiSheetAction
+One row of a `UiActionSheet`.
 ```dart
-const UiStatusDot(label: 'Online', pulse: true);
+const UiSheetAction('Share', value: 'share', icon: Icons.ios_share_rounded)
 ```
-- `UiStatusDot({status = success, size = 10, pulse, label, color})`
+- `label` (positional), `value` (required), `icon`, `subtitle`, `destructive` (default `false`), `enabled` (default `true`).
 
-### UiBadge
-Puts a count or a dot on any widget. Counts above `max` show as `99+`.
-
+### UiMenu
+Popup menu anchored to a widget or a position. Returns the picked value or `null`.
 ```dart
-UiBadge(count: 120, child: Icon(Icons.notifications_rounded));
+final v = await UiMenu.show(context, items: [const UiMenuItem('edit', 'Edit', icon: Icons.edit_outlined)]);
 ```
-- `UiBadge({required child, count, dot, max = 99, status = danger, show, offset})`
+- `items` — `List<UiMenuItem<T>>`, required.
+- `position` — global offset. Default none.
+- `anchorKey` — opens below this widget. Default: below `context`'s widget.
+
+### UiMenuItem
+One menu row, or a divider.
+```dart
+const UiMenuItem('copy', 'Copy', icon: Icons.copy_rounded, shortcut: '⌘C')
+const UiMenuItem.divider()
+```
+- `value`, `label` (positional), `icon`, `destructive` (default `false`), `shortcut`, `enabled` (default `true`).
+
+### UiMenuButton
+Icon button (or custom child) that opens a `UiMenu` below itself. Null `onSelected` disables it.
+```dart
+UiMenuButton<String>(items: const [UiMenuItem('rename', 'Rename')], onSelected: rename)
+```
+- `items` — required.
+- `onSelected` — required; null disables.
+- `child` — non-interactive custom trigger. Default an `IconButton`.
+- `icon` — default `Icons.more_horiz_rounded`. `tooltip` — default `'More options'`.
+
+### UiPopover
+Floating card anchored to its child. Tap the child to toggle, tap outside to close.
+```dart
+UiPopover(popover: (context) => const Text('Details'), child: const Icon(Icons.info_outline))
+```
+- `child` — the anchor, required.
+- `popover` — `WidgetBuilder` for the card content, required.
+- `controller` — `UiPopoverController` with `show()`, `hide()`, `toggle()`, `isOpen`. Use it when the child is a button.
+- `width` — default `280` (shrinks on narrow screens).
+- `above` — open above the anchor. Default `false`.
+- `alignEnd` — align right edges. Default `false`.
+- `openOnTap` — default `true`.
+- `padding` — default `16` all sides.
 
 ### UiTooltip
-Themed tooltip.
-
+Tooltip with design defaults.
 ```dart
-UiTooltip('Copy link', child: Icon(Icons.link_rounded));
+UiTooltip('Copy link', child: Icon(Icons.link_rounded))
 ```
-- `UiTooltip(message, {required child, tap = false})`
+- `message` (positional), `child` (required), `preferBelow`, `triggerMode`.
 
-### UiStatusIcon
-Gives the default icon for a status.
-
+### UiProgressBar
+Horizontal bar. `null` value is indeterminate. Value changes animate.
 ```dart
-Icon(UiStatus.warning.icon);
+UiProgressBar(0.4, label: 'Uploading', showPercent: true)
+const UiProgressBar(null)
 ```
+- `value` (positional) — 0 to 1, or `null`.
+- `status` — fill color. Default `accent`.
+- `label` — text above, left. Default none.
+- `showPercent` — percent above, right. Default `false`.
+- `height` — default `6`.
+- `UiProgressBar.indeterminate({status, label, height})` — same as `UiProgressBar(null)`.
+
+### UiProgressRing
+Circular progress. `null` value spins.
+```dart
+UiProgressRing(0.72, showPercent: true, size: 64)
+```
+- `value` (positional) — 0 to 1, or `null`.
+- `size` — default `44`. `stroke` — default `4`.
+- `status` — default `accent`.
+- `center` — widget in the middle. Default none.
+- `showPercent` — percent in the middle when `center` is null. Default `false`.
+
+### UiSpinner
+Small indeterminate spinner.
+```dart
+const UiSpinner(size: 16)
+```
+- `size` — default `20`. `color` — default accent. `strokeWidth` — default `size / 10`.
+
+### UiSkeleton
+Shimmer placeholder shapes. Stays still when reduced motion is on.
+```dart
+const UiSkeleton.text(lines: 2)
+const UiSkeleton.circle(size: 48)
+const UiSkeleton.box(height: 160)
+```
+- `UiSkeleton({width, height = 14, radius = 6})` — one bar. Null width fills.
+- `UiSkeleton.box({width, height = 120, radius = 14})` — a block.
+- `UiSkeleton.text({lines = 3, height = 12})` — paragraph; last line is shorter.
+- `UiSkeleton.circle({size = 40})` — avatar.
+
+### UiShimmer
+Shares one shimmer animation with every skeleton below it. Skeletons without one create their own.
+```dart
+UiShimmer(child: Column(children: [UiSkeleton.circle(), UiSkeleton.text()]))
+```
+- `child` — required.
+
+### UiSkeletonList
+List placeholder: rows with an avatar circle and text lines. Never overflows.
+```dart
+const UiSkeletonList(count: 6)
+```
+- `count` — default `4`. `avatar` — default `true`.
+- `lines` — text lines per row incl. title. Default `2`.
+- `padding` — per row. Default `16 × 12`.
+
+### UiEmptyState
+Centered placeholder for screens with no content. Icon in a soft circle.
+```dart
+UiEmptyState(title: 'No notes yet', message: 'Tap + to write one.', action: newButton)
+```
+- `title` (required), `message`, `icon` (default `Icons.inbox_outlined`), `action`, `compact` (default `false`).
+
+### UiErrorState
+Centered error with an optional retry button.
+```dart
+UiErrorState(message: 'Check your connection.', onRetry: load)
+```
+- `title` — default `'Something went wrong'`.
+- `message`, `onRetry` (shows the button), `retryLabel` (default `'Try again'`), `icon` (default `Icons.error_outline_rounded`), `compact` (default `false`).
+
+### UiSuccessState
+Centered confirmation that something finished.
+```dart
+UiSuccessState(title: 'Payment sent', message: 'We emailed your receipt.')
+```
+- `title` (required), `message`, `icon` (default `Icons.check_rounded`), `action`, `compact` (default `false`).
+
+### UiLoadingOverlay
+Dims its child, shows a spinner card and blocks input while loading.
+```dart
+UiLoadingOverlay(loading: saving, message: 'Saving…', child: form)
+```
+- `loading` (required), `child` (required), `message` (default none).

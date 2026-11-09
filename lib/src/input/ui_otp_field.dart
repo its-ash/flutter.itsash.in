@@ -1,271 +1,251 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
+import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/ui_field_label.dart';
 
+/// One-time code input drawn as separate boxes. Typing advances to the next
+/// box, backspace goes back, and pasting a full code fills every box.
+///
+/// ```dart
+/// UiOtpField(onCompleted: verify)
+/// ```
 class UiOtpField extends StatefulWidget {
   const UiOtpField({
     super.key,
     this.length = 6,
     this.onCompleted,
     this.onChanged,
-    this.controller,
     this.obscure = false,
-    this.numeric = true,
-    this.error,
     this.autofocus = false,
-    this.enabled = true,
+    this.error,
+    this.label,
+    this.helper,
+    this.controller,
     this.focusNode,
-  });
+    this.digitsOnly = true,
+    this.enabled = true,
+  }) : assert(length > 0);
 
+  /// Number of boxes.
   final int length;
+
+  /// Called once every box is filled.
   final ValueChanged<String>? onCompleted;
   final ValueChanged<String>? onChanged;
-  final TextEditingController? controller;
+
+  /// Shows dots instead of the characters.
   final bool obscure;
-  final bool numeric;
-  final String? error;
   final bool autofocus;
-  final bool enabled;
+
+  /// Error text below the boxes; also turns their borders red.
+  final String? error;
+  final String? label;
+  final String? helper;
+
+  /// Optional external controller. Not disposed by this widget.
+  final TextEditingController? controller;
   final FocusNode? focusNode;
+
+  /// Accept only 0-9. When false, letters are accepted too (upper-cased).
+  final bool digitsOnly;
+  final bool enabled;
 
   @override
   State<UiOtpField> createState() => _UiOtpFieldState();
 }
 
 class _UiOtpFieldState extends State<UiOtpField> {
-  TextEditingController? _own;
+  TextEditingController? _ownController;
   FocusNode? _ownFocus;
-  String? _done;
+  String _lastCompleted = '';
 
-  TextEditingController get _ctrl => widget.controller ?? (_own ??= TextEditingController());
+  TextEditingController get _controller => widget.controller ?? (_ownController ??= TextEditingController());
   FocusNode get _focus => widget.focusNode ?? (_ownFocus ??= FocusNode());
-  int get _len => widget.length.clamp(4, 8);
 
   @override
   void initState() {
     super.initState();
-    _ctrl.addListener(_onText);
+    _controller.addListener(_onText);
     _focus.addListener(_onFocus);
   }
 
   @override
-  void didUpdateWidget(UiOtpField old) {
-    super.didUpdateWidget(old);
-    if (old.controller != widget.controller) {
-      (old.controller ?? _own)?.removeListener(_onText);
-      _ctrl.addListener(_onText);
+  void didUpdateWidget(UiOtpField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      (oldWidget.controller ?? _ownController)?.removeListener(_onText);
+      _controller.addListener(_onText);
     }
-    if (old.focusNode != widget.focusNode) {
-      (old.focusNode ?? _ownFocus)?.removeListener(_onFocus);
+    if (oldWidget.focusNode != widget.focusNode) {
+      (oldWidget.focusNode ?? _ownFocus)?.removeListener(_onFocus);
       _focus.addListener(_onFocus);
     }
   }
 
   @override
   void dispose() {
-    _ctrl.removeListener(_onText);
+    _controller.removeListener(_onText);
     _focus.removeListener(_onFocus);
-    _own?.dispose();
+    _ownController?.dispose();
     _ownFocus?.dispose();
     super.dispose();
   }
 
-  void _onFocus() {
-    if (mounted) setState(() {});
-  }
+  void _onFocus() => setState(() {});
 
   void _onText() {
-    if (!mounted) return;
     setState(() {});
-    final v = _ctrl.text;
-    if (v.length == _len) {
-      if (_done != v) {
-        _done = v;
-        widget.onCompleted?.call(v);
-      }
-    } else {
-      _done = null;
+    final text = _controller.text;
+    if (text.length < widget.length) {
+      _lastCompleted = '';
+    } else if (text.length == widget.length && text != _lastCompleted) {
+      _lastCompleted = text;
+      widget.onCompleted?.call(text);
     }
+  }
+
+  void _moveCaretToEnd() {
+    final len = _controller.text.length;
+    _controller.selection = TextSelection.collapsed(offset: len);
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final len = _len;
-    final text = _ctrl.text;
-    final hasError = widget.error != null;
+    final c = context.colors;
+    final hasError = widget.error != null && widget.error!.isNotEmpty;
+    final text = _controller.text;
     final focused = _focus.hasFocus;
-    final input = TextField(
-      controller: _ctrl,
-      focusNode: _focus,
-      enabled: widget.enabled,
-      autofocus: widget.autofocus,
-      maxLength: len,
-      maxLines: null,
-      expands: true,
-      textAlignVertical: TextAlignVertical.center,
-      showCursor: false,
-      autocorrect: false,
-      enableSuggestions: false,
-      keyboardType: widget.numeric ? TextInputType.number : TextInputType.visiblePassword,
-      textCapitalization: TextCapitalization.characters,
-      autofillHints: const [AutofillHints.oneTimeCode],
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(widget.numeric ? RegExp('[0-9]') : RegExp('[A-Za-z0-9]')),
-        LengthLimitingTextInputFormatter(len),
-      ],
-      onChanged: widget.onChanged,
-      style: const TextStyle(color: Colors.transparent, fontSize: 1),
-      cursorColor: Colors.transparent,
-      decoration: const InputDecoration(
-        counterText: '',
-        filled: false,
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-        isCollapsed: true,
-      ),
-    );
+    final n = widget.length;
 
-    return Semantics(
-      label: 'Verification code, $len characters',
-      value: widget.obscure ? null : text,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          LayoutBuilder(
-            builder: (context, c) {
-              const gap = UiSpace.sm;
-              final maxW = c.hasBoundedWidth ? c.maxWidth : len * 56.0;
-              final w = math.min(56.0, (maxW - gap * (len - 1)) / len).clamp(28.0, 56.0);
-              final h = math.max(w * 1.15, 48.0);
-              return Stack(
-                alignment: Alignment.center,
+    return UiFieldLabel(
+      label: widget.label,
+      helper: widget.helper,
+      error: widget.error,
+      enabled: widget.enabled,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = UiSpace.sm;
+          final maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : 52.0 * n + gap * (n - 1);
+          final boxW = ((maxW - gap * (n - 1)) / n).clamp(24.0, 52.0);
+          final boxH = (boxW * 1.15).clamp(44.0, 60.0);
+          final rowW = boxW * n + gap * (n - 1);
+          final style = UiTypography.mono(
+            fontSize: (boxW * 0.45).clamp(16.0, 24.0),
+            fontWeight: FontWeight.w600,
+            color: widget.enabled ? c.text : c.textDisabled,
+          );
+
+          Widget box(int i) {
+            final filled = i < text.length;
+            final active = focused && widget.enabled && i == (text.length < n ? text.length : n - 1);
+            final borderColor = hasError
+                ? c.danger
+                : active
+                ? c.accent
+                : filled
+                ? c.borderStrong
+                : c.border;
+            return AnimatedContainer(
+              duration: context.motion(UiMotion.fast),
+              curve: UiMotion.standard,
+              width: boxW,
+              height: boxH,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: widget.enabled ? (filled ? c.surface : c.surfaceMuted) : c.surfaceMuted.withValues(alpha: 0.6),
+                borderRadius: UiRadius.all(UiRadius.md),
+                border: Border.all(color: borderColor, width: active || hasError ? 1.5 : 1),
+              ),
+              child: filled
+                  ? widget.obscure
+                        ? Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(color: style.color, shape: BoxShape.circle),
+                          )
+                        : Text(text[i], style: style)
+                  : active
+                  ? Container(
+                      width: 2,
+                      height: boxH * 0.4,
+                      decoration: BoxDecoration(color: c.accent, borderRadius: UiRadius.all(1)),
+                    )
+                  : null,
+            );
+          }
+
+          return Center(
+            child: SizedBox(
+              width: rowW,
+              height: boxH,
+              child: Stack(
                 children: [
-                  ExcludeSemantics(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (var i = 0; i < len; i++) ...[
-                          if (i > 0) const SizedBox(width: gap),
-                          _Box(
-                            char: i < text.length ? (widget.obscure ? '•' : text[i]) : null,
-                            active: focused && (i == text.length || (i == len - 1 && text.length == len)),
-                            error: hasError,
-                            enabled: widget.enabled,
-                            width: w,
-                            height: h,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
                   Positioned.fill(
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        textSelectionTheme: const TextSelectionThemeData(
-                          selectionColor: Colors.transparent,
-                          selectionHandleColor: Colors.transparent,
-                          cursorColor: Colors.transparent,
+                    child: TextSelectionTheme(
+                      data: const TextSelectionThemeData(
+                        selectionColor: Colors.transparent,
+                        cursorColor: Colors.transparent,
+                      ),
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focus,
+                        autofocus: widget.autofocus,
+                        enabled: widget.enabled,
+                        showCursor: false,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        keyboardType: widget.digitsOnly ? TextInputType.number : TextInputType.text,
+                        textCapitalization: TextCapitalization.characters,
+                        autofillHints: widget.enabled ? const [AutofillHints.oneTimeCode] : null,
+                        inputFormatters: [
+                          if (widget.digitsOnly)
+                            FilteringTextInputFormatter.digitsOnly
+                          else ...[
+                            FilteringTextInputFormatter.allow(RegExp('[A-Za-z0-9]')),
+                            const _UpperCaseFormatter(),
+                          ],
+                          LengthLimitingTextInputFormatter(n),
+                        ],
+                        onChanged: widget.onChanged,
+                        onTap: _moveCaretToEnd,
+                        style: const TextStyle(color: Colors.transparent, fontSize: 1),
+                        decoration: const InputDecoration(
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          counterText: '',
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
-                      child: Opacity(opacity: 0.01, child: input),
+                    ),
+                  ),
+                  IgnorePointer(
+                    child: Semantics(
+                      excludeSemantics: true,
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < n; i++) ...[if (i > 0) const SizedBox(width: gap), box(i)],
+                        ],
+                      ),
                     ),
                   ),
                 ],
-              );
-            },
-          ),
-          AnimatedSize(
-            duration: UiDuration.fast,
-            child: hasError && widget.error!.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.only(top: UiSpace.sm),
-                    child: Text(
-                      widget.error!,
-                      textAlign: TextAlign.center,
-                      style: context.text.bodySmall?.copyWith(color: cs.error, fontWeight: FontWeight.w500),
-                    ),
-                  )
-                : const SizedBox(width: double.infinity),
-          ),
-        ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-class _Box extends StatelessWidget {
-  const _Box({
-    required this.char,
-    required this.active,
-    required this.error,
-    required this.enabled,
-    required this.width,
-    required this.height,
-  });
-
-  final String? char;
-  final bool active;
-  final bool error;
-  final bool enabled;
-  final double width;
-  final double height;
+class _UpperCaseFormatter extends TextInputFormatter {
+  const _UpperCaseFormatter();
 
   @override
-  Widget build(BuildContext context) {
-    final cs = context.colors;
-    final border = error
-        ? cs.error
-        : active
-            ? cs.primary
-            : char != null
-                ? cs.outlineVariant
-                : Colors.transparent;
-    final fill = error
-        ? cs.errorContainer.withValues(alpha: 0.35)
-        : cs.surfaceContainerHighest.withValues(alpha: context.isDark ? 0.6 : 0.7);
-    return AnimatedContainer(
-      duration: UiDuration.fast,
-      curve: UiCurve.standard,
-      width: width,
-      height: height,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: enabled ? fill : cs.onSurface.withValues(alpha: 0.06),
-        borderRadius: context.tokens.md,
-        border: Border.all(color: border, width: active || error ? 1.6 : 1),
-      ),
-      child: AnimatedSwitcher(
-        duration: UiDuration.fast,
-        transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
-        child: char != null
-            ? Text(
-                char!,
-                key: ValueKey(char),
-                style: context.text.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38),
-                ),
-              )
-            : active
-                ? Container(
-                    key: const ValueKey('caret'),
-                    width: 2,
-                    height: height * 0.4,
-                    decoration: BoxDecoration(color: cs.primary, borderRadius: context.tokens.full),
-                  )
-                : const SizedBox.shrink(),
-      ),
-    );
-  }
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) =>
+      newValue.copyWith(text: newValue.text.toUpperCase());
 }

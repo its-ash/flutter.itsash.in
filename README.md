@@ -1,11 +1,11 @@
 # theme
 
-A Flutter design system for every app you build: e-commerce, gym and workout, finance, health, food, travel, social, booking, education, and productivity.
+A Flutter design system for every app in this workspace.
 
 - One import: `package:theme/theme.dart`.
-- Light and dark mode from one brand preset.
-- Modern Material 3 look: filled pill tabs, rounded corners, card layouts, filled inputs.
-- More than 150 `Ui*` widgets. Each widget works with one to three arguments.
+- **One light theme and one dark theme.** You can set a custom accent color, and the other colors stay the same.
+- Flat surfaces, 1 px borders, generous radius, soft accent tints. Built-in Material widgets are styled to match.
+- About 190 public `Ui*` APIs in 11 groups. Most widgets need only one to three arguments: `UiButton('Save', onPressed: save)`.
 
 See **[COMPONENTS.md](COMPONENTS.md)** for the full reference.
 
@@ -31,70 +31,64 @@ flutter pub get
 import 'package:flutter/material.dart';
 import 'package:theme/theme.dart';
 
-void main() => runApp(const UiApp(title: 'Shop', brand: UiBrand.commerce, home: HomePage()));
+void main() => runApp(const UiApp(title: 'Notes', home: SettingsPage()));
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) => UiScaffold(
-        title: 'Discover',
-        scrollable: false,
-        body: UiTabView(
-          tabs: const ['All', 'Shoes', 'Bags'],
+        appBar: const UiAppBar(title: 'Settings'),
+        scrollable: true,
+        body: Column(
           children: [
-            for (var i = 0; i < 3; i++)
-              UiResponsiveGrid.builder(
-                itemCount: 8,
-                mainAxisExtent: 300,
-                itemBuilder: (_, i) => UiProductCard(
-                  title: 'Air Runner $i',
-                  price: 129,
-                  compareAt: 159,
-                  rating: 4.6,
-                  imageUrl: 'https://picsum.photos/seed/p$i/400',
-                ),
-              ),
+            UiListGroup(
+              header: 'Account',
+              children: [
+                UiListTile('Profile', icon: Icons.person_rounded, chevron: true, onTap: () {}),
+                UiListTile('Wi-Fi', icon: Icons.wifi_rounded, value: 'Home', chevron: true, onTap: () {}),
+              ],
+            ),
+            const UiGap(UiSpace.xl),
+            UiButton('Save', expand: true, onPressed: () => context.showToast('Saved', status: UiStatus.success)),
           ],
         ),
       );
 }
 ```
 
+Change the mode or accent at runtime:
+
+```dart
+final theme = UiThemeController();
+UiApp(controller: theme, accent: Colors.teal, home: const HomePage());
+
+UiThemeController.of(context)?.toggle(context); // light <-> dark
+```
+
 Use only the theme with your own `MaterialApp`:
 
 ```dart
-MaterialApp(
-  theme: UiTheme.light(UiBrand.fitness),
-  darkTheme: UiTheme.dark(UiBrand.fitness),
-);
-```
-
-Make a custom brand from one color:
-
-```dart
-final brand = UiBrand.neutral.copyWith(id: 'acme', name: 'Acme', seed: const Color(0xFF00897B));
+MaterialApp(theme: UiTheme.light(accent: Colors.teal), darkTheme: UiTheme.dark(accent: Colors.teal));
 ```
 
 ## What is included
 
 | Group | Examples |
 |---|---|
-| Foundation | `UiTheme`, `UiBrand` (11 presets), `UiColors`, `UiTokens`, `UiSpace`, context shortcuts |
-| Primitives | `UiButton`, `UiIconButton`, `UiCard`, `UiImage`, `UiTag`, `UiAvatar`, `UiRatingStars` |
-| Controls | text, password, search, OTP, dropdown, chips, segmented, sliders, steppers, date/time, tags |
-| Layout | `UiApp`, `UiScaffold`, `UiSection`, `UiListGroup`, `UiResponsiveGrid`, accordion |
-| Navigation | `UiTabView`, `UiBottomNav`, `UiFloatingNavBar`, `UiAdaptiveShell`, steps, dots |
-| Feedback | toasts, dialogs, sheets, banners, empty/error states, skeletons, progress |
-| Display | stat cards, charts, timeline, carousel, image viewer, countdown |
-| Commerce | product cards, price, cart, order summary, coupon, checkout, order tracker, reviews |
-| Fitness | activity rings, workout cards, set tracker, rest timer, streaks, goals |
-| Finance | balance card, payment card, transactions, budgets, spending donut, amount keypad |
-| Booking | date strip, calendar, time slots, tickets, seat picker, guest counter |
-| Social | chat bubbles, composer, posts, comments, profile header, stories, notifications |
-| Auth | onboarding, login, signup, PIN pad, paywall, splash, error pages |
+| Foundation | `UiApp`, `UiThemeController`, `UiTheme`, `UiColors`, `UiTypography`, tokens, `context.colors` |
+| Buttons | `UiButton`, `UiIconButton`, `UiFab`, `UiSegmentedControl`, `UiToggleGroup`, `UiCopyButton`, `UiHoldButton` |
+| Inputs | text, password, number, search, select, multi-select, autocomplete, date/time, OTP, PIN pad, stepper, tags |
+| Selection | checkbox, switch, radio, settings tiles, choice cards, chips, sliders, rating, color picker |
+| Display | cards, list tiles, avatars, badges, tags, stat cards, tables, timeline, accordion, countdown, code |
+| Charts | sparkline, line, bar, donut, heatmap, gauge |
+| Feedback | alerts, toasts, dialogs, sheets, menus, popovers, progress, skeletons, empty/error states |
+| Layout | `UiScaffold`, `UiSection`, `UiSurface`, responsive grid and layout, split view |
+| Navigation | `UiShell` (bottom nav / rail / sidebar by width), app bars, tabs, steps, pagination, breadcrumbs |
+| Media | `UiImage`, carousel, image viewer, image grid, `UiVideoPlayer` |
+| Scroll | `UiPagingController`, infinite list and grid, refresh, scroll-to-top, lazy builder |
 
-## Run the showcase
+## Run the gallery
 
 ```bash
 make run         # iOS simulator
@@ -105,10 +99,11 @@ make deploy      # docs + commit + push
 
 ## Contributing
 
-- Put all theme and component code in `lib/`. Read `CLAUDE.md`.
-- Put a new widget in the matching `lib/src/<group>/` folder. Export it from that folder's barrel file.
-- Document it in `doc/components/<group>.md`.
-- Show it in the `example` app.
+- Read `CLAUDE.md` for the component conventions.
+- Put a new widget in the matching `lib/src/<group>/` folder and export it from that folder's barrel file.
+- Document it in `doc/components/<group>.md` and the `COMPONENTS.md` table.
+- Add a widget test in `test/<group>_test.dart` and show the widget in the `example` gallery.
+- Run `flutter analyze` and `flutter test`.
 
 ## License
 

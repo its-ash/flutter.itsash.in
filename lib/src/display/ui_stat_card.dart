@@ -1,131 +1,168 @@
 import 'package:flutter/material.dart';
 
-import 'package:theme/src/display/ui_charts.dart';
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
-import 'package:theme/src/card/ui_card.dart';
+import 'package:theme/src/display/ui_card.dart';
+import 'package:theme/src/display/ui_list.dart';
+import 'package:theme/src/foundation/foundation.dart';
 
-class UiDelta extends StatelessWidget {
-  const UiDelta(this.value, {super.key, this.invert = false, this.suffix = '%', this.solid = false});
+/// Direction of a [UiStatCard] change.
+enum UiTrend { up, down, neutral }
 
-  final double value;
-  final bool invert;
-  final String suffix;
-  final bool solid;
-
-  @override
-  Widget build(BuildContext context) {
-    final v = value.isFinite ? value : 0.0;
-    final good = invert ? v < 0 : v > 0;
-    final status = v == 0 ? UiStatus.neutral : (good ? UiStatus.success : UiStatus.danger);
-    final t = context.tone(status);
-    final icon = v == 0 ? Icons.remove_rounded : (v > 0 ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded);
-    final a = v.abs();
-    final txt = '${v > 0 ? '+' : v < 0 ? '-' : ''}${a >= 100 || a == a.roundToDouble() ? a.toStringAsFixed(0) : a.toStringAsFixed(1)}$suffix';
-    final fg = solid ? t.onContainer : t.color;
-    return Semantics(
-      label: '${v > 0 ? 'Up' : v < 0 ? 'Down' : 'No change'} $txt',
-      child: ExcludeSemantics(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm - 2, vertical: UiSpace.xxs),
-          decoration: BoxDecoration(color: solid ? t.container : t.color.withValues(alpha: 0.12), borderRadius: context.tokens.full),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: fg),
-              const SizedBox(width: 2),
-              Text(txt, style: context.text.labelSmall?.copyWith(color: fg, fontWeight: FontWeight.w700)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+/// A KPI card: label, big value, and an auto-colored change.
+///
+/// ```dart
+/// UiStatCard(label: 'Revenue', value: '\$12.4k', delta: 8.2, deltaLabel: 'vs last week')
+/// ```
 class UiStatCard extends StatelessWidget {
   const UiStatCard({
     super.key,
     required this.label,
     required this.value,
-    this.icon,
     this.delta,
-    this.invertDelta = false,
-    this.caption,
-    this.sparkline,
-    this.status,
+    this.deltaLabel,
+    this.deltaUnit = '%',
+    this.icon,
+    this.iconStatus = UiStatus.accent,
+    this.trend,
+    this.invertColors = false,
+    this.footer,
     this.onTap,
-    this.variant = UiCardVariant.filled,
+    this.variant = UiCardVariant.outlined,
   });
 
   final String label;
   final String value;
+
+  /// Change shown as `+8.2%`. Its sign picks the [trend] when [trend] is null.
+  final num? delta;
+
+  /// Muted text after the change, e.g. "vs last week".
+  final String? deltaLabel;
+
+  /// Unit after [delta]. Defaults to `%`.
+  final String deltaUnit;
   final IconData? icon;
-  final double? delta;
-  final bool invertDelta;
-  final String? caption;
-  final List<double>? sparkline;
-  final UiStatus? status;
+  final UiStatus iconStatus;
+
+  /// Overrides the trend picked from [delta].
+  final UiTrend? trend;
+
+  /// Use when "down" is good (costs, errors, latency).
+  final bool invertColors;
+
+  /// Extra content under the value (sparkline, progress).
+  final Widget? footer;
   final VoidCallback? onTap;
   final UiCardVariant variant;
 
+  /// Trend that [delta] implies.
+  static UiTrend trendOf(num? delta) => delta == null || delta == 0
+      ? UiTrend.neutral
+      : delta > 0
+      ? UiTrend.up
+      : UiTrend.down;
+
+  /// Delta text with sign: `+8.2%`, `-3%`, `0%`.
+  static String formatDelta(num delta, [String unit = '%']) {
+    final abs = delta.abs();
+    final s = abs == abs.roundToDouble() ? abs.round().toString() : abs.toStringAsFixed(1);
+    final sign = delta > 0
+        ? '+'
+        : delta < 0
+        ? '-'
+        : '';
+    return '$sign$s$unit';
+  }
+
+  /// Status color of a trend.
+  static UiStatus statusOf(UiTrend trend, {bool invert = false}) => switch (trend) {
+    UiTrend.up => invert ? UiStatus.danger : UiStatus.success,
+    UiTrend.down => invert ? UiStatus.success : UiStatus.danger,
+    UiTrend.neutral => UiStatus.neutral,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final t = status == null ? null : context.tone(status!);
-    final iconBg = t?.container ?? cs.primaryContainer;
-    final iconFg = t?.onContainer ?? cs.onPrimaryContainer;
-    final d = delta;
-    final lineColor = d == null || d == 0
-        ? (t?.color ?? cs.primary)
-        : ((invertDelta ? d < 0 : d > 0) ? context.palette.success : cs.error);
-    final spark = sparkline;
-    return Semantics(
-      container: true,
-      child: UiCard(
-        variant: variant,
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    final colors = context.colors;
+    final text = context.text;
+    final t = trend ?? trendOf(delta);
+    final status = statusOf(t, invert: invertColors);
+    final tone = colors.tone(status);
+    final deltaFg = status == UiStatus.neutral ? colors.textMuted : tone.onSoft;
+
+    return UiCard(
+      onTap: onTap,
+      variant: variant,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.bodyMedium?.copyWith(color: colors.textMuted, fontWeight: FontWeight.w500),
+                ),
+              ),
+              if (icon != null) ...[const SizedBox(width: UiSpace.sm), UiIconBox(icon!, status: iconStatus, size: 28)],
+            ],
+          ),
+          const SizedBox(height: UiSpace.sm),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: text.headlineMedium?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            ),
+          ),
+          if (delta != null || deltaLabel != null) ...[
+            const SizedBox(height: UiSpace.sm),
             Row(
               children: [
-                if (icon != null)
+                if (delta != null)
                   Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(color: iconBg, borderRadius: context.tokens.sm),
-                    child: Icon(icon, size: 20, color: iconFg),
-                  )
-                else
-                  Expanded(
-                    child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
+                    key: const ValueKey('ui-stat-delta'),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: tone.soft, borderRadius: UiRadius.all(UiRadius.full)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          switch (t) {
+                            UiTrend.up => Icons.arrow_upward_rounded,
+                            UiTrend.down => Icons.arrow_downward_rounded,
+                            UiTrend.neutral => Icons.remove_rounded,
+                          },
+                          size: 12,
+                          color: deltaFg,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          formatDelta(delta!, deltaUnit),
+                          style: text.labelMedium?.copyWith(color: deltaFg, height: 1.2),
+                        ),
+                      ],
+                    ),
                   ),
-                if (icon != null) const Spacer(),
-                if (d != null) ...[const UiGap.sm(), UiDelta(d, invert: invertDelta)],
+                if (delta != null && deltaLabel != null) const SizedBox(width: UiSpace.sm),
+                if (deltaLabel != null)
+                  Flexible(
+                    child: Text(
+                      deltaLabel!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall?.copyWith(color: colors.textSubtle),
+                    ),
+                  ),
               ],
             ),
-            const UiGap.md(),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(value, maxLines: 1, style: context.text.headlineSmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-            ),
-            if (icon != null) ...[
-              const SizedBox(height: UiSpace.xxs),
-              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
-            ],
-            if (caption != null) ...[
-              const SizedBox(height: UiSpace.xxs),
-              Text(caption!, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
-            ],
-            if (spark != null && spark.isNotEmpty) ...[
-              const UiGap.md(),
-              ExcludeSemantics(child: UiSparkline(spark, color: lineColor, height: 36)),
-            ],
           ],
-        ),
+          if (footer != null) ...[const SizedBox(height: UiSpace.md), footer!],
+        ],
       ),
     );
   }

@@ -1,123 +1,127 @@
 # Foundation
 
-Import one file. It gives you the theme and all components.
+The theme, colors, type, and tokens. Every component is built on these. Import one file:
 
 ```dart
 import 'package:theme/theme.dart';
 ```
 
+## App setup
+
+### UiApp
+A `MaterialApp` with the light and dark themes applied. It follows the system mode by default.
+
+```dart
+void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
+```
+- `home` (required), `title`
+- `themeMode` (`ThemeMode.system`): a fixed mode when there is no controller.
+- `accent` (indigo): your brand color. All other colors stay the same.
+- `fontFamily` (Inter): a bundled font family to use instead of Inter.
+- `controller`: a `UiThemeController` to change the mode or accent at runtime.
+- `routes`, `onGenerateRoute`, `navigatorKey`, `scaffoldMessengerKey`, `navigatorObservers`, `locale`, `localizationsDelegates`, `supportedLocales`, `builder`
+- `UiApp.router(routerConfig: router, ...)` for `go_router` or any `RouterConfig`.
+
+### UiThemeController
+Holds the theme mode and accent. Widgets below `UiApp` can change them.
+
+```dart
+final theme = UiThemeController();
+UiApp(controller: theme, home: const HomePage());
+
+UiThemeController.of(context)?.toggle(context);        // light <-> dark
+UiThemeController.of(context)?.mode = ThemeMode.system;
+UiThemeController.of(context)?.accent = Colors.teal;
+```
+
 ### UiTheme
-Makes a complete Material 3 `ThemeData` for light or dark mode from one brand.
+Builds the `ThemeData` for each mode. Use it if you keep your own `MaterialApp`.
 
 ```dart
-MaterialApp(
-  theme: UiTheme.light(UiBrand.commerce),
-  darkTheme: UiTheme.dark(UiBrand.commerce),
-);
+MaterialApp(theme: UiTheme.light(), darkTheme: UiTheme.dark(), themeMode: ThemeMode.system);
 ```
-- `UiTheme.light([UiBrand brand = UiBrand.neutral])`
-- `UiTheme.dark([UiBrand brand = UiBrand.neutral])`
-- `UiTheme.build(UiBrand brand, Brightness brightness)`
+- `UiTheme.light({accent, fontFamily})`, `UiTheme.dark({accent, fontFamily})`
+- `UiTheme.fromColors(UiColors, {fontFamily})`
+- It styles all built-in Material widgets (buttons, fields, switches, sheets, dialogs, nav bars, tabs, and more), so they match the `Ui*` components.
 
-The theme sets: filled inputs with no border and a primary focus ring, pill tab indicators, stadium chips, rounded cards with a hairline border, floating snackbars, bottom sheets with a drag handle, rounded dialogs, and pill navigation indicators.
-
-### UiBrand
-One preset per app type. Each preset sets a seed color, a heading font, a body font (Google Fonts), a radius scale, and a color-scheme variant.
-
-| Preset | Seed | Fonts | Radius |
-|---|---|---|---|
-| `neutral` | Indigo | Plus Jakarta Sans / Inter | 1.0 |
-| `commerce` | Orange-red | Outfit / Inter | 1.0 |
-| `fitness` | Lime | Sora / Inter | 1.2 |
-| `finance` | Teal | Manrope | 0.85 |
-| `health` | Sky | Nunito | 1.2 |
-| `food` | Amber | Poppins / Inter | 1.1 |
-| `travel` | Blue | DM Sans | 1.0 |
-| `social` | Pink | Poppins / Inter | 1.3 |
-| `education` | Violet | Lexend | 1.0 |
-| `productivity` | Slate | Plus Jakarta Sans / Inter | 0.75 |
-| `luxury` | Bronze | Playfair Display / Lato | 0.5 |
-
-Make your own brand:
-```dart
-final brand = UiBrand.neutral.copyWith(id: 'acme', name: 'Acme', seed: const Color(0xFF00897B), radiusScale: 1.4);
-```
-- `UiBrand.values`, `UiBrand.byId(String id)`.
-
-### Context shortcuts
-```dart
-context.colors   // ColorScheme
-context.text     // TextTheme
-context.palette  // UiColors (success, warning, info, rating, sale, gradient, shimmer)
-context.tokens   // UiTokens (radius)
-context.isDark
-context.isCompact / isMedium / isExpanded
-context.tone(UiStatus.success) // (color, onColor, container, onContainer)
-```
-
-### Tokens
-- `UiSpace`: `xxs 2`, `xs 4`, `sm 8`, `md 12`, `lg 16`, `xl 20`, `xxl 24`, `xxxl 32`, `huge 48`, `page`, `card`.
-- `UiTokens` (theme extension, scaled by brand): `context.tokens.xs / sm / md / lg / xl / full` are `BorderRadius` values. `controlHeight` is 52.
-- `UiDuration`: `fast 150ms`, `normal 250ms`, `slow 400ms`. `UiCurve.standard`, `UiCurve.emphasized`.
-- `UiBreakpoint`: `compact 600`, `medium 840`, `expanded 1200`.
-- `UiSize { sm, md, lg }`, `UiStatus { neutral, info, success, warning, danger }`.
+## Colors
 
 ### UiColors
-A theme extension with semantic colors that the Material `ColorScheme` does not have: `success`, `warning`, `info` (each with `on`, `container`, `onContainer`), `rating`, `sale`, `shimmerBase`, `shimmerHighlight`, `gradient`.
+The color palette. There are two: `UiColors.light()` and `UiColors.dark()`. Read it with `context.colors`.
+
+```dart
+Container(color: context.colors.surface, child: Text('Hi', style: TextStyle(color: context.colors.textMuted)));
+```
+
+| Role | Colors |
+|---|---|
+| Surfaces | `background` (page), `surface` (cards, bars), `surfaceMuted` (inputs, tracks, hover), `surfaceRaised` (menus, dialogs), `surfaceInverse` / `onSurfaceInverse` (tooltips, snackbars) |
+| Lines | `border` (hairlines), `borderStrong` (control outlines) |
+| Text | `text`, `textMuted`, `textSubtle`, `textDisabled` |
+| Accent | `accent`, `onAccent`, `accentSoft` (tinted fill), `onAccentSoft` |
+| Status | `success`, `warning`, `danger`, `info`, each with `on…`, `…Soft`, `on…Soft` |
+| Other | `scrim`, `shimmerBase`, `shimmerHighlight`, `chart` (8 series colors), `chartColor(i)` |
+
+- `tone(UiStatus)` returns a `UiTone` with `color`, `onColor`, `soft`, `onSoft`.
+- If you pass an accent, dark mode lightens it when needed so that it stays readable.
+
+### UiStatus
+The meaning of a colored element: `neutral`, `accent`, `info`, `success`, `warning`, `danger`. `status.icon` gives a default icon.
+
+```dart
+final tone = context.colors.tone(UiStatus.success);
+Container(color: tone.soft, child: Icon(UiStatus.success.icon, color: tone.onSoft));
+```
+
+## Typography
+
+### UiTypography
+The type scale is Inter, from `google_fonts`. Read it with `context.text`.
+
+| Style | Size / weight |
+|---|---|
+| `displayLarge` / `Medium` / `Small` | 48 / 40 / 32, bold |
+| `headlineLarge` / `Medium` / `Small` | 28 / 24 bold, 20 semibold |
+| `titleLarge` / `Medium` / `Small` | 18 / 16 / 14, semibold |
+| `bodyLarge` / `Medium` / `Small` | 16 / 14 / 12.5 (`bodySmall` is muted) |
+| `labelLarge` / `Medium` / `Small` | 14 / 12.5 / 11, semibold |
+
+- `UiTypography.mono({fontSize, fontWeight, color})`: JetBrains Mono with tabular figures, for codes and IDs.
+- `UiTypography.useGoogleFonts = false`: uses the platform font, for tests and offline builds.
+
+## Tokens
+
+### UiSpace
+Spacing on a 4 pt grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24, `xxl` 32, `xxxl` 48, `page` 20 (page side padding).
+
+### UiRadius
+Corner radius: `xs` 6, `sm` 10, `md` 14 (controls), `lg` 18 (cards), `xl` 26 (sheets, dialogs), `full` (pills). Helpers: `UiRadius.all(r)`, `UiRadius.top(r)`.
+
+### UiMotion
+Durations `fast` 120 ms, `normal` 220 ms, `slow` 360 ms. Curves `standard`, `emphasized`, `bounce`. `context.motion(d)` returns zero when the user asks for reduced motion.
+
+### UiShadows
+`context.shadowSm`, `context.shadowMd`, `context.shadowLg`: soft shadows that suit the current mode.
+
+### UiSize
+Size of a control: `sm` (36), `md` (44, default), `lg` (52). It also gives `.iconSize`, `.fontSize`, and `.padding`.
+
+## Layout helpers
+
+### UiBreakpoint
+Window size class: `compact` (< 600), `medium` (< 840), `expanded` (< 1200), `large`. Read it with `context.breakpoint`. Use `context.isCompact` for phones.
+
+```dart
+final columns = context.responsive(compact: 2, medium: 3, expanded: 4);
+```
 
 ### UiGap
-A square spacer.
+A gap in a `Row` or `Column`. It uses the direction of the nearest one.
+
 ```dart
-const UiGap.md()
+Row(children: [icon, const UiGap(UiSpace.sm), label]);
 ```
-`UiGap(double)`, `.xs`, `.sm`, `.md`, `.lg`, `.xl`, `.xxl`.
 
-The basic widgets that used to be listed here as primitives now have their own pages: [button.md](button.md) (`UiButton`, `UiIconButton`), [card.md](card.md) (`UiCard`), [image.md](image.md) (`UiImage`, `UiAvatar`), and [display.md](display.md) (`UiTag`, `UiRatingStars`).
-
-## Formatting
-
-All widgets use these two helpers. Do not add a formatter in a slice. The helpers do not use the `intl` package.
-
-### UiFormat
-Formats dates, times, durations, and numbers.
-```dart
-UiFormat.date(d)                     // 12 Mar 2026
-UiFormat.day(d)                      // Fri, 14 Mar
-UiFormat.day(d, year: true)          // Fri, 14 Mar 2026
-UiFormat.shortDate(d)                // 14 Mar (adds the year if it is not this year)
-UiFormat.monthYear(d)                // March 2026
-UiFormat.time(t)                     // 9:05 AM (t is TimeOfDay or DateTime)
-UiFormat.time(t, h24: true)          // 09:05
-UiFormat.dateTime(d)                 // 12 Mar 2026, 9:05 AM
-UiFormat.dateTime(d, weekday: true)  // Fri, 14 Mar, 9:05 AM
-UiFormat.range(r)                    // 12 Mar – 15 Mar 2026
-UiFormat.relative(d)                 // now, 5m, 3h, 2d, then shortDate
-UiFormat.relativeDay(d)              // Today, Yesterday, Tomorrow, then day
-UiFormat.duration(d)                 // 04:05 or 1:04:05
-UiFormat.minutes(d)                  // 45 min, 1h, 1h 30m
-UiFormat.number(12345.6, decimals: 1) // 12,345.6
-UiFormat.compact(1234)               // 1.2k (also M, B, T)
-UiFormat.count(1299)                 // 1.2k (rounds down, never below 0)
-UiFormat.percent(4.25)               // +4.3%
-UiFormat.masked('4111 1111 1111 1234') // •••• 1234
-```
-- Date helpers: `dateOnly`, `sameDay`, `daysInMonth`, `daysUntil`, `weekday`.
-- Lists: `weekdays`, `months`, `monthsLong`, `mask`.
-- `number(v, {decimals = 0, trimZeros = false, group = ',', point = '.'})`. `trimZeros` removes trailing zeros. Null, NaN, and infinity become 0.
-- `compact(v, {floor = false})`. Use `floor: true` to round down.
-
-### UiMoney
-Formats money. Commerce, finance, and booking widgets use it. Set the global values one time at app start.
-```dart
-UiMoney.symbol = '₹';
-UiMoney.format(1299.5);                                           // ₹1,299.50
-UiMoney.format(1200, compact: true);                              // ₹1.2k
-UiMoney.format(42, sign: true);                                   // +₹42.00
-UiMoney.format(9, symbol: '€', position: UiSymbolPosition.after); // 9.00 €
-UiMoney.spoken(12.5);                                             // 12.50 rupees
-UiMoney.discountPercent(129, 159);                                // 19
-```
-- Global values: `symbol` ('\$'), `decimals` (2), `position` (`UiSymbolPosition.before`), `groupSeparator` (','), `decimalSeparator` ('.'), `names` (symbol to spoken name).
-- `format(amount, {symbol, decimals, position, compact, trimZeros, sign})`. `compact` applies from 1000. `trimZeros` removes ".00" only. `sign` adds "+" to a positive value.
-- `safe(v)` changes null, NaN, and infinity to 0.
-- A widget `symbol` param that is null uses `UiMoney.symbol`.
+### UiContext and UiResponsive extensions
+`UiContext`: `context.theme`, `context.colors`, `context.text`, `context.isDark`, `context.screenSize`, `context.breakpoint`, `context.isCompact`, `context.shadowSm/Md/Lg`, `context.motion(d)`.
+`UiResponsive`: `context.responsive(compact: ..., medium: ..., expanded: ..., large: ...)`.

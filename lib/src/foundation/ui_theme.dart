@@ -1,351 +1,501 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_brand.dart';
 import 'package:theme/src/foundation/ui_colors.dart';
+import 'package:theme/src/foundation/ui_tokens.dart';
+import 'package:theme/src/foundation/ui_typography.dart';
 
+/// Builds the two [ThemeData]s of the design system.
+///
+/// ```dart
+/// MaterialApp(theme: UiTheme.light(), darkTheme: UiTheme.dark());
+/// ```
+/// Or use `UiApp`, which does this for you.
 abstract final class UiTheme {
-  static ThemeData light([UiBrand brand = UiBrand.neutral]) => build(brand, Brightness.light);
+  static ThemeData light({Color? accent, String? fontFamily}) =>
+      fromColors(UiColors.light(accent: accent), fontFamily: fontFamily);
 
-  static ThemeData dark([UiBrand brand = UiBrand.neutral]) => build(brand, Brightness.dark);
+  static ThemeData dark({Color? accent, String? fontFamily}) =>
+      fromColors(UiColors.dark(accent: accent), fontFamily: fontFamily);
 
-  static ThemeData build(UiBrand brand, Brightness brightness) {
-    final cs = ColorScheme.fromSeed(
-      seedColor: brand.seed,
-      brightness: brightness,
-      dynamicSchemeVariant: brand.variant,
+  /// Builds a full Material 3 theme from a palette. Every built-in Material
+  /// widget is styled, so plain `ElevatedButton`, `TextField`, `Switch` etc.
+  /// match the `Ui*` components.
+  static ThemeData fromColors(UiColors c, {String? fontFamily}) {
+    final dark = c.isDark;
+    final text = UiTypography.textTheme(text: c.text, muted: c.textMuted, fontFamily: fontFamily);
+    final label = text.labelLarge!;
+
+    final scheme = ColorScheme(
+      brightness: c.brightness,
+      primary: c.accent,
+      onPrimary: c.onAccent,
+      primaryContainer: c.accentSoft,
+      onPrimaryContainer: c.onAccentSoft,
+      secondary: c.text,
+      onSecondary: c.background,
+      secondaryContainer: c.surfaceMuted,
+      onSecondaryContainer: c.text,
+      tertiary: c.info,
+      onTertiary: c.onInfo,
+      tertiaryContainer: c.infoSoft,
+      onTertiaryContainer: c.onInfoSoft,
+      error: c.danger,
+      onError: c.onDanger,
+      errorContainer: c.dangerSoft,
+      onErrorContainer: c.onDangerSoft,
+      surface: c.surface,
+      onSurface: c.text,
+      onSurfaceVariant: c.textMuted,
+      surfaceDim: c.background,
+      surfaceBright: c.surfaceRaised,
+      surfaceContainerLowest: c.background,
+      surfaceContainerLow: c.surface,
+      surfaceContainer: c.surface,
+      surfaceContainerHigh: c.surfaceMuted,
+      surfaceContainerHighest: c.surfaceMuted,
+      outline: c.borderStrong,
+      outlineVariant: c.border,
+      inverseSurface: c.surfaceInverse,
+      onInverseSurface: c.onSurfaceInverse,
+      inversePrimary: dark ? UiColors.defaultAccentLight : UiColors.defaultAccentDark,
+      shadow: Colors.black,
+      scrim: Colors.black,
+      surfaceTint: Colors.transparent,
     );
-    final t = UiTokens.scaled(brand.radiusScale);
-    final text = _textTheme(brand, cs);
-    final dark = brightness == Brightness.dark;
 
-    RoundedRectangleBorder shape(BorderRadius r, [BorderSide side = BorderSide.none]) =>
-        RoundedRectangleBorder(borderRadius: r, side: side);
-    final controlSize = Size(64, t.controlHeight);
-    final btnPad = const EdgeInsets.symmetric(horizontal: UiSpace.xl);
-    final label = text.labelLarge?.copyWith(fontWeight: FontWeight.w600, fontSize: 15);
-    OutlineInputBorder border(Color c, [double w = 1]) =>
-        OutlineInputBorder(borderRadius: t.md, borderSide: BorderSide(color: c, width: w));
-    final inputs = InputDecorationTheme(
-      filled: true,
-      fillColor: cs.surfaceContainerHighest.withValues(alpha: dark ? 0.6 : 0.7),
-      contentPadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.lg),
-      border: border(Colors.transparent),
-      enabledBorder: border(Colors.transparent),
-      focusedBorder: border(cs.primary, 1.6),
-      errorBorder: border(cs.error),
-      focusedErrorBorder: border(cs.error, 1.6),
-      disabledBorder: border(Colors.transparent),
-      hintStyle: text.bodyLarge?.copyWith(color: cs.onSurfaceVariant.withValues(alpha: 0.7)),
-      labelStyle: text.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-      floatingLabelStyle: text.bodyMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.w600),
-      prefixIconColor: cs.onSurfaceVariant,
-      suffixIconColor: cs.onSurfaceVariant,
-      errorMaxLines: 2,
+    final r = UiRadius.all;
+    final controlShape = RoundedRectangleBorder(borderRadius: r(UiRadius.md));
+    const controlSize = Size(64, 44);
+    const controlPadding = EdgeInsets.symmetric(horizontal: 18, vertical: 10);
+    final disabledFill = c.surfaceMuted;
+
+    OutlineInputBorder inputBorder(Color color, [double width = 1]) => OutlineInputBorder(
+          borderRadius: r(UiRadius.md),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    final overlay = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: c.brightness,
+      systemNavigationBarColor: c.background,
+      systemNavigationBarIconBrightness: dark ? Brightness.light : Brightness.dark,
     );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: brightness,
-      colorScheme: cs,
+      brightness: c.brightness,
+      colorScheme: scheme,
+      fontFamily: fontFamily,
       textTheme: text,
       primaryTextTheme: text,
-      scaffoldBackgroundColor: cs.surface,
-      canvasColor: cs.surface,
-      splashFactory: InkSparkle.splashFactory,
+      scaffoldBackgroundColor: c.background,
+      canvasColor: c.background,
+      cardColor: c.surface,
+      dividerColor: c.border,
+      hintColor: c.textSubtle,
+      disabledColor: c.textDisabled,
+      focusColor: c.accent.withValues(alpha: 0.12),
+      hoverColor: c.text.withValues(alpha: 0.04),
+      highlightColor: Colors.transparent,
+      splashColor: c.text.withValues(alpha: 0.06),
+      splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
       visualDensity: VisualDensity.standard,
-      materialTapTargetSize: MaterialTapTargetSize.padded,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      extensions: [c],
+      iconTheme: IconThemeData(color: c.text, size: 22),
+      primaryIconTheme: IconThemeData(color: c.onAccent, size: 22),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
         },
       ),
-      extensions: [t, UiColors.from(cs)],
-      appBarTheme: AppBarTheme(
+      appBarTheme: AppBarThemeData(
+        backgroundColor: c.background,
+        foregroundColor: c.text,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        backgroundColor: cs.surface,
-        foregroundColor: cs.onSurface,
-        surfaceTintColor: Colors.transparent,
-        titleTextStyle: text.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-        titleSpacing: UiSpace.lg,
+        titleSpacing: UiSpace.page,
+        toolbarHeight: 60,
+        systemOverlayStyle: overlay,
+        titleTextStyle: text.titleLarge,
+        iconTheme: IconThemeData(color: c.text, size: 22),
+        actionsIconTheme: IconThemeData(color: c.text, size: 22),
       ),
       cardTheme: CardThemeData(
+        color: c.surface,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
-        color: cs.surfaceContainerLow,
-        surfaceTintColor: Colors.transparent,
         clipBehavior: Clip.antiAlias,
-        shape: shape(t.lg, BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5))),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg), side: BorderSide(color: c.border)),
+      ),
+      dividerTheme: DividerThemeData(color: c.border, thickness: 1, space: 1),
+      inputDecorationTheme: InputDecorationThemeData(
+        filled: true,
+        fillColor: c.surfaceMuted,
+        hoverColor: Colors.transparent,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        hintStyle: text.bodyMedium!.copyWith(color: c.textSubtle),
+        labelStyle: text.bodyMedium!.copyWith(color: c.textMuted),
+        floatingLabelStyle: text.bodyMedium!.copyWith(color: c.accent, fontWeight: FontWeight.w600),
+        helperStyle: text.bodySmall,
+        errorStyle: text.bodySmall!.copyWith(color: c.danger),
+        prefixIconColor: c.textSubtle,
+        suffixIconColor: c.textSubtle,
+        border: inputBorder(Colors.transparent),
+        enabledBorder: inputBorder(Colors.transparent),
+        disabledBorder: inputBorder(Colors.transparent),
+        focusedBorder: inputBorder(c.accent, 1.5),
+        errorBorder: inputBorder(c.danger),
+        focusedErrorBorder: inputBorder(c.danger, 1.5),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: c.accent,
+        selectionColor: c.accent.withValues(alpha: 0.25),
+        selectionHandleColor: c.accent,
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(minimumSize: controlSize, padding: btnPad, textStyle: label, shape: shape(t.md)),
+        style: FilledButton.styleFrom(
+          backgroundColor: c.accent,
+          foregroundColor: c.onAccent,
+          disabledBackgroundColor: disabledFill,
+          disabledForegroundColor: c.textDisabled,
+          minimumSize: controlSize,
+          padding: controlPadding,
+          shape: controlShape,
+          textStyle: label,
+          elevation: 0,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 0,
+          backgroundColor: c.accent,
+          foregroundColor: c.onAccent,
+          disabledBackgroundColor: disabledFill,
+          disabledForegroundColor: c.textDisabled,
           minimumSize: controlSize,
-          padding: btnPad,
+          padding: controlPadding,
+          shape: controlShape,
           textStyle: label,
-          shape: shape(t.md),
-          backgroundColor: cs.primary,
-          foregroundColor: cs.onPrimary,
+          elevation: 0,
+          shadowColor: Colors.transparent,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          foregroundColor: c.text,
+          disabledForegroundColor: c.textDisabled,
           minimumSize: controlSize,
-          padding: btnPad,
+          padding: controlPadding,
+          shape: controlShape,
           textStyle: label,
-          shape: shape(t.md),
-          side: BorderSide(color: cs.outlineVariant),
+          side: BorderSide(color: c.borderStrong),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(textStyle: label, shape: shape(t.md), padding: const EdgeInsets.symmetric(horizontal: UiSpace.md)),
+        style: TextButton.styleFrom(
+          foregroundColor: c.accent,
+          disabledForegroundColor: c.textDisabled,
+          minimumSize: const Size(48, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: controlShape,
+          textStyle: label,
+        ),
       ),
-      iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(shape: shape(t.md))),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: c.text,
+          disabledForegroundColor: c.textDisabled,
+          minimumSize: const Size(40, 40),
+          shape: controlShape,
+        ),
+      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: c.accent,
+        foregroundColor: c.onAccent,
         elevation: 2,
-        highlightElevation: 4,
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-        shape: shape(t.lg),
+        focusElevation: 2,
+        hoverElevation: 4,
+        highlightElevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
         extendedTextStyle: label,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
-          shape: shape(t.full),
-          side: BorderSide(color: cs.outlineVariant),
-          selectedBackgroundColor: cs.primary,
-          selectedForegroundColor: cs.onPrimary,
-          textStyle: label?.copyWith(fontSize: 14),
+          backgroundColor: c.surface,
+          foregroundColor: c.textMuted,
+          selectedBackgroundColor: c.accentSoft,
+          selectedForegroundColor: c.onAccentSoft,
+          side: BorderSide(color: c.border),
+          shape: controlShape,
+          textStyle: label,
         ),
-      ),
-      inputDecorationTheme: inputs,
-      dropdownMenuTheme: DropdownMenuThemeData(
-        inputDecorationTheme: inputs,
-        menuStyle: MenuStyle(shape: WidgetStatePropertyAll(shape(t.md))),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: cs.primary,
-        selectionColor: cs.primary.withValues(alpha: 0.25),
-        selectionHandleColor: cs.primary,
-      ),
-      searchBarTheme: SearchBarThemeData(
-        elevation: const WidgetStatePropertyAll(0),
-        backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHigh),
-        shape: WidgetStatePropertyAll(shape(t.full)),
-        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: UiSpace.lg)),
-        constraints: BoxConstraints(minHeight: t.controlHeight),
-        hintStyle: WidgetStatePropertyAll(text.bodyLarge?.copyWith(color: cs.onSurfaceVariant)),
-      ),
-      tabBarTheme: TabBarThemeData(
-        indicator: BoxDecoration(color: cs.primary, borderRadius: t.full),
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        dividerHeight: 0,
-        labelColor: cs.onPrimary,
-        unselectedLabelColor: cs.onSurfaceVariant,
-        labelStyle: label?.copyWith(fontSize: 14),
-        unselectedLabelStyle: label?.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
-        splashBorderRadius: t.full,
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        labelPadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
-        tabAlignment: TabAlignment.fill,
       ),
       chipTheme: ChipThemeData(
-        shape: shape(t.full),
+        backgroundColor: c.surfaceMuted,
+        selectedColor: c.accentSoft,
+        disabledColor: c.surfaceMuted,
+        checkmarkColor: c.onAccentSoft,
+        deleteIconColor: c.textMuted,
+        labelStyle: text.labelMedium!.copyWith(color: c.text),
+        secondaryLabelStyle: text.labelMedium!.copyWith(color: c.onAccentSoft),
         side: BorderSide.none,
-        backgroundColor: cs.surfaceContainerHigh,
-        selectedColor: cs.primary,
-        secondarySelectedColor: cs.primary,
-        disabledColor: cs.surfaceContainerHighest,
-        labelStyle: text.labelLarge?.copyWith(color: cs.onSurface),
-        secondaryLabelStyle: text.labelLarge?.copyWith(color: cs.onPrimary),
-        checkmarkColor: cs.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.full)),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm, vertical: UiSpace.sm),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        height: 72,
-        elevation: 0,
-        backgroundColor: cs.surfaceContainer,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: cs.primaryContainer,
-        indicatorShape: shape(t.full),
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        labelTextStyle: WidgetStateProperty.resolveWith(
-          (s) => text.labelMedium?.copyWith(
-            fontWeight: s.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-            color: s.contains(WidgetState.selected) ? cs.onSurface : cs.onSurfaceVariant,
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: r(6)),
+        side: WidgetStateBorderSide.resolveWith(
+          (s) => BorderSide(
+            color: s.contains(WidgetState.selected) ? c.accent : c.borderStrong,
+            width: 1.5,
           ),
         ),
-        iconTheme: WidgetStateProperty.resolveWith(
-          (s) => IconThemeData(color: s.contains(WidgetState.selected) ? cs.onPrimaryContainer : cs.onSurfaceVariant),
+        fillColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.disabled)
+              ? (s.contains(WidgetState.selected) ? c.textDisabled : Colors.transparent)
+              : s.contains(WidgetState.selected)
+                  ? c.accent
+                  : Colors.transparent,
+        ),
+        checkColor: WidgetStatePropertyAll(c.onAccent),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.disabled)
+              ? c.textDisabled
+              : s.contains(WidgetState.selected)
+                  ? c.accent
+                  : c.borderStrong,
         ),
       ),
-      navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: cs.surfaceContainerLow,
-        indicatorColor: cs.primaryContainer,
-        indicatorShape: shape(t.full),
-        labelType: NavigationRailLabelType.all,
-        selectedLabelTextStyle: text.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-        unselectedLabelTextStyle: text.labelMedium?.copyWith(color: cs.onSurfaceVariant),
-      ),
-      navigationDrawerTheme: NavigationDrawerThemeData(
-        backgroundColor: cs.surfaceContainerLow,
-        indicatorColor: cs.primaryContainer,
-        indicatorShape: shape(t.full),
-      ),
-      drawerTheme: DrawerThemeData(
-        backgroundColor: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.horizontal(right: Radius.circular(t.radiusXl)),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.onAccent : (dark ? c.textMuted : Colors.white),
         ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.disabled)
+              ? c.surfaceMuted
+              : s.contains(WidgetState.selected)
+                  ? c.accent
+                  : (dark ? c.borderStrong : c.border),
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+        thumbIcon: const WidgetStatePropertyAll(null),
       ),
-      bottomAppBarTheme: BottomAppBarThemeData(color: cs.surfaceContainer, elevation: 0),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: cs.surfaceContainerLow,
-        surfaceTintColor: Colors.transparent,
-        modalBackgroundColor: cs.surfaceContainerLow,
-        showDragHandle: true,
-        dragHandleColor: cs.outlineVariant,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(t.radiusXl))),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: c.accent,
+        inactiveTrackColor: c.surfaceMuted,
+        thumbColor: c.accent,
+        overlayColor: c.accent.withValues(alpha: 0.12),
+        valueIndicatorColor: c.surfaceInverse,
+        valueIndicatorTextStyle: text.labelMedium!.copyWith(color: c.onSurfaceInverse),
+        trackHeight: 6,
+        // Opt into the 2024 look (Flutter asks callers to set this to false).
+        // ignore: deprecated_member_use
+        year2023: false,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: c.accent,
+        linearTrackColor: c.surfaceMuted,
+        circularTrackColor: Colors.transparent,
+        linearMinHeight: 6,
+        borderRadius: r(UiRadius.full),
+        // ignore: deprecated_member_use
+        year2023: false,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: c.textMuted,
+        textColor: c.text,
+        titleTextStyle: text.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
+        subtitleTextStyle: text.bodySmall,
+        leadingAndTrailingTextStyle: text.bodySmall,
+        contentPadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
+        minVerticalPadding: 10,
+        horizontalTitleGap: 14,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.md)),
+        selectedColor: c.onAccentSoft,
+        selectedTileColor: c.accentSoft,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: cs.surfaceContainerLow,
+        backgroundColor: c.surfaceRaised,
         surfaceTintColor: Colors.transparent,
-        shape: shape(t.xl),
-        titleTextStyle: text.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurface),
-        contentTextStyle: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
+        titleTextStyle: text.titleLarge,
+        contentTextStyle: text.bodyMedium!.copyWith(color: c.textMuted),
+        barrierColor: c.scrim,
+        insetPadding: const EdgeInsets.symmetric(horizontal: UiSpace.xl, vertical: UiSpace.xl),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: c.surfaceRaised,
+        modalBackgroundColor: c.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        modalElevation: 0,
+        modalBarrierColor: c.scrim,
+        showDragHandle: true,
+        dragHandleColor: c.borderStrong,
+        dragHandleSize: const Size(36, 4),
+        shape: RoundedRectangleBorder(borderRadius: UiRadius.top(UiRadius.xl)),
+        clipBehavior: Clip.antiAlias,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: cs.inverseSurface,
-        contentTextStyle: text.bodyMedium?.copyWith(color: cs.onInverseSurface),
-        actionTextColor: cs.inversePrimary,
-        shape: shape(t.md),
-        elevation: 2,
+        backgroundColor: c.surfaceInverse,
+        contentTextStyle: text.bodyMedium!.copyWith(color: c.onSurfaceInverse),
+        actionTextColor: dark ? UiColors.defaultAccentLight : UiColors.defaultAccentDark,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.md)),
+        insetPadding: const EdgeInsets.fromLTRB(UiSpace.lg, 0, UiSpace.lg, UiSpace.lg),
       ),
-      listTileTheme: ListTileThemeData(
-        shape: shape(t.md),
-        contentPadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
-        iconColor: cs.onSurfaceVariant,
-        titleTextStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface),
-        subtitleTextStyle: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-        minVerticalPadding: UiSpace.md,
-      ),
-      expansionTileTheme: ExpansionTileThemeData(
-        shape: shape(t.md),
-        collapsedShape: shape(t.md),
-        tilePadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
-        childrenPadding: const EdgeInsets.fromLTRB(UiSpace.lg, 0, UiSpace.lg, UiSpace.lg),
-      ),
-      dividerTheme: DividerThemeData(color: cs.outlineVariant.withValues(alpha: 0.6), thickness: 1, space: 1),
-      checkboxTheme: CheckboxThemeData(
-        shape: shape(BorderRadius.circular(6)),
-        side: BorderSide(color: cs.outline, width: 1.6),
-      ),
-      radioTheme: RadioThemeData(fillColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? cs.primary : cs.outline)),
-      switchTheme: SwitchThemeData(
-        thumbIcon: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? const Icon(Icons.check_rounded) : null),
-      ),
-      sliderTheme: SliderThemeData(
-        trackHeight: 6,
-        activeTrackColor: cs.primary,
-        inactiveTrackColor: cs.surfaceContainerHighest,
-        thumbColor: cs.primary,
-        overlayColor: cs.primary.withValues(alpha: 0.12),
-        valueIndicatorColor: cs.inverseSurface,
-        valueIndicatorTextStyle: text.labelMedium?.copyWith(color: cs.onInverseSurface),
-        showValueIndicator: ShowValueIndicator.onDrag,
-      ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: cs.primary,
-        linearTrackColor: cs.surfaceContainerHighest,
-        circularTrackColor: cs.surfaceContainerHighest,
-        linearMinHeight: 6,
-        borderRadius: t.full,
-        strokeCap: StrokeCap.round,
-      ),
-      badgeTheme: BadgeThemeData(backgroundColor: cs.error, textColor: cs.onError, textStyle: text.labelSmall?.copyWith(fontWeight: FontWeight.w700)),
       tooltipTheme: TooltipThemeData(
-        decoration: BoxDecoration(color: cs.inverseSurface, borderRadius: t.sm),
-        textStyle: text.labelMedium?.copyWith(color: cs.onInverseSurface),
-        padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
+        decoration: BoxDecoration(color: c.surfaceInverse, borderRadius: r(UiRadius.sm)),
+        textStyle: text.labelMedium!.copyWith(color: c.onSurfaceInverse),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         waitDuration: const Duration(milliseconds: 400),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: cs.surfaceContainer,
+        color: c.surfaceRaised,
         surfaceTintColor: Colors.transparent,
-        elevation: 3,
-        shape: shape(t.md),
+        elevation: 8,
+        shadowColor: Colors.black.withValues(alpha: dark ? 0.6 : 0.12),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.md), side: BorderSide(color: c.border)),
         textStyle: text.bodyMedium,
+        labelTextStyle: WidgetStatePropertyAll(text.bodyMedium),
+        menuPadding: const EdgeInsets.symmetric(vertical: UiSpace.xs),
       ),
       menuTheme: MenuThemeData(
         style: MenuStyle(
-          backgroundColor: WidgetStatePropertyAll(cs.surfaceContainer),
+          backgroundColor: WidgetStatePropertyAll(c.surfaceRaised),
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-          shape: WidgetStatePropertyAll(shape(t.md)),
-          elevation: const WidgetStatePropertyAll(3),
+          elevation: const WidgetStatePropertyAll(8),
+          shadowColor: WidgetStatePropertyAll(Colors.black.withValues(alpha: dark ? 0.6 : 0.12)),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: r(UiRadius.md), side: BorderSide(color: c.border)),
+          ),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: UiSpace.xs)),
         ),
       ),
-      datePickerTheme: DatePickerThemeData(
-        backgroundColor: cs.surfaceContainerLow,
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: text.bodyMedium,
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(c.surfaceRaised),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: r(UiRadius.md), side: BorderSide(color: c.border)),
+          ),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: c.surface,
         surfaceTintColor: Colors.transparent,
-        shape: shape(t.xl),
-        headerBackgroundColor: cs.primary,
-        headerForegroundColor: cs.onPrimary,
+        elevation: 0,
+        height: 68,
+        indicatorColor: c.accentSoft,
+        indicatorShape: RoundedRectangleBorder(borderRadius: r(UiRadius.full)),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(size: 22, color: s.contains(WidgetState.selected) ? c.onAccentSoft : c.textMuted),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (s) => text.labelSmall!.copyWith(
+            letterSpacing: 0,
+            color: s.contains(WidgetState.selected) ? c.text : c.textMuted,
+          ),
+        ),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: c.surface,
+        indicatorColor: c.accentSoft,
+        indicatorShape: RoundedRectangleBorder(borderRadius: r(UiRadius.full)),
+        selectedIconTheme: IconThemeData(color: c.onAccentSoft, size: 22),
+        unselectedIconTheme: IconThemeData(color: c.textMuted, size: 22),
+        selectedLabelTextStyle: text.labelMedium!.copyWith(color: c.text),
+        unselectedLabelTextStyle: text.labelMedium!.copyWith(color: c.textMuted),
+      ),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: c.surface,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: c.accentSoft,
+        indicatorShape: RoundedRectangleBorder(borderRadius: r(UiRadius.md)),
+      ),
+      drawerTheme: DrawerThemeData(
+        backgroundColor: c.surface,
+        surfaceTintColor: Colors.transparent,
+        scrimColor: c.scrim,
+        shape: const RoundedRectangleBorder(),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: c.text,
+        unselectedLabelColor: c.textMuted,
+        labelStyle: label,
+        unselectedLabelStyle: label.copyWith(fontWeight: FontWeight.w500),
+        indicatorColor: c.accent,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: c.border,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        tabAlignment: TabAlignment.start,
+      ),
+      badgeTheme: BadgeThemeData(
+        backgroundColor: c.danger,
+        textColor: c.onDanger,
+        textStyle: text.labelSmall!.copyWith(letterSpacing: 0),
+      ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: const WidgetStatePropertyAll(0),
+        backgroundColor: WidgetStatePropertyAll(c.surfaceMuted),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: r(UiRadius.full))),
+        hintStyle: WidgetStatePropertyAll(text.bodyMedium!.copyWith(color: c.textSubtle)),
+        textStyle: WidgetStatePropertyAll(text.bodyMedium),
+        constraints: const BoxConstraints(minHeight: 44),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: c.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: c.surfaceRaised,
+        headerForegroundColor: c.text,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
         dayShape: const WidgetStatePropertyAll(CircleBorder()),
+        todayBorder: BorderSide(color: c.accent),
+        rangeSelectionBackgroundColor: c.accentSoft,
       ),
       timePickerTheme: TimePickerThemeData(
-        backgroundColor: cs.surfaceContainerLow,
-        shape: shape(t.xl),
-        hourMinuteShape: shape(t.md),
-        dayPeriodShape: shape(t.md),
+        backgroundColor: c.surfaceRaised,
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
+        dialBackgroundColor: c.surfaceMuted,
+        hourMinuteColor: c.surfaceMuted,
+        dayPeriodColor: c.accentSoft,
+      ),
+      expansionTileTheme: ExpansionTileThemeData(
+        iconColor: c.textMuted,
+        collapsedIconColor: c.textMuted,
+        textColor: c.text,
+        collapsedTextColor: c.text,
+        shape: const Border(),
+        collapsedShape: const Border(),
+        tilePadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
       ),
       scrollbarTheme: ScrollbarThemeData(
-        radius: const Radius.circular(8),
-        thickness: const WidgetStatePropertyAll(6),
-        thumbColor: WidgetStatePropertyAll(cs.onSurfaceVariant.withValues(alpha: 0.4)),
+        thumbColor: WidgetStatePropertyAll(c.borderStrong),
+        radius: const Radius.circular(UiRadius.full),
+        thickness: const WidgetStatePropertyAll(4),
       ),
-      iconTheme: IconThemeData(color: cs.onSurface, size: 24),
-    );
-  }
-
-  static TextTheme _textTheme(UiBrand brand, ColorScheme cs) {
-    final base = (cs.brightness == Brightness.dark ? Typography.material2021().white : Typography.material2021().black)
-        .apply(bodyColor: cs.onSurface, displayColor: cs.onSurface);
-    TextTheme body;
-    TextStyle Function(TextStyle?) heading;
-    try {
-      body = GoogleFonts.getTextTheme(brand.bodyFont, base);
-      heading = (s) => GoogleFonts.getFont(brand.headingFont, textStyle: s);
-    } catch (_) {
-      body = base;
-      heading = (s) => s ?? const TextStyle();
-    }
-    TextStyle h(TextStyle? s, FontWeight w, [double ls = -0.5]) => heading(s).copyWith(fontWeight: w, letterSpacing: ls);
-    return body.copyWith(
-      displayLarge: h(body.displayLarge, FontWeight.w800, -1.5),
-      displayMedium: h(body.displayMedium, FontWeight.w800, -1),
-      displaySmall: h(body.displaySmall, FontWeight.w700, -0.8),
-      headlineLarge: h(body.headlineLarge, FontWeight.w700),
-      headlineMedium: h(body.headlineMedium, FontWeight.w700),
-      headlineSmall: h(body.headlineSmall, FontWeight.w700, -0.3),
-      titleLarge: h(body.titleLarge, FontWeight.w700, -0.2),
-      titleMedium: body.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-      titleSmall: body.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-      labelLarge: body.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      bottomAppBarTheme: BottomAppBarThemeData(
+        color: c.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
     );
   }
 }

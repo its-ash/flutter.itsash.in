@@ -1,63 +1,89 @@
-# Scroll and lazy loading
+# Scroll & lazy loading
 
-Source: `lib/src/scroll/`. Infinite lists, lazy building, and scroll helpers. No extra packages.
+Paged lists and grids, pull-to-refresh, a back-to-top button and lazy building.
 
-### UiPagingController<T>
-Holds the loaded items and the paging state. Pass it to `UiInfiniteList` or `UiInfiniteGrid`. Create it in `initState` (or as a `late final` field) and dispose it in `dispose`.
+### UiPagingController
+
+Loads a list page by page. It guards against concurrent loads. Widgets that receive it never dispose it, so call `dispose()` yourself.
+
 ```dart
-late final _orders = UiPagingController<Order>(
-  pageSize: 20,
-  fetch: (page, size) => api.orders(page: page, limit: size),
-);
+final paging = UiPagingController<Post>(fetch: (page, size) => api.posts(page: page, limit: size));
 ```
-- `fetch` (`Future<List<T>> Function(int page, int pageSize)`), `pageSize` (20), `firstPage` (1)
-- When a page returns fewer than `pageSize` items, there are no more pages.
-- State: `items` (read-only list), `length`, `isEmpty`, `isLoading`, `isRefreshing`, `hasMore`, `hasError`, `error`, `nextPage`
-- Actions: `loadMore()`, `retry()`, `refresh()` (loads the first page again and keeps the old items on screen until it finishes), `reset()`, `update((items) => ...)` (edit the list in place, for example to remove a deleted row)
-- Replies from before a `refresh()` or `reset()` are ignored.
 
-### UiInfiniteList<T>
-A list that loads the next page when the user gets near the end.
-```dart
-UiInfiniteList<Order>(
-  controller: _orders,
-  itemBuilder: (context, order, i) => OrderTile(order),
-  separatorBuilder: (_, _) => const Divider(height: 1),
-)
-```
-- `controller`, `itemBuilder` (`(context, item, index)`), `separatorBuilder`, `header` (scrolls with the list)
-- `padding`, `scrollController`, `physics`, `shrinkWrap`
-- `prefetch` (3): starts the next page when one of the last N items is built
-- `pullToRefresh` (true): pull down to call `controller.refresh()`
-- `loadingBuilder` (first page; default skeleton rows), `emptyBuilder` (default "Nothing here yet"), `errorBuilder` (`(context, error, retry)`; default `UiErrorState`), `endBuilder` (after the last page)
-- If a later page fails, the list keeps its items and shows "Could not load more" with **Retry** at the bottom.
-- It loads the first page by itself. It keeps loading pages until the screen is full.
+- `fetch(page, pageSize)`: returns one page. A page shorter than `pageSize` is the last one. Required.
+- `pageSize`: default `20`.
+- `firstPage`: default `1`.
+- State: `items`, `length`, `loading`, `refreshing`, `error`, `hasMore`, `isEmpty`, `isFirstLoad`, `nextPage`.
+- Actions: `loadMore()`, `retry()`, `refresh()` (keeps items until the new first page arrives), `reset()`, `updateItems(fn)`.
 
-### UiInfiniteGrid<T>
-Same as `UiInfiniteList`, as a grid.
+### UiInfiniteList
+
+List that loads the next page as you near the end. Shows a skeleton on first load, an empty state, a loading row, and an error row with retry. Pull-to-refresh is built in.
+
 ```dart
-UiInfiniteGrid<Product>(
-  controller: _products,
-  crossAxisCount: 2,
-  childAspectRatio: 0.7,
-  itemBuilder: (context, p, i) => UiProductCard(...),
-)
+UiInfiniteList<Post>(controller: paging, itemBuilder: (context, post, i) => PostTile(post))
 ```
-- `gridDelegate` (overrides the next three), `crossAxisCount` (2), `childAspectRatio` (0.75), `spacing` (12)
-- `padding` (16 on all sides), `prefetch` (4), and all other `UiInfiniteList` parameters except `separatorBuilder`.
+
+- `controller`, `itemBuilder(context, item, index)` (`UiPagedItemBuilder<T>`): required.
+- `separatorBuilder`: default: none.
+- `empty`: shown when there are no items. Default: "Nothing here yet".
+- `padding`: default: none.
+- `loadingBuilder`: one skeleton item. Default: shimmer row.
+- `errorBuilder(context, error, retry)` (`UiPagedErrorBuilder`): default: full-page error, or an error row under loaded items.
+- `end`: shown after the last page. Default: small gap.
+- `scrollController`, `physics`: default: none.
+- `refreshable`: pull-to-refresh. Default `true`.
+- `skeletonCount`: default `6`.
+
+### UiInfiniteGrid
+
+Grid version of `UiInfiniteList`.
+
+```dart
+UiInfiniteGrid<Photo>(controller: paging, crossAxisCount: 3, itemBuilder: (context, p, i) => UiImage(p.url))
+```
+
+- Same as `UiInfiniteList`, without `separatorBuilder`.
+- `crossAxisCount` or `maxCrossAxisExtent` (default `200`).
+- `childAspectRatio`: default `1`.
+- `mainAxisSpacing`, `crossAxisSpacing`: default `UiSpace.md`.
+- `skeletonCount`: default `9`.
+
+### UiRefresh
+
+Pull-to-refresh in the theme colors. The child must be scrollable.
+
+```dart
+UiRefresh(onRefresh: reload, child: ListView(children: rows))
+```
+
+- `onRefresh`, `child`: required.
+- `displacement`: default `40`.
+- `edgeOffset`: default `0`.
 
 ### UiScrollToTop
-Wraps a scroll view. A small round button shows after the user scrolls past `threshold`. A tap scrolls back to the top.
+
+Floating "back to top" button that appears after the user scrolls past a threshold.
+
 ```dart
-UiScrollToTop(controller: _scroll, child: ListView(controller: _scroll, children: ...))
+UiScrollToTop(controller: scroll, child: ListView(controller: scroll, children: rows))
 ```
-- `controller` (the same `ScrollController` that the scroll view uses), `child`, `threshold` (600 px)
-- `icon` (up arrow), `tooltip` ('Back to top'), `padding` (16), `alignment` (bottom end)
+
+- `controller`: the scrollable's controller. Required. Not disposed here.
+- `child`: required.
+- `threshold`: offset in pixels. Default `600`.
+- `label`: optional text next to the arrow. Default: icon only.
+- `alignment`: default `Alignment.bottomRight`.
 
 ### UiLazyBuilder
-Builds its child only when it first gets near the screen. After that, the child stays built. Use it for heavy widgets in a `Column` or `SingleChildScrollView` (for example charts or maps). `ListView.builder` already builds lazily, so it does not need this.
+
+Builds its child only once it comes near the viewport. Outside a scrollable it builds right away.
+
 ```dart
-UiLazyBuilder(placeholderHeight: 240, builder: (_) => const UiLineChart(...))
+UiLazyBuilder(builder: (context) => const ExpensiveChart(), placeholderHeight: 240)
 ```
-- `builder`, `placeholder` (default empty box), `placeholderHeight` (200), `margin` (200 px around the screen that counts as "near")
-- Outside a scroll view, it builds the child right away.
+
+- `builder`: required.
+- `placeholderHeight`: default `200`.
+- `margin`: distance outside the viewport that starts the build. Default `300`.
+- `placeholder`: widget shown before building. Default: empty box.

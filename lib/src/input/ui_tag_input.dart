@@ -1,189 +1,355 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/field_style.dart';
 import 'package:theme/src/input/ui_field_label.dart';
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
 
+/// Free-form tag entry. Type and press enter or comma to add a tag; tags
+/// show as removable pills. Backspace in an empty input removes the last tag.
+///
+/// ```dart
+/// UiTagInput(label: 'Skills', tags: skills, onChanged: (t) => setState(() => skills = t))
+/// ```
 class UiTagInput extends StatefulWidget {
   const UiTagInput({
     super.key,
-    this.tags = const [],
-    this.onChanged,
+    required this.tags,
+    required this.onChanged,
     this.label,
-    this.hint = 'Add tag',
+    this.hint = 'Add a tag',
+    this.helper,
+    this.error,
+    this.validator,
+    this.suggestions = const [],
     this.maxTags,
-    this.maxLength = 32,
     this.caseSensitive = false,
-    this.enabled = true,
+    this.size = UiSize.md,
+    this.isRequired = false,
   });
 
+  /// Current tags.
   final List<String> tags;
+
+  /// Called with the new list. Null disables the input.
   final ValueChanged<List<String>>? onChanged;
   final String? label;
   final String hint;
+  final String? helper;
+  final String? error;
+
+  /// Validates [tags] inside a [Form].
+  final FormFieldValidator<List<String>>? validator;
+
+  /// Quick-add pills shown under the field while it is focused.
+  final List<String> suggestions;
+
+  /// Maximum number of tags. Shows a `n / max` counter.
   final int? maxTags;
-  final int maxLength;
+
+  /// When false, `Flutter` and `flutter` count as the same tag.
   final bool caseSensitive;
-  final bool enabled;
+  final UiSize size;
+  final bool isRequired;
 
   @override
   State<UiTagInput> createState() => _UiTagInputState();
 }
 
 class _UiTagInputState extends State<UiTagInput> {
-  final _ctrl = TextEditingController();
+  final _controller = TextEditingController();
   final _focus = FocusNode();
-  late List<String> _tags = _clean(widget.tags);
+  final _fieldKey = GlobalKey<FormFieldState<List<String>>>();
 
-  bool get _full => widget.maxTags != null && _tags.length >= widget.maxTags!;
+  bool get _enabled => widget.onChanged != null;
+  bool get _full => widget.maxTags != null && widget.tags.length >= widget.maxTags!;
 
   @override
   void initState() {
     super.initState();
-    _focus.addListener(_refresh);
-    _focus.onKeyEvent = _onKey;
-  }
-
-  @override
-  void didUpdateWidget(UiTagInput old) {
-    super.didUpdateWidget(old);
-    if (!listEquals(old.tags, widget.tags)) _tags = _clean(widget.tags);
+    _focus.addListener(_rebuild);
+    _controller.addListener(_rebuild);
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _focus.removeListener(_rebuild);
+    _controller.removeListener(_rebuild);
+    _controller.dispose();
     _focus.dispose();
     super.dispose();
   }
 
-  void _refresh() {
-    if (mounted) setState(() {});
-  }
+  void _rebuild() => setState(() {});
 
   String _key(String s) => widget.caseSensitive ? s : s.toLowerCase();
 
-  List<String> _clean(List<String> src) {
-    final seen = <String>{};
-    final out = <String>[];
-    for (final t in src) {
-      final v = t.trim();
-      if (v.isEmpty || !seen.add(_key(v))) continue;
-      if (widget.maxTags != null && out.length >= widget.maxTags!) break;
-      out.add(v);
+  bool _has(List<String> list, String tag) => list.any((t) => _key(t) == _key(tag));
+
+  void _emit(List<String> next) {
+    _fieldKey.currentState?.didChange(next);
+    widget.onChanged?.call(next);
+  }
+
+  /// Adds every non-empty part of [parts]; returns whether anything was added.
+  bool _addAll(Iterable<String> parts) {
+    final next = [...widget.tags];
+    for (final raw in parts) {
+      final t = raw.trim();
+      if (t.isEmpty || _has(next, t)) continue;
+      if (widget.maxTags != null && next.length >= widget.maxTags!) break;
+      next.add(t);
     }
-    return out;
+    if (next.length == widget.tags.length) return false;
+    _emit(next);
+    return true;
   }
 
-  void _commit(List<String> next) {
-    setState(() => _tags = next);
-    widget.onChanged?.call(List.unmodifiable(next));
-  }
-
-  void _add(Iterable<String> raw) {
-    final next = _clean([..._tags, ...raw.map((s) => widget.maxLength > 0 && s.trim().length > widget.maxLength ? s.trim().substring(0, widget.maxLength) : s)]);
-    if (!listEquals(next, _tags)) _commit(next);
-  }
-
-  void _remove(int i) {
-    if (i < 0 || i >= _tags.length) return;
-    _commit([..._tags]..removeAt(i));
-  }
+  void _remove(String tag) => _emit([...widget.tags]..remove(tag));
 
   void _onChanged(String v) {
     if (!v.contains(',')) return;
     final parts = v.split(',');
-    _add(parts.take(parts.length - 1));
-    final rest = parts.last;
-    _ctrl.value = TextEditingValue(text: rest, selection: TextSelection.collapsed(offset: rest.length));
+    final rest = parts.removeLast();
+    _addAll(parts);
+    _controller.value = TextEditingValue(
+      text: rest,
+      selection: TextSelection.collapsed(offset: rest.length),
+    );
   }
 
   void _submit(String v) {
-    _add([v]);
-    _ctrl.clear();
-    if (!_full) _focus.requestFocus();
+    _addAll([v]);
+    _controller.clear();
+    _focus.requestFocus();
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
-    if (e is! KeyDownEvent || e.logicalKey != LogicalKeyboardKey.backspace) return KeyEventResult.ignored;
-    if (_ctrl.text.isNotEmpty || _tags.isEmpty) return KeyEventResult.ignored;
-    _remove(_tags.length - 1);
-    return KeyEventResult.handled;
+    if (e is KeyUpEvent || !_enabled) return KeyEventResult.ignored;
+    if (e.logicalKey == LogicalKeyboardKey.backspace && _controller.text.isEmpty && widget.tags.isNotEmpty) {
+      _remove(widget.tags.last);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = context.colors;
-    final enabled = widget.enabled;
+    final c = context.colors;
+    final w = widget;
+    final size = w.size;
+    final enabled = _enabled;
     final focused = _focus.hasFocus;
-    final r = context.tokens.md;
-    return UiFieldLabel(
-      widget.label,
-      trailing: widget.maxTags == null
-          ? null
-          : Text(
-              '${_tags.length}/${widget.maxTags}',
-              style: context.text.labelMedium?.copyWith(color: cs.onSurfaceVariant),
+
+    final q = _controller.text.trim().toLowerCase();
+    final suggestions = !enabled || !focused || _full
+        ? const <String>[]
+        : w.suggestions.where((s) => !_has(w.tags, s) && (q.isEmpty || s.toLowerCase().contains(q))).take(8).toList();
+
+    return FormField<List<String>>(
+      key: _fieldKey,
+      initialValue: w.tags,
+      enabled: enabled,
+      validator: w.validator == null ? null : (_) => w.validator!(widget.tags),
+      builder: (field) {
+        final err = w.error ?? field.errorText;
+        final hasError = err != null;
+        final input = Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onKeyEvent: _onKey,
+          child: TextField(
+            controller: _controller,
+            focusNode: _focus,
+            enabled: enabled,
+            onChanged: _onChanged,
+            onSubmitted: _submit,
+            onEditingComplete: () {},
+            textInputAction: TextInputAction.done,
+            style: fieldTextStyle(context, size, enabled: enabled),
+            decoration: InputDecoration(
+              hintText: w.hint,
+              hintStyle: TextStyle(color: c.textSubtle, fontSize: size.fontSize),
+              filled: false,
+              isDense: true,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: UiSpace.sm),
             ),
-      child: GestureDetector(
-        onTap: enabled && !_full ? _focus.requestFocus : null,
-        child: AnimatedContainer(
-          duration: UiDuration.fast,
-          width: double.infinity,
-          alignment: AlignmentDirectional.centerStart,
-          constraints: BoxConstraints(minHeight: context.tokens.controlHeight),
-          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
-          decoration: BoxDecoration(
-            color: enabled
-                ? cs.surfaceContainerHighest.withValues(alpha: context.isDark ? 0.6 : 0.7)
-                : cs.onSurface.withValues(alpha: 0.04),
-            borderRadius: r,
-            border: Border.all(color: focused ? cs.primary : Colors.transparent, width: 1.6),
           ),
-          child: Wrap(
-            spacing: UiSpace.xs + 2,
-            runSpacing: UiSpace.xs + 2,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (final (i, t) in _tags.indexed)
-                InputChip(
-                  label: Text(t),
-                  onDeleted: enabled ? () => _remove(i) : null,
-                  deleteIcon: const Icon(Icons.close_rounded, size: 16),
-                  deleteButtonTooltipMessage: 'Remove $t',
-                  backgroundColor: cs.surface,
-                  labelStyle: context.text.labelLarge?.copyWith(color: cs.onSurface),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.xs),
-                ),
-              if (!_full)
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 96, maxWidth: 240),
-                  child: IntrinsicWidth(
-                    child: TextField(
-                      controller: _ctrl,
-                      focusNode: _focus,
-                      enabled: enabled,
-                      onChanged: _onChanged,
-                      onSubmitted: _submit,
-                      textInputAction: TextInputAction.done,
-                      onEditingComplete: () {},
-                      decoration: InputDecoration(
-                        hintText: widget.hint,
-                        isDense: true,
-                        filled: false,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: UiSpace.xs, vertical: UiSpace.sm),
-                      ),
-                    ),
+        );
+
+        final box = GestureDetector(
+          onTap: enabled && !_full ? _focus.requestFocus : null,
+          child: AnimatedContainer(
+            duration: context.motion(UiMotion.fast),
+            curve: UiMotion.standard,
+            constraints: BoxConstraints(minHeight: size.height),
+            padding: EdgeInsets.symmetric(
+              horizontal: w.tags.isEmpty ? size.padding - 2 : UiSpace.sm,
+              vertical: w.tags.isEmpty ? 0 : UiSpace.sm,
+            ),
+            alignment: AlignmentDirectional.centerStart,
+            decoration: BoxDecoration(
+              color: enabled ? c.surfaceMuted : c.surfaceMuted.withValues(alpha: 0.6),
+              borderRadius: UiRadius.all(UiRadius.md),
+              border: Border.all(
+                color: hasError
+                    ? c.danger
+                    : focused
+                    ? c.accent
+                    : Colors.transparent,
+                width: focused || hasError ? 1.5 : 1,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (w.tags.isNotEmpty)
+                  Wrap(
+                    spacing: UiSpace.xs + 2,
+                    runSpacing: UiSpace.xs + 2,
+                    children: [for (final t in w.tags) _TagPill(label: t, onRemove: enabled ? () => _remove(t) : null)],
                   ),
+                if (!_full)
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(start: w.tags.isEmpty ? 0 : UiSpace.xs),
+                    child: input,
+                  ),
+              ],
+            ),
+          ),
+        );
+
+        return UiFieldLabel(
+          label: w.label,
+          helper: w.helper,
+          error: err,
+          isRequired: w.isRequired,
+          enabled: enabled,
+          counter: w.maxTags == null ? null : '${w.tags.length} / ${w.maxTags}',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              box,
+              AnimatedSize(
+                duration: context.motion(UiMotion.fast),
+                curve: UiMotion.standard,
+                alignment: Alignment.topCenter,
+                child: suggestions.isEmpty
+                    ? const SizedBox(width: double.infinity)
+                    : TextFieldTapRegion(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: UiSpace.sm),
+                          child: Wrap(
+                            spacing: UiSpace.xs + 2,
+                            runSpacing: UiSpace.xs + 2,
+                            children: [
+                              for (final s in suggestions)
+                                _SuggestionPill(
+                                  label: s,
+                                  onTap: () {
+                                    _addAll([s]);
+                                    _controller.clear();
+                                    _focus.requestFocus();
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TagPill extends StatelessWidget {
+  const _TagPill({required this.label, this.onRemove});
+
+  final String label;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final enabled = onRemove != null;
+    final fg = enabled ? c.onAccentSoft : c.textDisabled;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 28),
+      padding: EdgeInsetsDirectional.only(start: UiSpace.sm + 2, end: enabled ? UiSpace.xxs : UiSpace.sm + 2),
+      decoration: BoxDecoration(color: enabled ? c.accentSoft : c.surface, borderRadius: UiRadius.all(UiRadius.full)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.labelMedium?.copyWith(color: fg),
+            ),
+          ),
+          if (enabled)
+            Semantics(
+              button: true,
+              label: 'Remove $label',
+              excludeSemantics: true,
+              child: InkResponse(
+                onTap: onRemove,
+                radius: 14,
+                child: Padding(
+                  padding: const EdgeInsets.all(UiSpace.xs + 1),
+                  child: Icon(Icons.close_rounded, size: 14, color: fg),
                 ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestionPill extends StatelessWidget {
+  const _SuggestionPill({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Material(
+      color: c.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: UiRadius.all(UiRadius.full),
+        side: BorderSide(color: c.border),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.xs + 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add_rounded, size: 14, color: c.textMuted),
+              const SizedBox(width: UiSpace.xs),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.labelMedium?.copyWith(color: c.textMuted),
+                ),
+              ),
             ],
           ),
         ),

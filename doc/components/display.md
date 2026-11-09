@@ -1,176 +1,234 @@
-# Display
+# Data display
 
-Widgets that show data and content. Source: `lib/src/display/`. Charts use `CustomPainter` and need no packages. All charts accept empty data, one point, and all-zero data. Images, the carousel, and the image viewer are in [image.md](image.md).
+Widgets that show content: cards, lists, avatars, badges, tables, timelines, text helpers and formatters.
 
-### UiTag
-A small status pill.
+### UiCard
+A rounded container with optional header, footer and press feedback.
 ```dart
-UiTag('Delivered', status: UiStatus.success, icon: Icons.check)
+UiCard(onTap: open, child: Text('Hello'))
 ```
-- `label`, `status`, `icon`, `solid`, `size`, `color`.
+- `child` (required)
+- `padding` = `EdgeInsets.all(UiSpace.lg)`
+- `onTap`, `onLongPress`: null means not tappable
+- `variant` = `UiCardVariant.outlined` (`outlined`, `filled`, `elevated`, `ghost`)
+- `selected` = `false`: accent border and soft ring
+- `header`, `footer`: shown with a divider
+- `radius` = `UiRadius.lg`, `semanticLabel`
 
-### UiRatingStars
-Shows a star rating with half stars.
+### UiListTile
+A row with a title, subtitle, leading and trailing parts. In a `UiListGroup` its divider starts under the text.
 ```dart
-UiRatingStars(4.5, count: 128, showValue: true)
+UiListTile('Wi-Fi', icon: Icons.wifi_rounded, value: 'Home', chevron: true, onTap: open)
 ```
-- `rating`, `max`, `size`, `count`, `showValue`.
+- `title` (positional), `subtitle`
+- `leading` widget, or `icon` + `iconStatus` = `UiStatus.accent` / `iconColor` for a `UiIconBox`
+- `value`: short muted text at the end. `trailing`: any widget
+- `onTap`, `onLongPress`: null means not interactive (still looks normal)
+- `chevron` = `false`, `dense` = `false`, `destructive` = `false`, `selected` = `false`
+- `enabled` = `true`: false greys the row out and ignores taps
+- `maxSubtitleLines` = `2`
 
-### UiMarquee
-One line of text. If the text is wider than the space, it scrolls sideways in a loop, like a news ticker. If it fits, it stays still.
+### UiIconBox
+An icon in a tinted rounded square.
 ```dart
-UiMarquee('Free shipping on orders over \$50. Use code SUN25.', style: context.text.titleMedium)
+UiIconBox(Icons.bolt_rounded, status: UiStatus.warning)
 ```
-- `text`, `style`, `velocity` (40 px per second), `gap` (48 px between copies), `pause` (1 s at the start of each loop), `fadeEdges` (true)
-- It stops and shows the text with `…` when the device asks for less motion.
+- `icon` (positional)
+- `status` = `UiStatus.accent`, or `color` for a custom tint
+- `size` = `32`, `solid` = `false`
+
+### UiListGroup
+An iOS-style grouped list: a rounded surface with hairline dividers and captions. Good for settings screens.
+```dart
+UiListGroup(header: 'Account', children: [UiListTile('Profile', chevron: true, onTap: open)])
+```
+- `children` (required)
+- `header`, `footer`: caption text
+- `inset` = `true`: rounded card. False means full width with top and bottom borders only
+- `dividers` = `true`
+
+### UiAvatar
+A picture, initials or icon, with an optional status dot. The tint comes from the name, so it is always the same for the same name.
+```dart
+UiAvatar(name: 'Ada Lovelace', image: NetworkImage(url), status: UiStatus.success)
+```
+- `name`: gives the initials and the tint
+- `image`: shows initials while it loads and if it fails
+- `icon`: used when there is no name (default person icon)
+- `size` = `UiSize.md` (32 / 40 / 56), or `diameter` in px
+- `status`: `success` online, `warning` away, `danger` busy, `neutral` offline
+- `shape` = `UiAvatarShape.circle` (`circle`, `rounded`)
+- `color`: custom tint. `semanticLabel`
+- Helpers: `UiAvatar.initialsOf(name)`, `UiAvatar.sizeOf(size)`
 
 ### UiAvatarGroup
-Stacked avatars with a `+N` tile.
-
+Overlapping avatars with a "+N" chip.
 ```dart
-UiAvatarGroup(names: ['Ana Lee', 'Bo Chen', 'Cy Ray'], images: [url1, null, url3], total: 24);
+UiAvatarGroup(avatars: [for (final u in users) UiAvatar(name: u.name)], max: 3)
 ```
-- `UiAvatarGroup({images, names, size = 36, max = 4, total, overlap = 0.3, onTap})`
+- `avatars` (required)
+- `max` = `4`, `size` = `UiSize.md`, `overlap` = `0.3`
+
+### UiBadge
+Puts a count or a dot on the corner of a child.
+```dart
+UiBadge(count: unread, child: Icon(Icons.notifications_rounded))
+```
+- `child` (required)
+- `count`: 0 or null hides it. `max` = `99` shows `99+`
+- `dot` = `false`, `status` = `UiStatus.danger`
+- `show` = `true`: animated hide. `offset` = `Offset.zero`
+- `UiBadge.standalone(count: 3)` gives an inline badge (or a dot)
+
+### UiCountBadge
+An inline count pill, e.g. next to a menu label.
+```dart
+UiCountBadge(5)
+```
+- `count` (positional), `status` = `UiStatus.danger`, `max` = `99`, `ring` = `false`
+
+### UiStatusPill
+A soft tinted pill for a state, with an optional pulsing dot or icon.
+```dart
+UiStatusPill('Online', status: UiStatus.success, pulse: true)
+```
+- `label` (positional), `status` = `UiStatus.neutral`
+- `dot` = `false`, `pulse` = `false` (pulse adds the dot), `icon`
+- `size` = `UiSize.sm`
+
+### UiTag
+A small rectangular label, can be removable.
+```dart
+UiTag('Design', color: Colors.purple, onRemove: () => remove('Design'))
+```
+- `label` (positional)
+- `color` (custom tint) or `status`. Neither gives a neutral outlined tag
+- `icon`, `onRemove`
+
+### UiKbd
+A keyboard key chip.
+```dart
+UiKbd('⌘K')
+```
+- `keys` (positional)
 
 ### UiStatCard
-Card with a label, a big value, an optional icon, a change percent, and a sparkline.
-
+A KPI card with a label, a big value and a colored change.
 ```dart
-UiStatCard(label: 'Revenue', value: '\$12.4k', icon: Icons.payments_rounded, delta: 8.2, sparkline: [3, 5, 4, 7, 9]);
+UiStatCard(label: 'Revenue', value: '\$12.4k', delta: 8.2, deltaLabel: 'vs last week')
 ```
-- `UiStatCard({required label, required value, icon, delta, invertDelta, caption, sparkline, status, onTap, variant})`
-- Set `invertDelta: true` when a drop is good (for example, expenses).
+- `label`, `value` (required)
+- `delta`: shown as `+8.2%`. Its sign picks the trend. `deltaUnit` = `'%'`, `deltaLabel`
+- `trend`: `UiTrend.up` / `down` / `neutral`, overrides the sign
+- `invertColors` = `false`: use when down is good (costs, errors)
+- `icon`, `iconStatus` = `UiStatus.accent`, `footer`, `onTap`, `variant` = `UiCardVariant.outlined`
 
-### UiDelta
-Up or down change pill with color.
-
+### UiKeyValue
+A description row with the label on the left and the value on the right.
 ```dart
-const UiDelta(-3.5);
+UiKeyValue('Order ID', 'A-10294', copyable: true, mono: true)
 ```
-- `UiDelta(value, {invert, suffix = '%', solid})`
+- `label`, `value` (positional)
+- `copyable` = `false`, `mono` = `false`, `stacked` = `false` (label above value), `maxLines` = `2`
+- `UiKeyValue.custom('Owner', child: UiAvatar(name: 'Ada'))` for a widget value
 
-### UiKeyValue and UiKeyValueList
-Label and value rows. The list can show dividers and a bold total row.
-
+### UiKeyValueList
+A list of `UiKeyValue` rows.
 ```dart
-UiKeyValueList.fromMap({'Subtotal': '\$40', 'Shipping': 'Free'}, total: ('Total', '\$40'));
+UiKeyValueList([UiKeyValue('Status', 'Paid'), UiKeyValue('Total', '\$42.00')])
 ```
-- `UiKeyValue(label, value, {icon, trailing, emphasis, valueColor, onTap, padding})`
-- `UiKeyValueList(List<UiKeyValue> items, {divided, total, totalColor})`
-- `UiKeyValueList.fromMap(Map<String, String> map, {divided, total, totalColor})`
+- `entries` (positional), `dividers` = `true`
+- `UiKeyValueList.map({'Status': 'Paid'})`
+
+### UiTable
+A bordered data table with sortable headers, row taps and striped rows. It scrolls sideways when it is wider than the screen.
+```dart
+UiTable<User>(columns: [UiTableColumn('Name', text: (u) => u.name, sortBy: (u) => u.name)], rows: users)
+```
+- `columns`, `rows` (required)
+- `onRowTap(row)`, `striped` = `false`, `dense` = `false`, `emptyMessage` = `'No data'`
+- `initialSortColumn`, `initialSortAscending` = `true`, `onSort(column, ascending)`
+- `UiTableColumn<T>(label, {text, builder, sortBy, width, numeric = false, mono = false})`. Pass `text: (row) => String` or `builder: (context, row) => Widget`. Columns fit their content unless `width` is set
 
 ### UiTimeline
-Vertical steps. Completed, current, and pending steps have different styles.
-
+A vertical list of events joined by a line.
 ```dart
-UiTimeline(const [
-  UiTimelineItem('Ordered', time: '09:12', done: true),
-  UiTimelineItem('Shipped', subtitle: 'In transit', current: true),
-  UiTimelineItem('Delivered'),
-]);
+UiTimeline(items: [UiTimelineItem('Order placed', time: '09:41', status: UiStatus.success)])
 ```
-- `UiTimeline(items, {dense})`
-- `UiTimelineItem(title, {subtitle, time, done, current, icon, status, content})`
+- `items` (required)
+- `UiTimelineItem(title, {time, description, icon, status = UiStatus.neutral, content})`
 
-### UiSparkline
-Small trend line with an optional gradient area.
-
+### UiAccordion
+Sections that expand and collapse, with a rotating chevron.
 ```dart
-UiSparkline([4, 6, 5, 9, 12], height: 40);
+UiAccordion(items: [UiAccordionItem('Shipping', Text('2–4 business days'))])
 ```
-- `UiSparkline(values, {color, fill = true, height = 40, width, strokeWidth = 2, smooth = true, animate})`
-
-### UiLineChart
-Line chart with a smooth curve, grid lines, axis values, x labels, and dots.
-
-```dart
-UiLineChart([12, 18, 9, 22, 30], labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
-```
-- `UiLineChart(values, {labels, color, height = 200, smooth, dots, grid, fill, gridLines = 4, format, emptyText, animate})`
-
-### UiBarChart
-Rounded bars that grow on first show. Tap a bar to select it and see its value. Negative values show as zero.
-
-```dart
-UiBarChart([5, 8, 3, 10], labels: ['Q1', 'Q2', 'Q3', 'Q4'], highlight: 3);
-```
-- `UiBarChart(values, {labels, highlight, color, height = 180, onSelect, format, showValues, emptyText, animate})`
-
-### UiDonutChart
-Donut chart with segments, a center text, and a legend.
-
-```dart
-UiDonutChart(const [UiChartSegment('Food', 420), UiChartSegment('Rent', 900)], centerText: '\$1.3k', centerLabel: 'Spent');
-```
-- `UiDonutChart(segments, {size = 160, thickness = 22, center, centerText, centerLabel, legend = true, animate})`
-- `UiChartSegment(label, value, {color})`. Colors come from the theme when not set.
-
-### UiProgressSegments
-Stacked bar of parts, or a step bar.
-
-```dart
-UiProgressSegments(const [UiChartSegment('Used', 60), UiChartSegment('Free', 40)], legend: true);
-const UiProgressSegments.steps(total: 5, done: 2);
-```
-- `UiProgressSegments(segments, {height = 10, legend})`
-- `UiProgressSegments.steps({required total, required done, height = 6, color})`
-
-### uiCompactNumber
-Formats numbers as `1.2k`, `3M`, `4B`. Charts use it by default.
-
-### UiDots
-Page indicator. The active dot is wider.
-
-```dart
-UiDots(count: 4, index: page);
-```
-- `UiDots({required count, required index, color, onTap})`
+- `items` (required)
+- `multiple` = `false`: when false, opening one section closes the others
+- `onChanged(index, expanded)`
+- `UiAccordionItem(title, child, {subtitle, icon, initiallyExpanded = false})`
 
 ### UiExpandableText
-Text that collapses after `maxLines` and shows "Read more" and "Read less".
-
+Long text cut to a few lines, with "Read more / Show less". The toggle shows only when the text is too long.
 ```dart
-UiExpandableText(description, maxLines: 3);
+UiExpandableText(post.body, maxLines: 3)
 ```
-- `UiExpandableText(text, {maxLines = 3, style, moreLabel, lessLabel})`
+- `text` (positional), `maxLines` = `3`, `style`
+- `moreLabel` = `'Read more'`, `lessLabel` = `'Show less'`, `initiallyExpanded` = `false`
+
+### UiHighlightText
+Text with every match of a search term highlighted. Case does not matter.
+```dart
+UiHighlightText(contact.name, query)
+```
+- `text`, `query` (positional), `style`, `maxLines`, `overflow`
+- `UiHighlightText.matches(text, query)` returns the match ranges
+
+### UiCodeText
+Inline monospace code or ID on a muted chip.
+```dart
+UiCodeText('A1B2-C3D4', copyable: true)
+```
+- `code` (positional), `copyable` = `false`, `fontSize` = `13`
+
+### UiCodeBlock
+A block of monospace code with an optional title bar and copy button.
+```dart
+UiCodeBlock('flutter pub add theme', title: 'Terminal')
+```
+- `code` (positional), `title`, `copyable` = `true`
+- `wrap` = `false`: long lines scroll sideways. `fontSize` = `13`
+
+### UiFileTile
+A file row with a type icon, name, size and optional progress. Good for downloaders, file transfer, recovery and scanner apps.
+```dart
+UiFileTile(name: 'movie.mkv', size: bytes, progress: 0.4, onTap: open)
+```
+- `name` (required): the extension picks the icon and tint (`UiFileKind`)
+- `size` in bytes, shown as KB / MB / GB. With `progress` it reads `512 MB of 1 GB`
+- `subtitle`, `progress` (0..1, null hides the bar)
+- `status`: colors the bar and meta text (e.g. `danger` for failed)
+- `icon`, `leading` (e.g. a thumbnail), `trailing`, `onTap`, `onLongPress`, `selected` = `false`
+- `UiFileKind.fromName(name)`: `image`, `video`, `audio`, `pdf`, `archive`, `document`, `code`, `apk`, `generic`
 
 ### UiCountdown
-Countdown boxes for days, hours, minutes, and seconds. Calls `onDone` one time at zero.
-
+A ring that drains smoothly and turns warning, then danger, near the end. Good for OTP codes and timers.
 ```dart
-UiCountdown(target: sale.endsAt, onDone: refresh);
-UiCountdown(duration: const Duration(minutes: 5), size: UiSize.sm);
+UiCountdown(period: Duration(seconds: 30), remaining: left, repeat: true, onComplete: refresh)
 ```
-- `UiCountdown({target, duration, onDone, showDays, labels = true, size = md, status})`
+- `period` (required): the ring is full at this value
+- `remaining` (default `period`) or `endsAt` (wall-clock end). Keep `endsAt` in state; a new value computed in `build` restarts the countdown on every rebuild
+- `size` = `UiSize.md` (32 / 44 / 72), or `diameter`
+- `onComplete`, `repeat` = `false` (starts a new period each time)
+- `label`: inside the ring when large, beside it otherwise
+- `showText` = `true`, `warningBelow` = `0.34`, `dangerBelow` = `0.17`
 
-### UiInfoTile
-Small stat in a tonal rounded box.
-
+### UiFormat
+Small formatters that don't need `intl`.
 ```dart
-UiInfoTile(icon: Icons.local_fire_department_rounded, title: 'Calories', value: '540');
+UiFormat.bytes(1536); // 1.5 KB
 ```
-- `UiInfoTile({required icon, required title, required value, status, onTap, horizontal})`
-
-### UiFeatureList
-List with check icons. Excluded items show a cross and a line through.
-
-```dart
-UiFeatureList(['Free delivery', '24/7 support'], excluded: ['Priority booking']);
-```
-- `UiFeatureList(items, {excluded, icon, color, dense})`
-
-### UiChipList
-Read-only tags. Extra tags show as `+N`.
-
-```dart
-UiChipList(['Vegan', 'Gluten free', 'Spicy'], max: 2);
-```
-- `UiChipList(items, {status, max, icon, size, spacing})`
-
-### UiQuoteCard
-Quote or review card with author, avatar, and rating.
-
-```dart
-UiQuoteCard('Best gym in town.', author: 'Sam K', subtitle: 'Member since 2023', rating: 5);
-```
-- `UiQuoteCard(quote, {author, subtitle, avatarUrl, rating})`
+- `bytes(int, {decimals = 1})`: `512 B`, `1.5 KB`, `3.4 GB`
+- `compact(num, {decimals = 1})`: `999`, `1.2k`, `3.4M`
+- `relativeTime(DateTime, {now})`: `just now`, `5m`, `3h`, `2d`, `Mar 5`, `Mar 5, 2024`, `in 5m`
+- `duration(Duration)`: `4:09`, `1:05:09`

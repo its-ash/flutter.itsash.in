@@ -1,3 +1,15 @@
+## 2.0.0
+
+Breaking: full redesign. All v1 `Ui*` widgets, `UiBrand` presets and domain kits (commerce, fitness, finance, booking, social, auth) are removed.
+
+* One light theme and one dark theme from `UiColors.light()` / `UiColors.dark()`, with an optional custom `accent`. `UiApp` + `UiThemeController` change the mode and accent at runtime.
+* New tokens: `UiSpace`, `UiRadius`, `UiMotion` (honors reduced motion), `UiShadows`, `UiSize`, `UiStatus`/`UiTone`, `UiBreakpoint`, `UiGap`.
+* 11 groups: foundation, button, input, selection, display, chart, feedback, layout, navigation, media, scroll. See `COMPONENTS.md`.
+* New charts group: `UiSparkline`, `UiLineChart`, `UiBarChart`, `UiDonutChart`, `UiHeatmap`, `UiGauge`.
+* Dropdowns, chips, cards, images and video moved into `input`, `selection`, `display` and `media`.
+* Widget tests for every group, in light and dark mode.
+* The example app is now a gallery with one page per group.
+
 ## 1.0.0
 
 Layout: generic widgets are grouped by element type in `lib/src/{button, input, dropdown, chip, selection, card, image, video, scroll}`. The old `primitives/` and `controls/` folders are removed. Domain kits stay in their own folders. Public names did not change; import `package:theme/theme.dart` as before.

@@ -1,190 +1,218 @@
 import 'package:flutter/material.dart';
 
-import 'package:theme/src/input/ui_field_label.dart';
-import 'package:theme/src/foundation/tokens.dart';
-import 'package:theme/src/foundation/ui_context.dart';
+import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/field_style.dart';
+import 'package:theme/src/input/ui_text_field.dart';
 
-enum UiPasswordStrength { none, weak, medium, strong }
+/// Rough strength of a password, from length and character classes.
+enum UiPasswordStrength {
+  weak,
+  fair,
+  good,
+  strong;
 
+  /// Scores [password]. Returns null for an empty string.
+  static UiPasswordStrength? of(String password) {
+    if (password.isEmpty) return null;
+    final classes = [
+      RegExp('[a-z]'),
+      RegExp('[A-Z]'),
+      RegExp(r'\d'),
+      RegExp(r'[^A-Za-z0-9]'),
+    ].where((r) => r.hasMatch(password)).length;
+    final len = password.length;
+    if (len < 6) return weak;
+    var score = 0;
+    if (len >= 8) score++;
+    if (len >= 12) score++;
+    if (classes >= 2) score++;
+    if (classes >= 3) score++;
+    if (classes == 4) score++;
+    return switch (score) {
+      <= 1 => weak,
+      2 => fair,
+      3 => good,
+      _ => strong,
+    };
+  }
+
+  /// Display label, e.g. `Strong`.
+  String get label => switch (this) {
+    weak => 'Weak',
+    fair => 'Fair',
+    good => 'Good',
+    strong => 'Strong',
+  };
+
+  /// Status used to color the meter.
+  UiStatus get status => switch (this) {
+    weak => UiStatus.danger,
+    fair => UiStatus.warning,
+    good => UiStatus.info,
+    strong => UiStatus.success,
+  };
+}
+
+/// Password input with a show/hide toggle and an optional strength meter.
+///
+/// ```dart
+/// UiPasswordField(label: 'Password', showStrength: true, validator: UiValidators.minLength(8))
+/// ```
 class UiPasswordField extends StatefulWidget {
   const UiPasswordField({
     super.key,
     this.label = 'Password',
     this.hint,
+    this.helper,
+    this.error,
     this.controller,
     this.onChanged,
     this.onSubmitted,
     this.validator,
+    this.autovalidateMode,
     this.showStrength = false,
-    this.minLength,
-    this.isRequired = false,
     this.enabled = true,
     this.autofocus = false,
-    this.textInputAction = TextInputAction.done,
-    this.newPassword = false,
-    this.helper,
-    this.error,
     this.focusNode,
+    this.textInputAction,
+    this.size = UiSize.md,
+    this.isRequired = false,
+    this.labelTrailing,
+    this.autofillHints = const [AutofillHints.password],
+    this.prefixIcon = Icons.lock_outline_rounded,
   });
 
   final String? label;
   final String? hint;
+  final String? helper;
+  final String? error;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final FormFieldValidator<String>? validator;
+  final AutovalidateMode? autovalidateMode;
+
+  /// Shows a four-step strength bar under the field.
   final bool showStrength;
-  final int? minLength;
-  final bool isRequired;
   final bool enabled;
   final bool autofocus;
-  final TextInputAction textInputAction;
-  final bool newPassword;
-  final String? helper;
-  final String? error;
   final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final UiSize size;
+  final bool isRequired;
 
-  static UiPasswordStrength strengthOf(String v) {
-    if (v.isEmpty) return UiPasswordStrength.none;
-    var s = 0;
-    if (v.length >= 8) s++;
-    if (v.length >= 12) s++;
-    if (RegExp('[a-z]').hasMatch(v) && RegExp('[A-Z]').hasMatch(v)) s++;
-    if (RegExp(r'\d').hasMatch(v)) s++;
-    if (RegExp(r'[^A-Za-z0-9]').hasMatch(v)) s++;
-    return s <= 2 ? UiPasswordStrength.weak : (s == 3 ? UiPasswordStrength.medium : UiPasswordStrength.strong);
-  }
+  /// Widget at the end of the label row, e.g. a "Forgot?" link.
+  final Widget? labelTrailing;
+  final Iterable<String>? autofillHints;
+  final IconData? prefixIcon;
 
   @override
   State<UiPasswordField> createState() => _UiPasswordFieldState();
 }
 
 class _UiPasswordFieldState extends State<UiPasswordField> {
-  TextEditingController? _own;
-  var _hidden = true;
-
-  TextEditingController get _ctrl => widget.controller ?? (_own ??= TextEditingController());
+  bool _hidden = true;
+  UiPasswordStrength? _strength;
 
   @override
   void initState() {
     super.initState();
-    _ctrl.addListener(_onText);
+    _strength = UiPasswordStrength.of(widget.controller?.text ?? '');
   }
 
-  @override
-  void didUpdateWidget(UiPasswordField old) {
-    super.didUpdateWidget(old);
-    if (old.controller != widget.controller) {
-      (old.controller ?? _own)?.removeListener(_onText);
-      _ctrl.addListener(_onText);
+  void _changed(String v) {
+    if (widget.showStrength) {
+      final s = UiPasswordStrength.of(v);
+      if (s != _strength) setState(() => _strength = s);
     }
-  }
-
-  @override
-  void dispose() {
-    _ctrl.removeListener(_onText);
-    _own?.dispose();
-    super.dispose();
-  }
-
-  void _onText() {
-    if (widget.showStrength && mounted) setState(() {});
-  }
-
-  String? _validate(String? raw) {
-    final v = raw ?? '';
-    if (v.isEmpty) return widget.isRequired ? 'Password is required' : widget.validator?.call(raw);
-    final min = widget.minLength;
-    if (min != null && min > 0 && v.length < min) return 'Use at least $min characters';
-    return widget.validator?.call(raw);
+    widget.onChanged?.call(v);
   }
 
   @override
   Widget build(BuildContext context) {
-    final field = TextFormField(
-      controller: _ctrl,
-      focusNode: widget.focusNode,
-      obscureText: _hidden,
-      enableSuggestions: false,
-      autocorrect: false,
-      enabled: widget.enabled,
-      autofocus: widget.autofocus,
-      onChanged: widget.onChanged,
-      onFieldSubmitted: widget.onSubmitted,
-      validator: _validate,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      textInputAction: widget.textInputAction,
+    final w = widget;
+    final field = UiTextField(
+      label: w.label,
+      hint: w.hint,
+      helper: w.helper,
+      error: w.error,
+      controller: w.controller,
+      onChanged: _changed,
+      onSubmitted: w.onSubmitted,
+      validator: w.validator,
+      autovalidateMode: w.autovalidateMode,
+      obscure: _hidden,
+      enabled: w.enabled,
+      autofocus: w.autofocus,
+      focusNode: w.focusNode,
+      textInputAction: w.textInputAction,
       keyboardType: TextInputType.visiblePassword,
-      autofillHints: widget.enabled ? [widget.newPassword ? AutofillHints.newPassword : AutofillHints.password] : null,
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      decoration: InputDecoration(
-        hintText: widget.hint ?? '••••••••',
-        helperText: widget.helper,
-        errorText: widget.error,
-        prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-        suffixIcon: IconButton(
-          tooltip: _hidden ? 'Show password' : 'Hide password',
-          onPressed: widget.enabled ? () => setState(() => _hidden = !_hidden) : null,
-          icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20),
-        ),
+      size: w.size,
+      isRequired: w.isRequired,
+      labelTrailing: w.labelTrailing,
+      autofillHints: w.autofillHints,
+      prefixIcon: w.prefixIcon,
+      suffix: FieldIconButton(
+        icon: _hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        tooltip: _hidden ? 'Show password' : 'Hide password',
+        onPressed: w.enabled ? () => setState(() => _hidden = !_hidden) : null,
       ),
     );
-    return UiFieldLabel(
-      widget.label,
-      isRequired: widget.isRequired,
-      child: widget.showStrength
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [field, _StrengthMeter(UiPasswordField.strengthOf(_ctrl.text))],
-            )
-          : field,
+    if (!w.showStrength) return field;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        field,
+        const SizedBox(height: UiSpace.sm),
+        _StrengthMeter(strength: _strength),
+      ],
     );
   }
 }
 
 class _StrengthMeter extends StatelessWidget {
-  const _StrengthMeter(this.strength);
+  const _StrengthMeter({required this.strength});
 
-  final UiPasswordStrength strength;
+  final UiPasswordStrength? strength;
 
   @override
   Widget build(BuildContext context) {
-    final (n, status, text) = switch (strength) {
-      UiPasswordStrength.none => (0, UiStatus.neutral, ''),
-      UiPasswordStrength.weak => (1, UiStatus.danger, 'Weak'),
-      UiPasswordStrength.medium => (2, UiStatus.warning, 'Medium'),
-      UiPasswordStrength.strong => (3, UiStatus.success, 'Strong'),
-    };
-    final c = context.tone(status).color;
-    final track = context.colors.surfaceContainerHighest;
-    return AnimatedSize(
-      duration: UiDuration.normal,
-      curve: UiCurve.standard,
-      child: n == 0
-          ? const SizedBox(width: double.infinity)
-          : Semantics(
-              label: 'Password strength: $text',
-              child: Padding(
-                padding: const EdgeInsets.only(top: UiSpace.sm),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < 3; i++) ...[
-                      Expanded(
-                        child: AnimatedContainer(
-                          duration: UiDuration.normal,
-                          height: 4,
-                          decoration: BoxDecoration(color: i < n ? c : track, borderRadius: context.tokens.full),
-                        ),
-                      ),
-                      const SizedBox(width: UiSpace.xs),
-                    ],
-                    const SizedBox(width: UiSpace.xs),
-                    Text(text, style: context.text.labelMedium?.copyWith(color: c, fontWeight: FontWeight.w700)),
-                  ],
+    final c = context.colors;
+    final s = strength;
+    final filled = s == null ? 0 : s.index + 1;
+    final color = s == null ? c.border : c.tone(s.status).color;
+    return Semantics(
+      label: 'Password strength: ${s?.label ?? 'none'}',
+      child: Row(
+        children: [
+          for (var i = 0; i < 4; i++) ...[
+            if (i > 0) const SizedBox(width: UiSpace.xs),
+            Expanded(
+              child: AnimatedContainer(
+                duration: context.motion(UiMotion.normal),
+                curve: UiMotion.standard,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: i < filled ? color : c.border,
+                  borderRadius: UiRadius.all(UiRadius.full),
                 ),
               ),
             ),
+          ],
+          const SizedBox(width: UiSpace.md),
+          SizedBox(
+            width: 48,
+            child: Text(
+              s?.label ?? '',
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.labelMedium?.copyWith(color: s == null ? c.textSubtle : color),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
