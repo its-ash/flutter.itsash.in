@@ -716,4 +716,13 @@ void main() {
       });
     }
   });
+
+  testWidgets('UiStatusPill pulse can turn on, off and on again', (tester) async {
+    for (final pulse in [true, false, true, false, true]) {
+      await pumpUi(tester, UiStatusPill('Live', status: UiStatus.success, pulse: pulse));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull, reason: 'pulse: $pulse');
+    }
+    await tester.pumpWidget(const SizedBox());
+  });
 }

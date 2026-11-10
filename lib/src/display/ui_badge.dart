@@ -176,7 +176,10 @@ class UiStatusPill extends StatefulWidget {
   State<UiStatusPill> createState() => _UiStatusPillState();
 }
 
-class _UiStatusPillState extends State<UiStatusPill> with SingleTickerProviderStateMixin {
+// TickerProviderStateMixin, not the single-ticker one: the pulse controller
+// is disposed when `pulse` turns off and created again when it turns back
+// on, and a SingleTickerProviderStateMixin may only ever create one ticker.
+class _UiStatusPillState extends State<UiStatusPill> with TickerProviderStateMixin {
   AnimationController? _pulse;
 
   @override
