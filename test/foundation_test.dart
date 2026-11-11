@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:theme/src/about/about.dart';
 import 'package:theme/src/foundation/foundation.dart';
 
 void main() {
@@ -140,6 +142,30 @@ void main() {
       controller.accent = const Color(0xFFE11D48);
       await t.pumpAndSettle();
       expect(ctx.colors.accent, isNot(UiColors.defaultAccentDark));
+    });
+
+    testWidgets('starts light and restores a saved mode', (t) async {
+      SharedPreferences.setMockInitialValues({});
+      late BuildContext ctx;
+      Widget app() => UiApp(
+            home: Builder(builder: (c) {
+              ctx = c;
+              return const UiAppearanceSection();
+            }),
+          );
+      await t.pumpWidget(app());
+      await t.pumpAndSettle();
+      expect(ctx.isDark, isFalse);
+
+      await t.tap(find.text('Dark'));
+      await t.pumpAndSettle();
+      expect(ctx.isDark, isTrue);
+      expect(await UiAppearance.load(), ThemeMode.dark);
+
+      await t.pumpWidget(const SizedBox());
+      await t.pumpWidget(app());
+      await t.pumpAndSettle();
+      expect(ctx.isDark, isTrue);
     });
 
     testWidgets('fixed themeMode without controller', (t) async {

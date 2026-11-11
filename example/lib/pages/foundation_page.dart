@@ -55,6 +55,11 @@ class FoundationPage extends StatelessWidget {
             ],
           ),
         ),
+        const Demo(
+          'Appearance section',
+          subtitle: 'UiAppearanceSection: Light / Dark / Auto, saved',
+          child: UiAppearanceSection(),
+        ),
         Demo(
           'Palette',
           child: UiResponsiveGrid(

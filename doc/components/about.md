@@ -1,8 +1,17 @@
 # App info
 
-Sections every Ash Store app shows at the bottom of its settings screen, in this order: `UiUpdateSection`, then `UiDeveloperSection` (last).
+Sections every Ash Store app shows at the bottom of its settings screen, in this order: `UiAppearanceSection`, `UiUpdateSection`, then `UiDeveloperSection` (last).
+
+### UiAppearanceSection
+The "Appearance" group: a Light / Dark / Auto (system) control. It changes the nearest `UiThemeController` (from `UiApp`) and saves the choice in `SharedPreferences` (key `ui_theme_mode`, via `UiAppearance`). `UiApp` restores it on start. With nothing saved, apps start in light mode. Put it just before `UiUpdateSection`.
+```dart
+const UiAppearanceSection()
+```
+- `header` = `'Appearance'`
 
 ```dart
+const UiAppearanceSection(),
+const UiGap(UiSpace.lg),
 const UiUpdateSection(storeId: 'linkdrop'),
 const UiGap(UiSpace.lg),
 const UiDeveloperSection(),

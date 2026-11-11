@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:theme/src/foundation/ui_theme.dart';
 
-/// Holds the app's theme mode (system / light / dark) and optional accent.
+/// Holds the app's theme mode (light / dark / system) and optional accent.
+/// Apps start in light mode; the user's saved choice (see [UiAppearance]) wins.
 ///
 /// ```dart
 /// final theme = UiThemeController();
@@ -11,7 +13,7 @@ import 'package:theme/src/foundation/ui_theme.dart';
 /// UiThemeController.of(context)?.toggle(context);
 /// ```
 class UiThemeController extends ChangeNotifier {
-  UiThemeController({ThemeMode mode = ThemeMode.system, Color? accent})
+  UiThemeController({ThemeMode mode = ThemeMode.light, Color? accent})
       : _mode = mode,
         _accent = accent;
 
@@ -41,6 +43,30 @@ class UiThemeController extends ChangeNotifier {
   /// The nearest controller provided by a [UiApp], if any.
   static UiThemeController? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_UiThemeScope>()?.notifier;
+}
+
+/// The saved appearance choice (light / dark / system), kept in
+/// `SharedPreferences`. [UiApp] restores it on start; `UiAppearanceSection`
+/// saves it. Nothing saved means light.
+abstract final class UiAppearance {
+  static const key = 'ui_theme_mode';
+
+  /// The saved mode, or null if none was saved (or storage is unavailable).
+  static Future<ThemeMode?> load() async {
+    try {
+      final name = (await SharedPreferences.getInstance()).getString(key);
+      for (final m in ThemeMode.values) {
+        if (m.name == name) return m;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<void> save(ThemeMode mode) async {
+    try {
+      await (await SharedPreferences.getInstance()).setString(key, mode.name);
+    } catch (_) {}
+  }
 }
 
 class _UiThemeScope extends InheritedNotifier<UiThemeController> {
@@ -103,7 +129,8 @@ class UiApp extends StatefulWidget {
   /// [themeMode] and [accent] when given.
   final UiThemeController? controller;
 
-  /// Fixed theme mode when no [controller] is given. Defaults to system.
+  /// Fixed theme mode when no [controller] is given. Defaults to light. A
+  /// mode saved by the user ([UiAppearance]) overrides it.
   final ThemeMode? themeMode;
 
   /// Brand color. Defaults to the design system's indigo.
@@ -131,7 +158,18 @@ class _UiAppState extends State<UiApp> {
   UiThemeController? _own;
 
   UiThemeController get _controller =>
-      widget.controller ?? (_own ??= UiThemeController(mode: widget.themeMode ?? ThemeMode.system, accent: widget.accent));
+      widget.controller ?? (_own ??= UiThemeController(mode: widget.themeMode ?? ThemeMode.light, accent: widget.accent));
+
+  @override
+  void initState() {
+    super.initState();
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    final saved = await UiAppearance.load();
+    if (saved != null && mounted) _controller.mode = saved;
+  }
 
   @override
   void didUpdateWidget(UiApp old) {
@@ -139,7 +177,7 @@ class _UiAppState extends State<UiApp> {
     final own = _own;
     if (widget.controller == null && own != null) {
       own
-        ..mode = widget.themeMode ?? ThemeMode.system
+        ..mode = widget.themeMode ?? ThemeMode.light
         ..accent = widget.accent;
     }
   }

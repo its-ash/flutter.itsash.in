@@ -9,13 +9,13 @@ import 'package:theme/theme.dart';
 ## App setup
 
 ### UiApp
-A `MaterialApp` with the light and dark themes applied. It follows the system mode by default.
+A `MaterialApp` with the light and dark themes applied. It starts in light mode; a mode the user saved with `UiAppearanceSection` is restored on start and wins over the default.
 
 ```dart
 void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
 ```
 - `home` (required), `title`
-- `themeMode` (`ThemeMode.system`): a fixed mode when there is no controller.
+- `themeMode` (`ThemeMode.light`): the starting mode when there is no controller. Do not pass it in apps: the default is light and the user's saved choice overrides it.
 - `accent` (indigo): your brand color. All other colors stay the same.
 - `fontFamily` (Inter): a bundled font family to use instead of Inter.
 - `controller`: a `UiThemeController` to change the mode or accent at runtime.
@@ -23,7 +23,7 @@ void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
 - `UiApp.router(routerConfig: router, ...)` for `go_router` or any `RouterConfig`.
 
 ### UiThemeController
-Holds the theme mode and accent. Widgets below `UiApp` can change them.
+Holds the theme mode (default `ThemeMode.light`) and accent. Widgets below `UiApp` can change them. `UiAppearance.load()` / `save(mode)` read and write the persisted choice (`SharedPreferences` key `ui_theme_mode`); `UiApp` calls `load()` on start. Use `UiAppearanceSection` in settings instead of calling these.
 
 ```dart
 final theme = UiThemeController();
