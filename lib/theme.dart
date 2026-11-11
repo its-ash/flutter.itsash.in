@@ -7,6 +7,7 @@ library;
 
 export 'src/foundation/foundation.dart';
 
+export 'src/about/about.dart';
 export 'src/button/button.dart';
 export 'src/chart/chart.dart';
 export 'src/display/display.dart';

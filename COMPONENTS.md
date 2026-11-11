@@ -10,6 +10,7 @@ There is one light theme and one dark theme. You can set a custom accent. All pu
 
 | Group | Source | Main widgets | Reference |
 |---|---|---|---|
+| App info | `lib/src/about/` | `UiUpdateSection`, `UiUpdater`, `UiRelease`, `UiDeveloperSection`, `UiDeveloper`, `UiUrl` | [about.md](doc/components/about.md) |
 | Foundation | `lib/src/foundation/` | `UiApp`, `UiThemeController`, `UiTheme`, `UiColors`, `UiTypography`, `UiSpace`, `UiRadius`, `UiMotion`, `UiSize`, `UiStatus`, `UiBreakpoint`, `UiGap`, `context.*` | [foundation.md](doc/components/foundation.md) |
 | Buttons & actions | `lib/src/button/` | `UiButton`, `UiIconButton`, `UiFab`, `UiButtonBar`, `UiSegmentedControl`, `UiToggleButton`, `UiToggleGroup`, `UiCopyButton`, `UiSocialButton`, `UiHoldButton` | [button.md](doc/components/button.md) |
 | Text inputs & forms | `lib/src/input/` | `UiTextField`, `UiTextArea`, `UiNumberField`, `UiPasswordField`, `UiSearchField`, `UiSelect`, `UiMultiSelect`, `UiAutocomplete`, `UiDateField`, `UiDateRangeField`, `UiTimeField`, `UiOtpField`, `UiPinPad`, `UiStepper`, `UiTagInput`, `UiFieldLabel`, validators | [input.md](doc/components/input.md) |

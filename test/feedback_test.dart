@@ -621,6 +621,49 @@ void main() {
       });
     });
   }
+
+  testWidgets('UiSheet header scrolls away while the keyboard is open', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2160);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await _pump(
+      tester,
+      _trigger('go', (context) {
+        UiSheet.show<void>(
+          context,
+          title: 'Add your birth details',
+          subtitle: 'A long explanation that wraps over several lines on a phone, '
+              'telling the user why the details are needed and where they are kept.',
+          expand: true,
+          child: Column(children: [
+            const TextField(key: Key('name')),
+            for (var i = 0; i < 8; i++) SizedBox(height: 60, child: Text('row $i')),
+          ]),
+        );
+      }),
+      ThemeMode.light,
+    );
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('name')));
+    await tester.pump();
+    final field = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(field.widget.focusNode.hasFocus, isTrue);
+
+    // The keyboard opens and takes almost half the screen.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 960);
+    await tester.pumpAndSettle();
+    final viewport = tester.getSize(find.byType(SingleChildScrollView));
+    expect(viewport.height, greaterThan(200), reason: 'the form keeps room to type');
+    expect(tester.state<EditableTextState>(find.byType(EditableText)), same(field), reason: 'the field is not rebuilt');
+    expect(field.widget.focusNode.hasFocus, isTrue);
+    expect(find.text('Add your birth details'), findsOneWidget);
+
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pumpAndSettle();
+    expect(field.widget.focusNode.hasFocus, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 void _noop() {}

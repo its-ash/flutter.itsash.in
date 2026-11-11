@@ -76,8 +76,40 @@ class _SheetBody extends StatelessWidget {
     final media = MediaQuery.of(context);
     final hasHeader = title != null || subtitle != null;
 
+    Widget? headerContent() => !hasHeader
+        ? null
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title != null) Semantics(header: true, child: Text(title!, style: t.titleLarge)),
+              if (subtitle != null) ...[
+                if (title != null) const SizedBox(height: UiSpace.xs),
+                Text(subtitle!, style: t.bodyMedium?.copyWith(color: c.textMuted)),
+              ],
+            ],
+          );
+
+    // While the keyboard is open the sheet loses most of its height. A
+    // pinned header would then leave the fields only a sliver, so it
+    // scrolls away with the body instead. The body keeps its key, so a
+    // focused field keeps its state (and the keyboard) when the header
+    // moves.
+    final scrollHeader = scrollable && hasHeader && media.viewInsets.bottom > 0;
+    final header = hasHeader && !scrollHeader
+        ? Padding(padding: const EdgeInsets.fromLTRB(UiSpace.xl, 0, UiSpace.xl, UiSpace.lg), child: headerContent())
+        : null;
     final body = scrollable
-        ? SingleChildScrollView(padding: padding, child: child)
+        ? SingleChildScrollView(
+            padding: padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (scrollHeader)
+                  Padding(padding: const EdgeInsets.only(bottom: UiSpace.lg), child: headerContent()),
+                KeyedSubtree(key: const ValueKey('ui-sheet-body'), child: child),
+              ],
+            ),
+          )
         : Padding(padding: padding, child: child);
 
     return Padding(
@@ -88,20 +120,7 @@ class _SheetBody extends StatelessWidget {
           mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (hasHeader)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(UiSpace.xl, 0, UiSpace.xl, UiSpace.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title != null) Semantics(header: true, child: Text(title!, style: t.titleLarge)),
-                    if (subtitle != null) ...[
-                      if (title != null) const SizedBox(height: UiSpace.xs),
-                      Text(subtitle!, style: t.bodyMedium?.copyWith(color: c.textMuted)),
-                    ],
-                  ],
-                ),
-              ),
+            ?header,
             Flexible(fit: expand ? FlexFit.tight : FlexFit.loose, child: body),
             if (actions.isNotEmpty)
               DecoratedBox(
