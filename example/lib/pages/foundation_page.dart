@@ -57,7 +57,7 @@ class FoundationPage extends StatelessWidget {
         ),
         const Demo(
           'Appearance section',
-          subtitle: 'UiAppearanceSection: Light / Dark / Auto, saved',
+          subtitle: 'UiAppearanceSection: Light / Dark / Auto and text size, saved',
           child: UiAppearanceSection(),
         ),
         Demo(

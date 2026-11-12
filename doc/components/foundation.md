@@ -9,7 +9,7 @@ import 'package:theme/theme.dart';
 ## App setup
 
 ### UiApp
-A `MaterialApp` with the light and dark themes applied. It starts in light mode; a mode the user saved with `UiAppearanceSection` is restored on start and wins over the default.
+A `MaterialApp` with the light and dark themes applied. It starts in light mode at normal text size; a mode and text size the user saved with `UiAppearanceSection` are restored on start and win over the defaults. The text size multiplies the system `TextScaler` below `UiApp` (applied before your own `builder`).
 
 ```dart
 void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
@@ -23,7 +23,7 @@ void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
 - `UiApp.router(routerConfig: router, ...)` for `go_router` or any `RouterConfig`.
 
 ### UiThemeController
-Holds the theme mode (default `ThemeMode.light`) and accent. Widgets below `UiApp` can change them. `UiAppearance.load()` / `save(mode)` read and write the persisted choice (`SharedPreferences` key `ui_theme_mode`); `UiApp` calls `load()` on start. Use `UiAppearanceSection` in settings instead of calling these.
+Holds the theme mode (default `ThemeMode.light`), `textSize` (`UiTextSize.normal`; `small` / `normal` / `large` / `extraLarge`) and accent. Widgets below `UiApp` can change them. `UiAppearance.load()` / `save(mode)` and `loadTextSize()` / `saveTextSize(size)` read and write the persisted choices (`SharedPreferences` keys `ui_theme_mode`, `ui_text_size`); `UiApp` loads both on start. Use `UiAppearanceSection` in settings instead of calling these.
 
 ```dart
 final theme = UiThemeController();

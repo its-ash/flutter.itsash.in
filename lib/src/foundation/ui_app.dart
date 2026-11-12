@@ -3,8 +3,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:theme/src/foundation/ui_theme.dart';
 
-/// Holds the app's theme mode (light / dark / system) and optional accent.
-/// Apps start in light mode; the user's saved choice (see [UiAppearance]) wins.
+/// In-app text size, applied on top of the phone's own font size setting.
+enum UiTextSize {
+  small(0.9, 'S'),
+  normal(1.0, 'M'),
+  large(1.15, 'L'),
+  extraLarge(1.3, 'XL');
+
+  const UiTextSize(this.factor, this.label);
+
+  /// Multiplies the system text scale.
+  final double factor;
+
+  /// Short label for the settings control.
+  final String label;
+}
+
+/// Holds the app's theme mode (light / dark / system), text size and optional
+/// accent. Apps start in light mode at normal size; the user's saved choices
+/// (see [UiAppearance]) win.
 ///
 /// ```dart
 /// final theme = UiThemeController();
@@ -13,15 +30,24 @@ import 'package:theme/src/foundation/ui_theme.dart';
 /// UiThemeController.of(context)?.toggle(context);
 /// ```
 class UiThemeController extends ChangeNotifier {
-  UiThemeController({ThemeMode mode = ThemeMode.light, Color? accent})
+  UiThemeController({ThemeMode mode = ThemeMode.light, Color? accent, UiTextSize textSize = UiTextSize.normal})
       : _mode = mode,
-        _accent = accent;
+        _accent = accent,
+        _textSize = textSize;
 
   ThemeMode _mode;
   Color? _accent;
+  UiTextSize _textSize;
 
   ThemeMode get mode => _mode;
   Color? get accent => _accent;
+  UiTextSize get textSize => _textSize;
+
+  set textSize(UiTextSize value) {
+    if (value == _textSize) return;
+    _textSize = value;
+    notifyListeners();
+  }
 
   set mode(ThemeMode value) {
     if (value == _mode) return;
@@ -45,11 +71,29 @@ class UiThemeController extends ChangeNotifier {
       context.dependOnInheritedWidgetOfExactType<_UiThemeScope>()?.notifier;
 }
 
-/// The saved appearance choice (light / dark / system), kept in
-/// `SharedPreferences`. [UiApp] restores it on start; `UiAppearanceSection`
-/// saves it. Nothing saved means light.
+/// The saved appearance choices (theme mode and text size), kept in
+/// `SharedPreferences`. [UiApp] restores them on start; `UiAppearanceSection`
+/// saves them. Nothing saved means light, normal size.
 abstract final class UiAppearance {
   static const key = 'ui_theme_mode';
+  static const textSizeKey = 'ui_text_size';
+
+  /// The saved text size, or null if none was saved.
+  static Future<UiTextSize?> loadTextSize() async {
+    try {
+      final name = (await SharedPreferences.getInstance()).getString(textSizeKey);
+      for (final s in UiTextSize.values) {
+        if (s.name == name) return s;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<void> saveTextSize(UiTextSize size) async {
+    try {
+      await (await SharedPreferences.getInstance()).setString(textSizeKey, size.name);
+    } catch (_) {}
+  }
 
   /// The saved mode, or null if none was saved (or storage is unavailable).
   static Future<ThemeMode?> load() async {
@@ -169,6 +213,19 @@ class _UiAppState extends State<UiApp> {
   Future<void> _restore() async {
     final saved = await UiAppearance.load();
     if (saved != null && mounted) _controller.mode = saved;
+    final size = await UiAppearance.loadTextSize();
+    if (size != null && mounted) _controller.textSize = size;
+  }
+
+  /// Applies the in-app text size on top of the system one, then the app's own builder.
+  Widget _build(BuildContext context, Widget? child, UiTextSize size) {
+    Widget? out = child;
+    if (size != UiTextSize.normal && out != null) {
+      final mq = MediaQuery.of(context);
+      out = MediaQuery(data: mq.copyWith(textScaler: _TimesTextScaler(mq.textScaler, size.factor)), child: out);
+    }
+    final b = widget.builder;
+    return b == null ? (out ?? const SizedBox.shrink()) : b(context, out);
   }
 
   @override
@@ -199,6 +256,8 @@ class _UiAppState extends State<UiApp> {
           final light = UiTheme.light(accent: controller.accent, fontFamily: widget.fontFamily);
           final dark = UiTheme.dark(accent: controller.accent, fontFamily: widget.fontFamily);
           final w = widget;
+          final size = controller.textSize;
+          Widget builder(BuildContext c, Widget? child) => _build(c, child, size);
           if (w.routerConfig != null) {
             return MaterialApp.router(
               title: w.title,
@@ -210,7 +269,7 @@ class _UiAppState extends State<UiApp> {
               locale: w.locale,
               localizationsDelegates: w.localizationsDelegates,
               supportedLocales: w.supportedLocales,
-              builder: w.builder,
+              builder: builder,
               debugShowCheckedModeBanner: w.debugShowCheckedModeBanner,
             );
           }
@@ -228,11 +287,32 @@ class _UiAppState extends State<UiApp> {
             locale: w.locale,
             localizationsDelegates: w.localizationsDelegates,
             supportedLocales: w.supportedLocales,
-            builder: w.builder,
+            builder: builder,
             debugShowCheckedModeBanner: w.debugShowCheckedModeBanner,
           );
         },
       ),
     );
   }
+}
+
+/// The system [TextScaler] times a fixed factor (keeps Android's non-linear scaling).
+class _TimesTextScaler extends TextScaler {
+  const _TimesTextScaler(this.base, this.factor);
+
+  final TextScaler base;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => base.scale(fontSize) * factor;
+
+  @override
+  // ignore: deprecated_member_use
+  double get textScaleFactor => base.textScaleFactor * factor;
+
+  @override
+  bool operator ==(Object other) => other is _TimesTextScaler && other.base == base && other.factor == factor;
+
+  @override
+  int get hashCode => Object.hash(base, factor);
 }

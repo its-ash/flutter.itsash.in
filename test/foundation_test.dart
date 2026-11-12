@@ -167,6 +167,30 @@ void main() {
       await t.pumpAndSettle();
       expect(ctx.isDark, isTrue);
     });
+    testWidgets('text size scales text, is saved and restored', (t) async {
+      SharedPreferences.setMockInitialValues({});
+      late BuildContext ctx;
+      Widget app() => UiApp(
+            home: Builder(builder: (c) {
+              ctx = c;
+              return const SingleChildScrollView(child: UiAppearanceSection());
+            }),
+          );
+      await t.pumpWidget(app());
+      await t.pumpAndSettle();
+      expect(MediaQuery.textScalerOf(ctx).scale(10), closeTo(10, 0.001));
+
+      await t.tap(find.text('L'));
+      await t.pumpAndSettle();
+      expect(MediaQuery.textScalerOf(ctx).scale(10), closeTo(11.5, 0.001));
+      expect(await UiAppearance.loadTextSize(), UiTextSize.large);
+
+      await t.pumpWidget(const SizedBox());
+      await t.pumpWidget(app());
+      await t.pumpAndSettle();
+      expect(MediaQuery.textScalerOf(ctx).scale(10), closeTo(11.5, 0.001));
+    });
+
 
     testWidgets('fixed themeMode without controller', (t) async {
       late BuildContext ctx;

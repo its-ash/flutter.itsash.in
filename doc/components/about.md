@@ -3,7 +3,7 @@
 Sections every Ash Store app shows at the bottom of its settings screen, in this order: `UiAppearanceSection`, `UiUpdateSection`, then `UiDeveloperSection` (last).
 
 ### UiAppearanceSection
-The "Appearance" group: a Light / Dark / Auto (system) control. It changes the nearest `UiThemeController` (from `UiApp`) and saves the choice in `SharedPreferences` (key `ui_theme_mode`, via `UiAppearance`). `UiApp` restores it on start. With nothing saved, apps start in light mode. Put it just before `UiUpdateSection`.
+The "Appearance" group: a Light / Dark / Auto (system) control and a Text size control (S / M / L / XL = ×0.9 / ×1 / ×1.15 / ×1.3 on top of the phone's font size). It changes the nearest `UiThemeController` (from `UiApp`) and saves the choices in `SharedPreferences` (keys `ui_theme_mode`, `ui_text_size`, via `UiAppearance`). `UiApp` restores them on start. With nothing saved, apps start in light mode at normal size. Put it just before `UiUpdateSection`. Every app gets the text size option from this section; app layouts should survive XL (no fixed-height text rows).
 ```dart
 const UiAppearanceSection()
 ```
