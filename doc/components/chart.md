@@ -38,6 +38,8 @@ UiLineChart(series: [UiChartSeries('Visits', [12, 18, 15, 24, 30])], labels: ['M
 - `showLegend`: shown with 2+ series. Default `true`.
 - `yFormat`: formats ticks and tooltip values. Default: compact numbers (1.2k).
 - `tickCount`: about how many y intervals. Default `4`.
+- `animateUpdates`: animate when the data changes. Set `false` for live data updated every second, so the
+  line updates in place instead of redrawing from the left. It still animates in once. Default `true`.
 
 ### UiBarChart
 

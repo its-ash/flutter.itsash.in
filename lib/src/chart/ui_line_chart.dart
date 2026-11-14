@@ -25,6 +25,7 @@ class UiLineChart extends StatefulWidget {
     this.showLegend = true,
     this.yFormat,
     this.tickCount = 4,
+    this.animateUpdates = true,
     this.semanticLabel,
   });
 
@@ -51,6 +52,10 @@ class UiLineChart extends StatefulWidget {
 
   /// Approximate number of y-axis intervals.
   final int tickCount;
+
+  /// Animates data changes (redraw or morph). Set false for live data that
+  /// changes every second: the chart animates in once, then repaints in place.
+  final bool animateUpdates;
   final String? semanticLabel;
 
   @override
@@ -81,7 +86,11 @@ class _UiLineChartState extends State<UiLineChart> with SingleTickerProviderStat
     final same =
         before.length == after.length &&
         [for (var i = 0; i < before.length; i++) i].every((i) => listEquals(before[i], after[i]));
-    if (!same) {
+    if (!same && !widget.animateUpdates) {
+      // Live data: show the new values at once. Finishes a running enter animation too.
+      _from = null;
+      _anim.controller.value = 1;
+    } else if (!same) {
       final sameShape =
           before.length == after.length &&
           [for (var i = 0; i < before.length; i++) i].every((i) => before[i].length == after[i].length);
