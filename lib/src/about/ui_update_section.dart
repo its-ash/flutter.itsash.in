@@ -22,18 +22,21 @@ class UiRelease {
   final String apkUrl;
 }
 
-/// Looks up the latest release of `<owner>/<storeId>` on GitHub and compares
-/// versions. Used by [UiUpdateSection]; usable on its own.
+/// Looks up the latest release of `<owner>/<repo>` on GitHub and compares
+/// versions. `repo` defaults to the store id. Used by [UiUpdateSection];
+/// usable on its own.
 abstract final class UiUpdater {
-  /// `https://github.com/<owner>/<id>/releases/latest/download/<id>.apk`.
-  static String latestApkUrl(String storeId, {String owner = 'its-ash'}) =>
-      'https://github.com/$owner/$storeId/releases/latest/download/$storeId.apk';
+  /// `https://github.com/<owner>/<repo>/releases/latest/download/<id>.apk`.
+  static String latestApkUrl(String storeId, {String owner = 'its-ash', String? repo}) =>
+      'https://github.com/$owner/${repo ?? storeId}/releases/latest/download/$storeId.apk';
 
   /// Fetches the latest release. Throws when offline or GitHub fails.
-  static Future<UiRelease> latest(String storeId, {String owner = 'its-ash'}) async {
+  static Future<UiRelease> latest(String storeId, {String owner = 'its-ash', String? repo}) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
     try {
-      final req = await client.getUrl(Uri.parse('https://api.github.com/repos/$owner/$storeId/releases/latest'));
+      final req = await client.getUrl(
+        Uri.parse('https://api.github.com/repos/$owner/${repo ?? storeId}/releases/latest'),
+      );
       req.headers
         ..set(HttpHeaders.acceptHeader, 'application/vnd.github+json')
         ..set(HttpHeaders.userAgentHeader, storeId);
@@ -43,7 +46,7 @@ abstract final class UiUpdater {
       if (res.statusCode != 200) throw HttpException('GitHub returned ${res.statusCode}');
       final json = jsonDecode(body) as Map<String, dynamic>;
       final tag = (json['tag_name'] as String? ?? '').replaceFirst(RegExp('^v'), '');
-      var apk = latestApkUrl(storeId, owner: owner);
+      var apk = latestApkUrl(storeId, owner: owner, repo: repo);
       for (final a in (json['assets'] as List? ?? const [])) {
         if (a is Map && a['name'] == '$storeId.apk' && a['browser_download_url'] is String) {
           apk = a['browser_download_url'] as String;
@@ -91,15 +94,20 @@ class UiUpdateSection extends StatefulWidget {
     super.key,
     required this.storeId,
     this.owner = 'its-ash',
+    this.repo,
     this.checkForUpdates = true,
     this.header = 'Updates',
   });
 
-  /// Store id = GitHub repo name = APK name (`<id>.apk`).
+  /// Store id = APK name (`<id>.apk`), and the GitHub repo name unless [repo]
+  /// is set.
   final String storeId;
 
   /// GitHub owner of the repo.
   final String owner;
+
+  /// GitHub repo name when it differs from [storeId]. Default: [storeId].
+  final String? repo;
 
   /// Check GitHub when the section is shown. False for apps without internet.
   final bool checkForUpdates;
@@ -137,7 +145,7 @@ class _UiUpdateSectionState extends State<UiUpdateSection> {
       _error = null;
     });
     try {
-      final latest = await UiUpdater.latest(widget.storeId, owner: widget.owner);
+      final latest = await UiUpdater.latest(widget.storeId, owner: widget.owner, repo: widget.repo);
       if (!mounted) return;
       final current = _version;
       setState(() {
@@ -158,7 +166,7 @@ class _UiUpdateSectionState extends State<UiUpdateSection> {
   }
 
   Future<void> _download() async {
-    final url = _latest?.apkUrl ?? UiUpdater.latestApkUrl(widget.storeId, owner: widget.owner);
+    final url = _latest?.apkUrl ?? UiUpdater.latestApkUrl(widget.storeId, owner: widget.owner, repo: widget.repo);
     final ok = await UiUrl.open(url);
     if (!mounted) return;
     context.showToast(

@@ -27,6 +27,10 @@ void main() {
         UiUpdater.latestApkUrl('linkdrop'),
         'https://github.com/its-ash/linkdrop/releases/latest/download/linkdrop.apk',
       );
+      expect(
+        UiUpdater.latestApkUrl('workout', repo: 'workout.itsash.in'),
+        'https://github.com/its-ash/workout.itsash.in/releases/latest/download/workout.apk',
+      );
     });
   });
 

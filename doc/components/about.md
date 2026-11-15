@@ -24,14 +24,15 @@ const UiUpdateSection(storeId: 'recoverx')
 ```
 - `storeId` (required): store id = repo name = APK name
 - `owner` = `'its-ash'`
+- `repo` = `null`: GitHub repo name when it differs from `storeId` (e.g. `'workout.itsash.in'`); the asset is still `<storeId>.apk`
 - `checkForUpdates` = `true`. Needs the `INTERNET` permission in the app's main `AndroidManifest.xml`. Pass `false` for apps without internet: the row then only opens the latest APK download in the browser
 - `header` = `'Updates'`
 
 ### UiUpdater
 The logic behind `UiUpdateSection`.
-- `UiUpdater.latest(storeId, owner:)` → `Future<UiRelease>` (`version` without `v`, `apkUrl`). Throws when offline, on a 404 (no release) or other GitHub errors
+- `UiUpdater.latest(storeId, owner:, repo:)` → `Future<UiRelease>` (`version` without `v`, `apkUrl`). Throws when offline, on a 404 (no release) or other GitHub errors
 - `UiUpdater.isNewer(latest, current)`: compares `x.y.z`; ignores `v`, `+build` and `-pre`
-- `UiUpdater.latestApkUrl(storeId, owner:)`: `https://github.com/<owner>/<id>/releases/latest/download/<id>.apk`
+- `UiUpdater.latestApkUrl(storeId, owner:, repo:)`: `https://github.com/<owner>/<repo or id>/releases/latest/download/<id>.apk`
 
 ### UiDeveloperSection
 The "Developer" group: "Developed by Ashvini Jangid" and a Portfolio row that opens `https://itsash.github.io`. Always the last group on a settings screen.
