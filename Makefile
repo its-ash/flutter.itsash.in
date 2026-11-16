@@ -1,6 +1,6 @@
 DEVICE := iPhone 17
 
-.PHONY: run run-macos build-macos deploy docs commit check-assets
+.PHONY: run run-macos build-macos android deploy docs commit check-assets
 
 # example/assets/README.md is a symlink to the root README.md (kept in sync
 # for free). On a checkout/export that doesn't preserve symlinks (some CI
@@ -18,6 +18,12 @@ run: check-assets
 	open -a Simulator
 	until xcrun simctl list devices booted | grep -q "$(DEVICE)"; do sleep 1; done
 	cd example && flutter pub get && flutter run -d "$(DEVICE)"
+
+# Build the gallery as a release APK and install it on the connected Android phone.
+android: check-assets
+	cd example && flutter pub get && flutter build apk --release
+	adb install -r example/build/app/outputs/flutter-apk/app-release.apk
+	adb shell monkey -p com.itsash.theme_example -c android.intent.category.LAUNCHER 1 >/dev/null
 
 run-macos: check-assets
 	cd example && flutter pub get && flutter run -d macos

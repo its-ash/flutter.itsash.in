@@ -17,3 +17,4 @@ part 'ui_chip.dart';
 part 'ui_slider.dart';
 part 'ui_rating.dart';
 part 'ui_color_picker.dart';
+part 'ui_option_tiles.dart';

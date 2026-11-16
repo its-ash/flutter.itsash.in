@@ -12,22 +12,24 @@ import 'pages/media_page.dart';
 import 'pages/navigation_page.dart';
 import 'pages/scroll_page.dart';
 import 'pages/selection_page.dart';
+import 'pages/showcase_page.dart';
+import 'pages/sizes_page.dart';
 
 void main() => runApp(const GalleryApp());
 
-/// The design system's default accent (Primary blue).
+/// The design system's default accent (Primary coral).
 final Color defaultAccent = UiColors.light().accent;
 
 /// Accent choices for the theme settings sheet. The first one is the default.
 final galleryAccents = <Color>[
   defaultAccent,
+  const Color(0xFF7261EB), // Nova violet
+  const Color(0xFF3F88E4), // the old Ash blue
   Colors.teal,
   Colors.pink,
   Colors.orange,
   Colors.green,
-  Colors.deepPurple,
-  const Color(0xFFD1A300), // the design's "Yellow" primary
-  Colors.red,
+  const Color(0xFFD1A300),
 ];
 
 class GalleryApp extends StatefulWidget {
@@ -63,6 +65,8 @@ class _Destination {
 }
 
 const _destinations = [
+  _Destination(UiNavItem(Icons.auto_awesome_outlined, 'Showcase', selectedIcon: Icons.auto_awesome), ShowcasePage()),
+  _Destination(UiNavItem(Icons.straighten_outlined, 'Sizes', selectedIcon: Icons.straighten), SizesPage()),
   _Destination(UiNavItem(Icons.palette_outlined, 'Foundation', selectedIcon: Icons.palette), FoundationPage()),
   _Destination(UiNavItem(Icons.smart_button_outlined, 'Buttons', selectedIcon: Icons.smart_button), ButtonPage()),
   _Destination(UiNavItem(Icons.insights_outlined, 'Charts', selectedIcon: Icons.insights), ChartPage()),
@@ -106,7 +110,7 @@ class _GalleryHomeState extends State<GalleryHome> {
     );
     final appBar = UiAppBar(
       title: _destinations[_index].item.label,
-      subtitle: 'theme v2 gallery',
+      subtitle: 'theme 4 · Nova',
       border: true,
       actions: const [_ThemeActions()],
     );
@@ -119,7 +123,7 @@ class _GalleryHomeState extends State<GalleryHome> {
         body: content,
         sidebarCollapsible: true,
         header: Text('Theme gallery', style: context.text.titleLarge),
-        footer: const UiStatusPill('v2', status: UiStatus.accent),
+        footer: const UiStatusPill('v4', status: UiStatus.accent),
       );
     }
     return Scaffold(
@@ -183,7 +187,7 @@ class _ThemeActions extends StatelessWidget {
             UiColorPicker(
               value: theme.accent ?? defaultAccent,
               colors: galleryAccents,
-              labels: const ['Blue', 'Teal', 'Pink', 'Orange', 'Green', 'Purple', 'Yellow', 'Red'],
+              labels: const ['Coral', 'Violet', 'Blue', 'Teal', 'Pink', 'Orange', 'Green', 'Yellow'],
               onChanged: (c) => theme.accent = c == defaultAccent ? null : c,
             ),
           ],

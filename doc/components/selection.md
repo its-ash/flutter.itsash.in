@@ -208,6 +208,15 @@ UiRating(value: stars, onChanged: (v) => setState(() => stars = v))
 - `allowHalf`: default `false`.
 - `icon`: default `Icons.star_rounded`.
 
+### UiOptionTiles
+Single-select row of rounded square tiles (radius 14) for short values: sizes, amounts, durations. Unselected tiles use the Overlay fill, the selected one is solid Primary, disabled options show faded text.
+```dart
+UiOptionTiles(options: const [UiChoice(7, '7'), UiChoice(8, '8'), UiChoice(10, '10', enabled: false)], value: size, onChanged: (v) => setState(() => size = v))
+```
+- `options` (`List<UiChoice<T>>`), `value`, `onChanged` (null disables all)
+- `size` = `UiSize.md` (tiles 40 / 48 / 56)
+- `scrollable` = `true` (one scrolling row; false wraps), `spacing` = `UiSpace.sm`
+
 ### UiColorPicker
 
 Color swatches that wrap onto new lines. The selected swatch gets a ring and a check.

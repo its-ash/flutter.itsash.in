@@ -16,8 +16,8 @@ void main() => runApp(const UiApp(title: 'Notes', home: NotesPage()));
 ```
 - `home` (required), `title`
 - `themeMode` (`ThemeMode.light`): the starting mode when there is no controller. Do not pass it in apps: the default is light and the user's saved choice overrides it.
-- `accent` (Primary blue `#3F88E4`): your brand color. All other colors stay the same.
-- `fontFamily` (Inter): a bundled font family to use instead of Inter.
+- `accent` (Primary coral `#FF7E70`): your brand color. All other colors stay the same.
+- `fontFamily` (Outfit): a bundled font family to use instead of Outfit.
 - `controller`: a `UiThemeController` to change the mode or accent at runtime.
 - `routes`, `onGenerateRoute`, `navigatorKey`, `scaffoldMessengerKey`, `navigatorObservers`, `locale`, `localizationsDelegates`, `supportedLocales`, `builder`
 - `UiApp.router(routerConfig: router, ...)` for `go_router` or any `RouterConfig`.
@@ -53,33 +53,33 @@ The color palette. There are two: `UiColors.light()` and `UiColors.dark()`. Read
 Container(color: context.colors.surface, child: Text('Hi', style: TextStyle(color: context.colors.textMuted)));
 ```
 
-The palette follows the "Themes" gray scale of the Ash Theme Figma file: nine steps where 1 is the background and 9 the foreground. Light and dark mode are the same scale flipped.
+The full palette with every hex value is in [DESIGN.md](../../DESIGN.md) section 2 (Nova). It uses a violet-tinted nine-step gray scale where 1 is the background and 9 the foreground.
 
 | Step | Light | Dark | Used for |
 |---|---|---|---|
-| 1 | `#FFFFFF` | `#000000` | `background`, `onSurfaceInverse` |
-| 2 | `#F2F2F2` | `#262626` | `surface`, `surfaceRaised`, disabled fills, checkbox fill |
-| 3 | `#E0E0E0` | `#3B3B3B` | slider, progress, chart and gauge tracks, tab rule |
-| 4 | `#C4C4C4` | `#707070` | `borderStrong`, `textDisabled` |
-| 5 | `#999999` | `#999999` | `textSubtle` (labels, placeholders, captions) |
-| 6 | `#707070` | `#C4C4C4` | `textMuted` (descriptions) |
-| 7 | `#4D4D4D` | `#E0E0E0` | dim/ghost button labels |
-| 8 | `#262626` | `#F2F2F2` | `surfaceInverse` (tooltips, snackbars) |
-| 9 | `#000000` | `#FFFFFF` | `text` |
-| Overlay | `#999999` at 20% | same | `surfaceMuted` (fields, dim buttons, chips, hover), `border` (dividers) |
+| 1 | `#FFFFFF` | `#0E0E12` | `background` |
+| 2 | `#F7F6FB` | `#18171F` | `surface`, checkbox fill |
+| 3 | `#ECEBF2` | `#26252F` | `border`, tracks |
+| 4 | `#D9D7E3` | `#383646` | `borderStrong`, disabled button fill |
+| 5 | `#B3B0C2` | `#5A5770` | `textDisabled` |
+| 6 | `#8C899E` | `#8C899E` | `textSubtle` |
+| 7 | `#5E5B70` | `#B9B6C8` | `textMuted` |
+| 8 | `#2E2C3A` | `#E4E2EE` | |
+| 9 | `#121216` | `#F7F6FB` | `text` |
+| Overlay | `#6B5FB0` at 10% | `#C9C2FF` at 10% | `surfaceMuted` (chips, tiles, stepper, secondary buttons, hover). Fields are outline only: page-colored fill with a `borderStrong` outline |
 
 | Role | Colors |
 |---|---|
-| Surfaces | `background` (page), `surface` (cards, bars), `surfaceMuted` (inputs, tracks, hover; translucent), `surfaceRaised` (menus, dialogs), `surfaceInverse` / `onSurfaceInverse` (tooltips, snackbars) |
-| Lines | `border` (dividers; translucent), `borderStrong` (control outlines) |
+| Surfaces | `background` (page, outlined cards), `surface` (tinted areas, list groups), `surfaceMuted` (Overlay; translucent), `surfaceRaised` (menus, dialogs, sheets), `surfaceInverse` / `onSurfaceInverse` (promo banner, toasts, tooltips) |
+| Lines | `border` (hairlines, dividers), `borderStrong` (control outlines) |
 | Text | `text`, `textMuted`, `textSubtle`, `textDisabled` |
-| Accent | `accent` (Primary, `#3F88E4` in both modes), `onAccent`, `accentSoft` (accent at 20–25%), `onAccentSoft` |
-| Status | `success` `#0AB35A`, `warning` `#D69400`, `danger` `#DA3A3A`, `info` `#25A7B6`, each with `on…`, `…Soft` (30% overlay), `on…Soft` (darker tone in light, lighter tone in dark) |
-| Other | `scrim`, `shimmerBase`, `shimmerHighlight`, `chart` (8 series colors from the core palette), `chartColor(i)` |
+| Accent | `accent` (coral `#FF7E70`, `#FF8F83` in dark), `onAccent`, `accentSoft` (accent at 12% / 20%), `onAccentSoft` |
+| Status | `success` `#17B26A`, `warning` `#F2B705`, `danger` `#E5484D`, `info` `#3B82F6`, each with `on…`, `…Soft` (translucent), `on…Soft` |
+| Other | `scrim`, `shimmerBase`, `shimmerHighlight`, `chart` (8 series colors), `chartColor(i)` |
 
-- `gray(n)`: step `n` (1..9) of the scale for the current mode. `UiColors.grayLight` / `grayDark` hold the raw lists; `UiColors.overlay` is the Overlay color.
+- `gray(n)`: step `n` (1..9) of the scale for the current mode. `UiColors.grayLight` / `grayDark` hold the raw lists; `UiColors.overlay` / `overlayDark` are the Overlay colors.
 - `surfaceMutedSolid`: `surfaceMuted` blended over `surface`, for spots that need an opaque color.
-- `surfaceMuted`, `border`, `accentSoft` and the `…Soft` status colors are translucent, so they read the same on the page, a card or a dialog.
+- `surfaceMuted`, `accentSoft` and the `…Soft` status colors are translucent, so they read the same on the page, a card or a dialog.
 - `tone(UiStatus)` returns a `UiTone` with `color`, `onColor`, `soft`, `onSoft`.
 - If you pass an accent, dark mode lightens it when needed so that it stays readable.
 
@@ -94,23 +94,25 @@ Container(color: tone.soft, child: Icon(UiStatus.success.icon, color: tone.onSof
 ## Typography
 
 ### UiTypography
-The Ash Theme type ramp (mobile sizes). Two weights only: regular 400 and bold 600, no letter spacing. The design uses SF Pro / Segoe UI, which cannot ship on Android, so the font is Inter from `google_fonts`. Read it with `context.text`.
+The Nova type ramp: Outfit from `google_fonts`, weights 400 (body), 500 (titles, labels) and 600 (headings), no letter spacing. Read it with `context.text`.
 
-| Style | Design style | Size / line height |
-|---|---|---|
-| `displayLarge` | display / 50 | 50 / 60, bold |
-| `displayMedium` | display / 37 | 37 / 44, bold |
-| `displaySmall`, `headlineLarge` | H1 | 29 / 36, bold |
-| `headlineMedium` | H2 | 24 / 32, bold |
-| `headlineSmall` | H3 | 21 / 24, bold (dialog titles) |
-| `titleLarge` | H4 | 19 / 22, bold (app bar titles) |
-| `titleMedium` | H6 | 17 / 22, bold |
-| `titleSmall`, `labelLarge` | body/normal bold | 14 / 20, bold |
-| `bodyLarge` | medium | 16 / 22 |
-| `bodyMedium` | body/normal regular | 14 / 20 (the default text) |
-| `bodySmall` | body/small | 12 / 16, muted |
-| `labelMedium` | body/small bold | 12 / 16, bold |
-| `labelSmall` | body/x_small | 10 / 14, bold |
+| Style | Size / line height |
+|---|---|
+| `displayLarge` | 48 / 56, 600 |
+| `displayMedium` | 40 / 48, 600 |
+| `displaySmall` | 32 / 40, 600 (screen titles) |
+| `headlineLarge` | 28 / 36, 600 |
+| `headlineMedium` | 24 / 32, 600 |
+| `headlineSmall` | 22 / 28, 600 (prices, dialog titles) |
+| `titleLarge` | 20 / 26, 500 (app bar titles) |
+| `titleMedium` | 17 / 24, 500 |
+| `titleSmall` | 15 / 20, 500 |
+| `bodyLarge` | 17 / 24 |
+| `bodyMedium` | 15 / 22 (the default text) |
+| `bodySmall` | 13 / 18, muted |
+| `labelLarge` | 15 / 20, 500 (buttons, chips) |
+| `labelMedium` | 13 / 16, 500 |
+| `labelSmall` | 11 / 14, 500 |
 
 - `UiTypography.mono({fontSize, fontWeight, color})`: JetBrains Mono with tabular figures, for codes and IDs.
 - `UiTypography.useGoogleFonts = false`: uses the platform font, for tests and offline builds.
@@ -118,16 +120,16 @@ The Ash Theme type ramp (mobile sizes). Two weights only: regular 400 and bold 6
 ## Tokens
 
 ### UiSpace
-Spacing on a 4 pt grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24, `xxl` 32, `xxxl` 48, `page` 16 (page side padding).
+Spacing on a 4 pt grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24, `xxl` 32, `xxxl` 48, `page` 20 (page side padding).
 
 ### UiRadius
-Corner radius (design "Border radius", mobile): `xs` 4 (checkboxes), `sm` 6, `md` 8 (buttons, fields), `lg` 12 (cards, dialogs, menus), `xl` 20 (sheets), `full` (controls, chips, segmented controls, avatars). Helpers: `UiRadius.all(r)`, `UiRadius.top(r)`.
+Corner radius: `xs` 6 (checkboxes), `sm` 10 (tooltips), `md` 14 (fields, option tiles, thumbnails, menus), `lg` 24 (cards, promo cards, image tiles, toasts), `xl` 32 (sheets, dialogs), `full` (buttons, icon buttons, chips, segmented controls, steppers, avatars). Helpers: `UiRadius.all(r)`, `UiRadius.top(r)`.
 
 ### UiMotion
 Durations `fast` 120 ms, `normal` 220 ms, `slow` 360 ms. Curves `standard`, `emphasized`, `bounce`. `context.motion(d)` returns zero when the user asks for reduced motion.
 
 ### UiShadows
-The design's three shadow levels, each a tight plus a wide black shadow (stronger in dark mode):
+Three shadow levels, each a tight plus a wide shadow, tinted violet-gray in light mode (black and stronger in dark mode):
 
 | Level | Getter | Shadows | Used for |
 |---|---|---|---|
@@ -138,7 +140,7 @@ The design's three shadow levels, each a tight plus a wide black shadow (stronge
 `UiShadows.ring(color)`: the 4 px hover / focus ring around buttons, controls and fields (the color at 50%).
 
 ### UiSize
-Size of a control: `sm` (36), `md` (44, default), `lg` (52). It also gives `.iconSize`, `.fontSize`, and `.padding`.
+Size of a control: `sm` (36), `md` (44, default), `lg` (52). It also gives `.iconSize` (16 / 20 / 22), `.fontSize` (13 / 15 / 17), and `.padding` (14 / 18 / 22). Buttons and icon buttons are 40 / 48 / 56, chips and segments 32 / 40 / 48, fields and steppers 40 / 48 / 56; the full table is in [DESIGN.md](../../DESIGN.md) section 5.
 
 ## Layout helpers
 

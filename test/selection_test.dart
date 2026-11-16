@@ -295,7 +295,7 @@ void main() {
         StatefulBuilder(
           builder: (context, setState) => UiChipGroup(
             children: [
-              UiChip('Design', selected: selected, onTap: () => setState(() => selected = !selected)),
+              UiChip('Design', selected: selected, showCheck: true, onTap: () => setState(() => selected = !selected)),
               UiChip('flutter', icon: Icons.tag, onDeleted: () => deleted = true),
               const UiChip('Done', status: UiStatus.success, variant: UiChipVariant.soft),
               const UiChip('Error', status: UiStatus.danger, variant: UiChipVariant.filled, size: UiSize.sm),
@@ -374,6 +374,8 @@ void main() {
       ),
       width: 200,
     );
+    await tester.ensureVisible(find.text('Banana'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Banana'));
     await tester.pumpAndSettle();
     expect(value, 'banana');

@@ -9,7 +9,7 @@ import 'package:theme/src/navigation/ui_nav_item.dart';
 ///
 /// The standard bar sits flush at the bottom on the page background with a
 /// top Overlay rule; the selected item is Primary, the rest gray-5. The
-/// [floating] variant is a rounded pill with a shadow, inset from the screen
+/// [floating] variant is a softly rounded bar (radius 14) with a shadow, inset from the screen
 /// edges and lifted above the home indicator. Set `extendBody: true` on the
 /// `Scaffold` so content scrolls behind a floating bar (`UiShell` does this).
 ///
@@ -34,7 +34,7 @@ class UiBottomNav extends StatelessWidget {
   /// Called with the tapped index. Null disables the bar.
   final ValueChanged<int>? onChanged;
 
-  /// Rounded pill style that floats above the content.
+  /// Rounded (radius 14) bar that floats above the content.
   final bool floating;
 
   /// Shows labels under the icons. Icons get a tooltip when false.
@@ -74,7 +74,7 @@ class UiBottomNav extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: c.surfaceRaised,
-                borderRadius: UiRadius.all(UiRadius.full),
+                borderRadius: UiRadius.all(UiRadius.md),
                 boxShadow: context.shadowMd,
               ),
               child: Material(

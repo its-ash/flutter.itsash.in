@@ -14,7 +14,8 @@ enum UiChipVariant {
   filled,
 }
 
-/// Pill chip for tags, filters and choices: 24 / 28 / 36 high (sm / md / lg).
+/// Pill chip for tags, filters and choices: 32 / 40 / 48 high (sm / md / lg).
+/// Unselected chips are a soft Overlay fill; selected ones solid Primary.
 ///
 /// With [onTap] it is a toggle or action; with [onDeleted] it shows a remove
 /// button. With neither it is a static label. Set [enabled] to false to grey
@@ -35,9 +36,9 @@ class UiChip extends StatelessWidget {
     this.onDeleted,
     this.status = UiStatus.neutral,
     this.size = UiSize.md,
-    this.variant = UiChipVariant.outline,
+    this.variant = UiChipVariant.soft,
     this.enabled = true,
-    this.showCheck = true,
+    this.showCheck = false,
   });
 
   final String label;
@@ -68,15 +69,15 @@ class UiChip extends StatelessWidget {
   final bool showCheck;
 
   double get _height => switch (size) {
-    UiSize.sm => 24,
-    UiSize.md => 28,
-    UiSize.lg => 36,
+    UiSize.sm => 32,
+    UiSize.md => 40,
+    UiSize.lg => 48,
   };
 
   double get _hPad => switch (size) {
-    UiSize.sm => UiSpace.sm,
-    UiSize.md => UiSpace.md,
-    UiSize.lg => UiSpace.lg,
+    UiSize.sm => 14,
+    UiSize.md => 18,
+    UiSize.lg => 22,
   };
 
   @override
@@ -84,7 +85,7 @@ class UiChip extends StatelessWidget {
     final c = context.colors;
     final tone = c.tone(status);
     final neutral = status == UiStatus.neutral;
-    final iconSize = size == UiSize.sm ? 14.0 : 16.0;
+    final iconSize = size == UiSize.sm ? 14.0 : 18.0;
     final tap = enabled ? onTap : null;
     const clear = Colors.transparent;
 
@@ -99,11 +100,7 @@ class UiChip extends StatelessWidget {
             neutral ? (highlight ? c.text : c.gray(7)) : tone.onSoft,
             neutral ? (highlight ? c.textSubtle : c.borderStrong) : tone.color,
           ),
-          (false, UiChipVariant.soft) => (
-            tone.soft,
-            neutral ? (highlight ? c.text : c.gray(7)) : tone.onSoft,
-            clear,
-          ),
+          (false, UiChipVariant.soft) => (tone.soft, neutral ? c.text : tone.onSoft, clear),
           (false, UiChipVariant.filled) => (tone.color, tone.onColor, clear),
         };
         // The design's hover stroke: 4 px, inside the pill.
@@ -148,9 +145,9 @@ class UiChip extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: context.text.labelLarge?.copyWith(
                   color: fg,
-                  fontSize: size == UiSize.sm ? 12 : 14,
-                  height: size == UiSize.sm ? 16 / 12 : 20 / 14,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  fontSize: size.fontSize,
+                  height: 1.3,
+                  fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ),

@@ -7,6 +7,8 @@ export 'ui_file_tile.dart';
 export 'ui_format.dart';
 export 'ui_key_value.dart';
 export 'ui_list.dart';
+export 'ui_media_card.dart';
+export 'ui_promo.dart';
 export 'ui_stat_card.dart';
 export 'ui_table.dart';
 export 'ui_text.dart';

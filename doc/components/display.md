@@ -10,10 +10,39 @@ UiCard(onTap: open, child: Text('Hello'))
 - `child` (required)
 - `padding` = `EdgeInsets.all(UiSpace.lg)`
 - `onTap`, `onLongPress`: null means not tappable
-- `variant` = `UiCardVariant.outlined` (`outlined`: gray-2 surface, radius 12, no border; `filled`: Overlay fill; `elevated`: surface with a level 2 shadow; `ghost`)
+- `variant` = `UiCardVariant.outlined` (`outlined`: page fill with a 1 px hairline border, radius 24; `filled`: Overlay fill; `elevated`: raised surface with a level 2 shadow; `ghost`)
 - `selected` = `false`: Primary border and 4 px ring
 - `header`, `footer`: shown with a divider
 - `radius` = `UiRadius.lg`, `semanticLabel`
+
+### UiPromoCard
+Hero card for a feature, tip or offer: a soft tinted panel (radius 24, min height 160) with a headline, a muted message, an arrow link and an optional picture on the end side.
+```dart
+UiPromoCard(title: 'Step into style', message: 'New colors for every widget.', actionLabel: 'Show more', onAction: open, image: Image.asset('assets/shoe.png'))
+```
+- `title` (required, up to 3 lines), `message` (up to 3 lines)
+- `actionLabel` + `onAction`: text link with a trailing arrow
+- `image`: any widget, 40% of the width
+- `status` = `UiStatus.accent`: the panel uses this tone's soft color
+- `onTap`: makes the whole card tappable
+
+### UiPromoBanner
+Dark strip on the inverse surface (radius 24, `md` shadow, min height 72): a 64 × 56 leading tile, a title and subtitle, and a 40 px round action. Good floated over the bottom of a list.
+```dart
+UiPromoBanner(title: 'Free shipping', subtitle: 'On orders over \$50', icon: Icons.local_shipping_rounded, onTap: open)
+```
+- `title` (required), `subtitle`
+- `icon` (Primary, in the leading tile) or `leading` (any widget)
+- `onTap`: makes it tappable and shows the round `actionIcon` (= `Icons.keyboard_double_arrow_right_rounded`)
+
+### UiMediaCard
+Picture tile with a caption: a rounded (24) box tinted with `tint` at 12%, an optional yellow corner `badge`, then a title and an emphasized subtitle. For catalogs, galleries, exercises, presets.
+```dart
+UiMediaCard(image: Image.asset(path), title: 'Hoodie', subtitle: '\$80', tint: context.colors.chart[4], badge: '23%', onTap: open)
+```
+- `title` (required), `subtitle` (`titleMedium`), `image` (centered, 12 px inset)
+- `tint`: base color of the box (null = Overlay), `badge`: short text on a `warning` pill
+- `aspectRatio` = `0.85` (box width / height), `onTap`, `trailing` (end of the caption)
 
 ### UiListTile
 A row with a title, subtitle, leading and trailing parts. In a `UiListGroup` its divider starts under the text.

@@ -8,7 +8,8 @@ Design system for every app in this workspace: **one light theme, one dark theme
 - `lib/src/<group>/` — one folder per component group, with a `<group>.dart` barrel that exports its public files.
 - `doc/components/<group>.md` — reference for each group. `COMPONENTS.md` is the index.
 - `test/<group>_test.dart` — widget tests. `test/flutter_test_config.dart` turns off Google Fonts.
-- `example/` — gallery app (`make run-macos`).
+- `DESIGN.md` — the Nova design spec (colors, type, radius, sizes per component). Change it before the tokens.
+- `example/` — gallery app: `make android` (install on the phone), `make run-macos`. Showcase and Sizes tabs show the whole design.
 
 ## Component conventions (follow for every widget)
 - Public names start with `Ui`. Private helpers start with `_`.
@@ -16,7 +17,7 @@ Design system for every app in this workspace: **one light theme, one dark theme
 - **Never hardcode colors.** Read `context.colors` (`UiColors`) and `context.text` (`TextTheme`). Status colors come from `context.colors.tone(UiStatus.x)` → `color`, `onColor`, `soft`, `onSoft`.
 - Use tokens: `UiSpace.*` for spacing, `UiRadius.*` for corners, `UiMotion.*` for durations/curves (wrap with `context.motion(d)` to honor reduced motion), `context.shadowSm/Md/Lg` for shadows.
 - Sizes use `UiSize` (`sm`/`md`/`lg`; `.height`, `.iconSize`, `.fontSize`, `.padding`). Default is `md`.
-- Look: flat surfaces with 1 px `colors.border`, generous radius (controls `UiRadius.md`, cards `UiRadius.lg`, sheets/dialogs `UiRadius.xl`, pills `UiRadius.full`), soft accent tints (`accentSoft`) for selection, no Material elevation tint.
+- Look (Nova, see `DESIGN.md`): buttons and controls are pills, icon buttons circles; soft Overlay fills for chips/tiles, but text fields are outline only (page-colored fill, `fieldFill`/`fieldBorder` in `input/field_style.dart`); radius fields/tiles `UiRadius.md` (14), cards `UiRadius.lg` (24), sheets/dialogs `UiRadius.xl` (32); solid accent for selected controls, `accentSoft` for selected rows; no Material elevation tint.
 - Must look right in both light and dark mode. Only use palette colors, never `Colors.white/black` except for scrims over images/video.
 - A null callback (`onPressed`, `onChanged`, `onTap`) means disabled; show disabled styling (`textDisabled`, reduced opacity).
 - Simple API: the most common use takes 1–3 arguments, e.g. `UiButton('Save', onPressed: save)`. Main content is a positional argument.

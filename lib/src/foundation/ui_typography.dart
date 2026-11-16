@@ -3,26 +3,29 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Type scale of the design system.
 ///
-/// Ash Theme type ramp (mobile sizes): two weights, regular 400 and bold 600,
-/// no letter spacing. The design uses SF Pro / Segoe UI, which cannot ship
-/// on Android, so the default font is Inter, the closest open match.
+/// Nova type ramp (see `DESIGN.md`): Outfit, a geometric sans, in three
+/// weights (regular 400, medium 500, semibold 600), no letter spacing.
+/// Headings are semibold, titles and labels medium, body text regular.
 ///
-/// | Style | Design style | Size / line |
-/// |---|---|---|
-/// | displayLarge | display / 50 | 50 / 60 |
-/// | displayMedium | display / 37 | 37 / 44 |
-/// | displaySmall, headlineLarge | H1 | 29 / 36 |
-/// | headlineMedium | H2 | 24 / 32 |
-/// | headlineSmall | H3 | 21 / 24 |
-/// | titleLarge | H4 | 19 / 22 |
-/// | titleMedium | H6 | 17 / 22 |
-/// | titleSmall, labelLarge | body/normal bold | 14 / 20 |
-/// | bodyLarge | medium | 16 / 22 |
-/// | bodyMedium | body/normal regular | 14 / 20 |
-/// | bodySmall, labelMedium | body/small | 12 / 16 |
-/// | labelSmall | body/x_small | 10 / 14 |
+/// | Style | Use | Size / line | Weight |
+/// |---|---|---|---|
+/// | displayLarge | hero numbers | 48 / 56 | 600 |
+/// | displayMedium | big totals | 40 / 48 | 600 |
+/// | displaySmall | screen title ("CART") | 32 / 40 | 600 |
+/// | headlineLarge | H1 | 28 / 36 | 600 |
+/// | headlineMedium | H2, product name | 24 / 32 | 600 |
+/// | headlineSmall | H3, price | 22 / 28 | 600 |
+/// | titleLarge | app bar, card title | 20 / 26 | 500 |
+/// | titleMedium | section title, list title | 17 / 24 | 500 |
+/// | titleSmall | small title | 15 / 20 | 500 |
+/// | bodyLarge | lead text | 17 / 24 | 400 |
+/// | bodyMedium | body | 15 / 22 | 400 |
+/// | bodySmall | caption (muted) | 13 / 18 | 400 |
+/// | labelLarge | buttons, chips | 15 / 20 | 500 |
+/// | labelMedium | small buttons, tags | 13 / 16 | 500 |
+/// | labelSmall | badges | 11 / 14 | 500 |
 ///
-/// The default font is Inter (from `google_fonts`). Pass a `fontFamily` to
+/// The default font is Outfit (from `google_fonts`). Pass a `fontFamily` to
 /// `UiTheme.light` / `UiTheme.dark` to use a bundled font instead, or set
 /// [UiTypography.useGoogleFonts] to `false` (tests, offline builds) to fall
 /// back to the platform font.
@@ -33,35 +36,36 @@ abstract final class UiTypography {
   /// Builds the [TextTheme] for one palette.
   static TextTheme textTheme({required Color text, required Color muted, String? fontFamily}) {
     TextStyle s(double size, double line, FontWeight w, {Color? color}) => TextStyle(
-          fontFamily: fontFamily,
-          fontSize: size,
-          fontWeight: w,
-          height: line / size,
-          letterSpacing: 0,
-          color: color ?? text,
-        );
+      fontFamily: fontFamily,
+      fontSize: size,
+      fontWeight: w,
+      height: line / size,
+      letterSpacing: 0,
+      color: color ?? text,
+    );
     const bold = FontWeight.w600;
+    const medium = FontWeight.w500;
     const regular = FontWeight.w400;
 
     final base = TextTheme(
-      displayLarge: s(50, 60, bold),
-      displayMedium: s(37, 44, bold),
-      displaySmall: s(29, 36, bold),
-      headlineLarge: s(29, 36, bold),
+      displayLarge: s(48, 56, bold),
+      displayMedium: s(40, 48, bold),
+      displaySmall: s(32, 40, bold),
+      headlineLarge: s(28, 36, bold),
       headlineMedium: s(24, 32, bold),
-      headlineSmall: s(21, 24, bold),
-      titleLarge: s(19, 22, bold),
-      titleMedium: s(17, 22, bold),
-      titleSmall: s(14, 20, bold),
-      bodyLarge: s(16, 22, regular),
-      bodyMedium: s(14, 20, regular),
-      bodySmall: s(12, 16, regular, color: muted),
-      labelLarge: s(14, 20, bold),
-      labelMedium: s(12, 16, bold),
-      labelSmall: s(10, 14, bold),
+      headlineSmall: s(22, 28, bold),
+      titleLarge: s(20, 26, medium),
+      titleMedium: s(17, 24, medium),
+      titleSmall: s(15, 20, medium),
+      bodyLarge: s(17, 24, regular),
+      bodyMedium: s(15, 22, regular),
+      bodySmall: s(13, 18, regular, color: muted),
+      labelLarge: s(15, 20, medium),
+      labelMedium: s(13, 16, medium),
+      labelSmall: s(11, 14, medium),
     );
     if (fontFamily != null || !useGoogleFonts) return base;
-    return GoogleFonts.interTextTheme(base);
+    return GoogleFonts.outfitTextTheme(base);
   }
 
   /// Monospaced style for codes, OTPs, IDs and tabular numbers.

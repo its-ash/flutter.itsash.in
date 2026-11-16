@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/field_style.dart';
 import 'package:theme/src/input/ui_field_label.dart';
 
 /// One-time code input drawn as separate boxes. Typing advances to the next
@@ -139,11 +140,7 @@ class _UiOtpFieldState extends State<UiOtpField> {
           Widget box(int i) {
             final filled = i < text.length;
             final active = focused && widget.enabled && i == (text.length < n ? text.length : n - 1);
-            final borderColor = hasError
-                ? c.danger
-                : active
-                ? c.accent
-                : Colors.transparent;
+            final side = fieldBorder(c, focused: active, hasError: hasError, enabled: widget.enabled);
             return AnimatedContainer(
               duration: context.motion(UiMotion.fast),
               curve: UiMotion.standard,
@@ -151,12 +148,9 @@ class _UiOtpFieldState extends State<UiOtpField> {
               height: boxH,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: c.surfaceMuted,
+                color: fieldFill(c),
                 borderRadius: UiRadius.all(UiRadius.md),
-                border: Border.all(color: borderColor),
-                boxShadow: active && !hasError
-                    ? [BoxShadow(color: c.accent.withValues(alpha: 0.5), spreadRadius: 2)]
-                    : null,
+                border: Border.fromBorderSide(side),
               ),
               child: filled
                   ? widget.obscure

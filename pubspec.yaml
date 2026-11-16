@@ -1,6 +1,6 @@
 name: theme
 description: "Flutter design system: one light and one dark ThemeData with an optional accent, and a Ui* component library."
-version: 3.0.0
+version: 4.0.0
 homepage: https://github.com/its-ash/theme
 repository: https://github.com/its-ash/theme
 

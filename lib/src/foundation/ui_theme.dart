@@ -67,17 +67,17 @@ abstract final class UiTheme {
 
     final r = UiRadius.all;
     final regular = label.copyWith(fontWeight: FontWeight.w400);
-    // Buttons: 36 high, radius 8, 32/8 padding (Figma "button").
-    final controlShape = RoundedRectangleBorder(borderRadius: r(UiRadius.md));
-    const controlSize = Size(64, 36);
-    const controlPadding = EdgeInsets.symmetric(horizontal: 32, vertical: 8);
-    final disabledFill = c.gray(2);
+    // Buttons: 48 high pills, 28/12 padding (Nova, see DESIGN.md).
     final pill = RoundedRectangleBorder(borderRadius: r(UiRadius.full));
+    final controlShape = pill;
+    const controlSize = Size(64, 48);
+    const controlPadding = EdgeInsets.symmetric(horizontal: 28, vertical: 12);
+    final disabledFill = c.gray(3);
 
     OutlineInputBorder inputBorder(Color color, [double width = 1]) => OutlineInputBorder(
-          borderRadius: r(UiRadius.md),
-          borderSide: BorderSide(color: color, width: width),
-        );
+      borderRadius: r(UiRadius.md),
+      borderSide: BorderSide(color: color, width: width),
+    );
 
     final overlay = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -108,8 +108,8 @@ abstract final class UiTheme {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       extensions: [c],
-      iconTheme: IconThemeData(color: c.text, size: 20),
-      primaryIconTheme: IconThemeData(color: c.onAccent, size: 20),
+      iconTheme: IconThemeData(color: c.text, size: 22),
+      primaryIconTheme: IconThemeData(color: c.onAccent, size: 22),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
@@ -125,11 +125,11 @@ abstract final class UiTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleSpacing: UiSpace.page,
-        toolbarHeight: 56,
+        toolbarHeight: 64,
         systemOverlayStyle: overlay,
         titleTextStyle: text.titleLarge,
-        iconTheme: IconThemeData(color: c.text, size: 20),
-        actionsIconTheme: IconThemeData(color: c.text, size: 20),
+        iconTheme: IconThemeData(color: c.text, size: 22),
+        actionsIconTheme: IconThemeData(color: c.text, size: 22),
       ),
       cardTheme: CardThemeData(
         color: c.surface,
@@ -140,14 +140,15 @@ abstract final class UiTheme {
         shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
       ),
       dividerTheme: DividerThemeData(color: c.border, thickness: 1, space: 1),
-      // Fields: Overlay fill, no border at rest, 1 px Primary when focused,
-      // red when invalid (Figma "field").
+      // Fields: outline only. Page-colored fill, 1 px outline, 1.5 px Primary
+      // when focused, red when invalid. 48 high, radius 14.
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
-        fillColor: c.surfaceMuted,
+        fillColor: c.background,
+        constraints: const BoxConstraints(minHeight: 48),
         hoverColor: Colors.transparent,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
         hintStyle: text.bodyMedium!.copyWith(color: c.textSubtle),
         labelStyle: text.bodyMedium!.copyWith(color: c.textSubtle),
         floatingLabelStyle: text.labelSmall!.copyWith(color: c.textSubtle, fontWeight: FontWeight.w400),
@@ -155,12 +156,12 @@ abstract final class UiTheme {
         errorStyle: text.bodySmall!.copyWith(color: c.danger),
         prefixIconColor: c.textSubtle,
         suffixIconColor: c.textSubtle,
-        border: inputBorder(Colors.transparent),
-        enabledBorder: inputBorder(Colors.transparent),
-        disabledBorder: inputBorder(Colors.transparent),
-        focusedBorder: inputBorder(c.accent),
+        border: inputBorder(c.borderStrong),
+        enabledBorder: inputBorder(c.borderStrong),
+        disabledBorder: inputBorder(c.border),
+        focusedBorder: inputBorder(c.accent, 1.5),
         errorBorder: inputBorder(c.danger),
-        focusedErrorBorder: inputBorder(c.danger),
+        focusedErrorBorder: inputBorder(c.danger, 1.5),
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: c.accent,
@@ -194,57 +195,58 @@ abstract final class UiTheme {
           shadowColor: Colors.transparent,
         ),
       ),
-      // Ghost button: 1 px gray-4 outline, regular label.
+      // Outline button: 1 px outline, regular label.
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: c.gray(7),
-          disabledForegroundColor: c.gray(3),
-          minimumSize: controlSize,
-          padding: controlPadding,
-          shape: controlShape,
-          textStyle: regular,
-        ).copyWith(
-          side: WidgetStateProperty.resolveWith(
-            (s) => BorderSide(color: s.contains(WidgetState.disabled) ? c.gray(3) : c.borderStrong),
-          ),
-        ),
+        style:
+            OutlinedButton.styleFrom(
+              foregroundColor: c.text,
+              disabledForegroundColor: c.gray(3),
+              minimumSize: controlSize,
+              padding: controlPadding,
+              shape: controlShape,
+              textStyle: regular,
+            ).copyWith(
+              side: WidgetStateProperty.resolveWith(
+                (s) => BorderSide(color: s.contains(WidgetState.disabled) ? c.gray(3) : c.borderStrong),
+              ),
+            ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: c.accent,
           disabledForegroundColor: c.textDisabled,
-          minimumSize: const Size(48, 36),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          minimumSize: const Size(48, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           shape: controlShape,
-          textStyle: regular,
+          textStyle: label,
         ),
       ),
-      // Icon controls are round (Figma "control", type=icon).
+      // Icon buttons are 48 px circles.
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: c.text,
           disabledForegroundColor: c.textDisabled,
-          minimumSize: const Size(36, 36),
-          iconSize: 20,
+          minimumSize: const Size(48, 48),
+          iconSize: 22,
           shape: const CircleBorder(),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: c.accent,
         foregroundColor: c.onAccent,
-        elevation: 2,
-        focusElevation: 2,
-        hoverElevation: 4,
-        highlightElevation: 2,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 2,
+        highlightElevation: 0,
         shape: pill,
         extendedTextStyle: label,
       ),
-      // Segmented control: gray-2 pill track, the selected segment is a
-      // Primary pill with a bold label.
+      // Segmented control: Overlay pill track, the selected segment is a
+      // Primary pill.
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
-          backgroundColor: c.surface,
-          foregroundColor: c.gray(7),
+          backgroundColor: c.surfaceMuted,
+          foregroundColor: c.text,
           selectedBackgroundColor: c.accent,
           selectedForegroundColor: c.onAccent,
           side: BorderSide.none,
@@ -252,22 +254,22 @@ abstract final class UiTheme {
           textStyle: regular,
         ),
       ),
-      // Chips are "controls": 28 high pills, Overlay fill, Primary when selected.
+      // Chips: 40 high pills, Overlay fill, solid Primary when selected.
       chipTheme: ChipThemeData(
         backgroundColor: c.surfaceMuted,
         selectedColor: c.accent,
         disabledColor: c.surfaceMuted,
         checkmarkColor: c.onAccent,
         deleteIconColor: c.textMuted,
-        labelStyle: regular.copyWith(color: c.gray(7)),
+        labelStyle: regular.copyWith(color: c.text),
         secondaryLabelStyle: label.copyWith(color: c.onAccent),
         side: BorderSide.none,
         shape: pill,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6),
         showCheckmark: false,
       ),
-      // Checkbox: 20 px, radius 4, gray-2 fill with gray-4 outline; Primary when on.
+      // Checkbox: 20 px, radius 6, gray-2 fill with gray-4 outline; Primary when on.
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xs)),
         side: WidgetStateBorderSide.resolveWith(
@@ -277,8 +279,8 @@ abstract final class UiTheme {
           (s) => s.contains(WidgetState.disabled)
               ? (s.contains(WidgetState.selected) ? c.textDisabled : c.gray(2))
               : s.contains(WidgetState.selected)
-                  ? c.accent
-                  : c.gray(2),
+              ? c.accent
+              : c.gray(2),
         ),
         checkColor: WidgetStatePropertyAll(c.onAccent),
       ),
@@ -287,8 +289,8 @@ abstract final class UiTheme {
           (s) => s.contains(WidgetState.disabled)
               ? c.textDisabled
               : s.contains(WidgetState.selected)
-                  ? c.accent
-                  : c.borderStrong,
+              ? c.accent
+              : c.borderStrong,
         ),
         backgroundColor: WidgetStatePropertyAll(c.gray(2)),
       ),
@@ -300,40 +302,39 @@ abstract final class UiTheme {
           (s) => s.contains(WidgetState.disabled)
               ? c.gray(2)
               : s.contains(WidgetState.selected)
-                  ? c.accent
-                  : c.gray(3),
+              ? c.accent
+              : c.gray(3),
         ),
         trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
         thumbIcon: const WidgetStatePropertyAll(null),
       ),
-      // Slider: 2 px gray-3 track, filled with the foreground color, 16 px
-      // round thumb with a level 1 shadow (Figma "basic slider").
+      // Slider: 4 px gray-3 track filled with Primary, 20 px Primary thumb.
       sliderTheme: SliderThemeData(
-        activeTrackColor: c.text,
+        activeTrackColor: c.accent,
         inactiveTrackColor: c.gray(3),
-        thumbColor: c.text,
-        overlayColor: c.surfaceMuted,
+        thumbColor: c.accent,
+        overlayColor: c.accentSoft,
         valueIndicatorColor: c.surfaceInverse,
         valueIndicatorTextStyle: text.labelMedium!.copyWith(color: c.onSurfaceInverse),
-        trackHeight: 2,
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8, elevation: 3, pressedElevation: 4),
-        trackShape: const RectangularSliderTrackShape(),
+        trackHeight: 4,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10, elevation: 2, pressedElevation: 3),
+        trackShape: const RoundedRectSliderTrackShape(),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
         tickMarkShape: SliderTickMarkShape.noTickMark,
         showValueIndicator: ShowValueIndicator.onlyForDiscrete,
       ),
-      // Progress bar: 2 px, foreground fill on a gray-3 track.
+      // Progress bar: 6 px rounded, Primary fill on a gray-3 track.
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: c.text,
+        color: c.accent,
         linearTrackColor: c.gray(3),
         circularTrackColor: Colors.transparent,
-        linearMinHeight: 2,
-        borderRadius: BorderRadius.zero,
+        linearMinHeight: 6,
+        borderRadius: r(UiRadius.full),
         // ignore: deprecated_member_use
         year2023: true,
       ),
-      // List rows (Figma "menu item list"): 36 high, regular title, Overlay on
-      // hover, solid Primary when selected.
+      // List rows: 52 high, regular title, Overlay on hover, soft Primary
+      // when selected.
       listTileTheme: ListTileThemeData(
         iconColor: c.textMuted,
         textColor: c.text,
@@ -341,22 +342,22 @@ abstract final class UiTheme {
         subtitleTextStyle: text.bodySmall!.copyWith(color: c.textSubtle),
         leadingAndTrailingTextStyle: text.bodyMedium!.copyWith(color: c.textSubtle),
         contentPadding: const EdgeInsets.symmetric(horizontal: UiSpace.page),
-        minVerticalPadding: 6,
-        minTileHeight: 36,
-        horizontalTitleGap: 12,
-        minLeadingWidth: 16,
-        dense: true,
+        minVerticalPadding: 8,
+        minTileHeight: 52,
+        horizontalTitleGap: 14,
+        minLeadingWidth: 20,
+        dense: false,
         visualDensity: VisualDensity.standard,
         shape: const RoundedRectangleBorder(),
-        selectedColor: c.onAccent,
-        selectedTileColor: c.accent,
+        selectedColor: c.onAccentSoft,
+        selectedTileColor: c.accentSoft,
       ),
-      // Dialog: gray-2, radius 12, level 3 shadow, H3 title, gray-6 text.
+      // Dialog: raised surface, radius 32, H3 title, muted text.
       dialogTheme: DialogThemeData(
         backgroundColor: c.surfaceRaised,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
         titleTextStyle: text.headlineSmall,
         contentTextStyle: text.bodyMedium!.copyWith(color: c.textMuted),
         barrierColor: c.scrim,
@@ -371,7 +372,7 @@ abstract final class UiTheme {
         modalBarrierColor: c.scrim,
         showDragHandle: true,
         dragHandleColor: c.gray(4),
-        dragHandleSize: const Size(36, 4),
+        dragHandleSize: const Size(40, 5),
         shape: RoundedRectangleBorder(borderRadius: UiRadius.top(UiRadius.xl)),
         clipBehavior: Clip.antiAlias,
       ),
@@ -381,13 +382,13 @@ abstract final class UiTheme {
         contentTextStyle: text.bodyMedium!.copyWith(color: c.onSurfaceInverse),
         actionTextColor: c.accent,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.md)),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
         insetPadding: const EdgeInsets.fromLTRB(UiSpace.lg, 0, UiSpace.lg, UiSpace.lg),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(color: c.surfaceInverse, borderRadius: r(UiRadius.sm)),
         textStyle: text.bodySmall!.copyWith(color: c.onSurfaceInverse),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         waitDuration: const Duration(milliseconds: 400),
       ),
       popupMenuTheme: PopupMenuThemeData(
@@ -395,7 +396,7 @@ abstract final class UiTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 8,
         shadowColor: Colors.black.withValues(alpha: dark ? 0.6 : 0.15),
-        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.md)),
         textStyle: text.bodyMedium,
         labelTextStyle: WidgetStatePropertyAll(text.bodyMedium),
         menuPadding: const EdgeInsets.symmetric(vertical: UiSpace.sm),
@@ -406,7 +407,7 @@ abstract final class UiTheme {
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
           elevation: const WidgetStatePropertyAll(8),
           shadowColor: WidgetStatePropertyAll(Colors.black.withValues(alpha: dark ? 0.6 : 0.15)),
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: r(UiRadius.lg))),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: r(UiRadius.md))),
           padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: UiSpace.sm)),
         ),
       ),
@@ -424,7 +425,7 @@ abstract final class UiTheme {
         backgroundColor: c.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        height: 60,
+        height: 68,
         indicatorColor: Colors.transparent,
         indicatorShape: pill,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -459,16 +460,19 @@ abstract final class UiTheme {
         scrimColor: c.scrim,
         shape: const RoundedRectangleBorder(),
       ),
-      // Tabs: regular labels, active = foreground with a 1 px bar, rest gray-5
-      // over a gray-3 rule.
+      // Tabs: medium labels, active = foreground with a 2 px Primary bar,
+      // rest subtle, over a hairline rule.
       tabBarTheme: TabBarThemeData(
         labelColor: c.text,
         unselectedLabelColor: c.textSubtle,
-        labelStyle: regular,
+        labelStyle: label,
         unselectedLabelStyle: regular,
-        indicator: UnderlineTabIndicator(borderSide: BorderSide(color: c.text, width: 1)),
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: c.accent, width: 2),
+          borderRadius: r(UiRadius.full),
+        ),
         indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: c.gray(3),
+        dividerColor: c.border,
         dividerHeight: 1,
         labelPadding: const EdgeInsets.only(right: UiSpace.lg),
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
@@ -481,26 +485,27 @@ abstract final class UiTheme {
       ),
       searchBarTheme: SearchBarThemeData(
         elevation: const WidgetStatePropertyAll(0),
-        backgroundColor: WidgetStatePropertyAll(c.surfaceMuted),
+        backgroundColor: WidgetStatePropertyAll(c.background),
         surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: r(UiRadius.md))),
+        side: WidgetStatePropertyAll(BorderSide(color: c.borderStrong)),
+        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: r(UiRadius.full))),
         hintStyle: WidgetStatePropertyAll(text.bodyMedium!.copyWith(color: c.textSubtle)),
         textStyle: WidgetStatePropertyAll(text.bodyMedium),
-        constraints: const BoxConstraints(minHeight: 36),
+        constraints: const BoxConstraints(minHeight: 48),
       ),
       datePickerTheme: DatePickerThemeData(
         backgroundColor: c.surfaceRaised,
         surfaceTintColor: Colors.transparent,
         headerBackgroundColor: c.surfaceRaised,
         headerForegroundColor: c.text,
-        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
         dayShape: const WidgetStatePropertyAll(CircleBorder()),
         todayBorder: BorderSide(color: c.accent),
         rangeSelectionBackgroundColor: c.accentSoft,
       ),
       timePickerTheme: TimePickerThemeData(
         backgroundColor: c.surfaceRaised,
-        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.lg)),
+        shape: RoundedRectangleBorder(borderRadius: r(UiRadius.xl)),
         dialBackgroundColor: c.surfaceMuted,
         hourMinuteColor: c.surfaceMuted,
         dayPeriodColor: c.accentSoft,
@@ -512,7 +517,10 @@ abstract final class UiTheme {
         collapsedIconColor: c.textMuted,
         textColor: c.text,
         collapsedTextColor: c.textMuted,
-        shape: Border(top: BorderSide(color: c.border), bottom: BorderSide(color: c.border)),
+        shape: Border(
+          top: BorderSide(color: c.border),
+          bottom: BorderSide(color: c.border),
+        ),
         collapsedShape: Border(top: BorderSide(color: c.border)),
         tilePadding: const EdgeInsets.symmetric(horizontal: UiSpace.page),
         childrenPadding: const EdgeInsets.fromLTRB(UiSpace.page, 0, UiSpace.page, UiSpace.lg),
@@ -522,11 +530,7 @@ abstract final class UiTheme {
         radius: const Radius.circular(UiRadius.full),
         thickness: const WidgetStatePropertyAll(4),
       ),
-      bottomAppBarTheme: BottomAppBarThemeData(
-        color: c.background,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
+      bottomAppBarTheme: BottomAppBarThemeData(color: c.background, surfaceTintColor: Colors.transparent, elevation: 0),
     );
   }
 }

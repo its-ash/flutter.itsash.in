@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
 
-/// Height of a field of [size] (Ash Theme "field": 36 at md).
+/// Height of a field of [size]: 40 / 48 / 56, same as buttons.
 double fieldHeight(UiSize size) => switch (size) {
-  UiSize.sm => 32,
-  UiSize.md => 36,
-  UiSize.lg => 44,
+  UiSize.sm => 40,
+  UiSize.md => 48,
+  UiSize.lg => 56,
 };
 
 /// Corner radius of a field. With an error the bottom corners are square so
@@ -15,9 +15,9 @@ double fieldHeight(UiSize size) => switch (size) {
 BorderRadius fieldRadius({bool hasError = false, double radius = UiRadius.md}) =>
     hasError ? BorderRadius.vertical(top: Radius.circular(radius)) : UiRadius.all(radius);
 
-/// Hover and focus halo around a field: a 4 px gray-3 ring on hover, a
-/// Primary 50% glow while focused (the 1 px Primary border comes from the
-/// field itself). Tracks focus of any descendant.
+/// Wrapper kept for every field. Fields are outline-only (see
+/// [fieldDecoration]): no hover ring and no tinted focus glow, the focused
+/// state is just the 1.5 px Primary outline drawn by the field itself.
 class FieldFrame extends StatefulWidget {
   const FieldFrame({
     super.key,
@@ -37,42 +37,20 @@ class FieldFrame extends StatefulWidget {
 }
 
 class _FieldFrameState extends State<FieldFrame> {
-  bool _hover = false;
-  bool _focus = false;
-
   @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final List<BoxShadow> shadows;
-    if (!widget.enabled) {
-      shadows = const [];
-    } else if (_focus) {
-      final glow = widget.hasError ? c.danger : c.accent;
-      shadows = [BoxShadow(color: glow.withValues(alpha: 0.5), spreadRadius: 2)];
-    } else if (_hover) {
-      shadows = [BoxShadow(color: c.gray(3), spreadRadius: 4)];
-    } else {
-      shadows = const [];
-    }
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: (f) => setState(() => _focus = f),
-        child: AnimatedContainer(
-          duration: context.motion(UiMotion.fast),
-          curve: UiMotion.standard,
-          decoration: BoxDecoration(
-            borderRadius: fieldRadius(hasError: widget.hasError, radius: widget.radius),
-            boxShadow: shadows,
-          ),
-          child: widget.child,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Fill inside every field: the page color (white in light mode, near-black
+/// in dark mode), never a tint.
+Color fieldFill(UiColors c) => c.background;
+
+/// Outline of a field for its state.
+BorderSide fieldBorder(UiColors c, {bool focused = false, bool hasError = false, bool enabled = true}) {
+  if (hasError) return BorderSide(color: c.danger, width: focused ? 1.5 : 1);
+  if (!enabled) return BorderSide(color: c.border);
+  if (focused) return BorderSide(color: c.accent, width: 1.5);
+  return BorderSide(color: c.borderStrong);
 }
 
 /// Builds the [InputDecoration] used by every text input of the group.
@@ -93,17 +71,15 @@ InputDecoration fieldDecoration(
   final c = context.colors;
   final height = fieldHeight(size);
   final shape = fieldRadius(hasError: hasError, radius: radius);
-  OutlineInputBorder border(Color color) => OutlineInputBorder(
-    borderRadius: shape,
-    borderSide: BorderSide(color: color),
-  );
-  final vertical = multiline ? UiSpace.sm : 0.0;
+  OutlineInputBorder border(BorderSide side) => OutlineInputBorder(borderRadius: shape, borderSide: side);
+  // Single-line fields center the text in [height]; multiline ones pad it.
+  final vertical = multiline ? UiSpace.md : ((height - 22) / 2).floorToDouble();
   return InputDecoration(
     hintText: hint,
     hintStyle: TextStyle(color: enabled ? c.textSubtle : c.textDisabled, fontSize: size.fontSize),
     hintMaxLines: multiline ? null : 1,
     filled: true,
-    fillColor: c.surfaceMuted,
+    fillColor: fieldFill(c),
     hoverColor: Colors.transparent,
     isDense: true,
     constraints: BoxConstraints(minHeight: height),
@@ -127,12 +103,12 @@ InputDecoration fieldDecoration(
           ),
     suffixIconConstraints: BoxConstraints(minHeight: height - 8, minWidth: UiSpace.sm),
     counterText: '',
-    border: border(hasError ? c.danger : Colors.transparent),
-    enabledBorder: border(hasError ? c.danger : Colors.transparent),
-    disabledBorder: border(Colors.transparent),
-    focusedBorder: border(hasError ? c.danger : c.accent),
-    errorBorder: border(c.danger),
-    focusedErrorBorder: border(c.danger),
+    border: border(fieldBorder(c, hasError: hasError)),
+    enabledBorder: border(fieldBorder(c, hasError: hasError)),
+    disabledBorder: border(fieldBorder(c, enabled: false)),
+    focusedBorder: border(fieldBorder(c, focused: true, hasError: hasError)),
+    errorBorder: border(fieldBorder(c, hasError: true)),
+    focusedErrorBorder: border(fieldBorder(c, focused: true, hasError: true)),
   );
 }
 
@@ -141,7 +117,7 @@ TextStyle fieldTextStyle(BuildContext context, UiSize size, {bool enabled = true
   final c = context.colors;
   return (context.text.bodyMedium ?? const TextStyle()).copyWith(
     fontSize: size.fontSize,
-    height: 20 / 14,
+    height: 22 / 15,
     color: enabled ? c.text : c.textDisabled,
   );
 }
@@ -212,11 +188,7 @@ class _FieldBoxState extends State<FieldBox> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final enabled = widget.onTap != null;
-    final borderColor = widget.hasError
-        ? c.danger
-        : _focused
-        ? c.accent
-        : Colors.transparent;
+    final side = fieldBorder(c, focused: _focused, hasError: widget.hasError, enabled: enabled);
     final radius = fieldRadius(hasError: widget.hasError);
     return Semantics(
       button: true,
@@ -229,11 +201,7 @@ class _FieldBoxState extends State<FieldBox> {
           duration: context.motion(UiMotion.fast),
           curve: UiMotion.standard,
           constraints: BoxConstraints(minHeight: fieldHeight(widget.size)),
-          decoration: BoxDecoration(
-            color: c.surfaceMuted,
-            borderRadius: radius,
-            border: Border.all(color: borderColor),
-          ),
+          decoration: BoxDecoration(color: fieldFill(c), borderRadius: radius, border: Border.fromBorderSide(side)),
           child: Material(
             type: MaterialType.transparency,
             child: InkWell(

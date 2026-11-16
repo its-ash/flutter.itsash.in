@@ -51,27 +51,31 @@ class UiColors extends ThemeExtension<UiColors> {
     required this.chart,
   });
 
-  /// Default accent in both modes (Ash Theme "Primary", core/blue).
-  static const Color defaultAccentLight = Color(0xFF3F88E4);
+  /// Default accent ("Primary", coral). See `DESIGN.md`.
+  static const Color defaultAccentLight = Color(0xFFFF7E70);
 
-  /// Same as [defaultAccentLight]: the design keeps one primary in both modes.
-  static const Color defaultAccentDark = Color(0xFF3F88E4);
+  /// Dark-mode default accent: the same coral, a touch lighter so it keeps
+  /// contrast on the dark background.
+  static const Color defaultAccentDark = Color(0xFFFF8F83);
 
-  /// The neutral "Overlay" fill (#999999 at 20%). Translucent, so it reads
-  /// the same on the background, a card or a dialog.
-  static const Color overlay = Color(0x33999999);
+  /// Light "Overlay" fill: a violet-gray at 10%. Translucent, so it reads the
+  /// same on the background, a card or a dialog (#F0EFF7 on white).
+  static const Color overlay = Color(0x1A6B5FB0);
 
-  /// Gray scale of the Figma "Themes" collection, steps 1..9 (light mode).
-  /// 1 is the background, 9 the foreground.
+  /// Dark "Overlay" fill: a lavender white at 10%.
+  static const Color overlayDark = Color(0x1AC9C2FF);
+
+  /// Violet-tinted gray scale, steps 1..9 (light mode). 1 is the background,
+  /// 9 the foreground.
   static const List<Color> grayLight = [
-    Color(0xFFFFFFFF), Color(0xFFF2F2F2), Color(0xFFE0E0E0), Color(0xFFC4C4C4), Color(0xFF999999), //
-    Color(0xFF707070), Color(0xFF4D4D4D), Color(0xFF262626), Color(0xFF000000),
+    Color(0xFFFFFFFF), Color(0xFFF7F6FB), Color(0xFFECEBF2), Color(0xFFD9D7E3), Color(0xFFB3B0C2), //
+    Color(0xFF8C899E), Color(0xFF5E5B70), Color(0xFF2E2C3A), Color(0xFF121216),
   ];
 
   /// Gray scale steps 1..9 in dark mode.
   static const List<Color> grayDark = [
-    Color(0xFF000000), Color(0xFF262626), Color(0xFF3B3B3B), Color(0xFF707070), Color(0xFF999999), //
-    Color(0xFFC4C4C4), Color(0xFFE0E0E0), Color(0xFFF2F2F2), Color(0xFFFFFFFF),
+    Color(0xFF0E0E12), Color(0xFF18171F), Color(0xFF26252F), Color(0xFF383646), Color(0xFF5A5770), //
+    Color(0xFF8C899E), Color(0xFFB9B6C8), Color(0xFFE4E2EE), Color(0xFFF7F6FB),
   ];
 
   /// The light palette. Pass [accent] to use a custom brand color.
@@ -83,47 +87,47 @@ class UiColors extends ThemeExtension<UiColors> {
       background: g[0],
       surface: g[1],
       surfaceMuted: overlay,
-      surfaceRaised: g[1],
-      surfaceInverse: g[7],
+      surfaceRaised: g[0],
+      surfaceInverse: const Color(0xFF161616),
       onSurfaceInverse: g[0],
-      border: overlay,
+      border: g[2],
       borderStrong: g[3],
       text: g[8],
-      textMuted: g[5],
-      textSubtle: g[4],
-      textDisabled: g[3],
+      textMuted: g[6],
+      textSubtle: g[5],
+      textDisabled: g[4],
       accent: a,
       onAccent: _on(a),
-      accentSoft: a.withValues(alpha: 0.2),
-      onAccentSoft: _shade(a, maxLightness: 0.38),
-      success: const Color(0xFF0AB35A),
+      accentSoft: a.withValues(alpha: 0.12),
+      onAccentSoft: _shade(a, maxLightness: 0.45),
+      success: const Color(0xFF17B26A),
       onSuccess: Colors.white,
-      successSoft: const Color(0x3309A854),
-      onSuccessSoft: const Color(0xFF037D48),
-      warning: const Color(0xFFD69400),
-      onWarning: Colors.white,
-      warningSoft: const Color(0x33D19000),
-      onWarningSoft: const Color(0xFF9E6700),
-      danger: const Color(0xFFDA3A3A),
+      successSoft: const Color(0x1F17B26A),
+      onSuccessSoft: const Color(0xFF067647),
+      warning: const Color(0xFFF2B705),
+      onWarning: g[8],
+      warningSoft: const Color(0x2EF2B705),
+      onWarningSoft: const Color(0xFF8A6500),
+      danger: const Color(0xFFE5484D),
       onDanger: Colors.white,
-      dangerSoft: const Color(0x33D93535),
-      onDangerSoft: const Color(0xFFA31920),
-      info: const Color(0xFF25A7B6),
+      dangerSoft: const Color(0x17E5484D),
+      onDangerSoft: const Color(0xFFD12F35),
+      info: const Color(0xFF3B82F6),
       onInfo: Colors.white,
-      infoSoft: const Color(0x33239CAA),
-      onInfoSoft: const Color(0xFF04677B),
-      scrim: const Color(0x66000000),
+      infoSoft: const Color(0x1A3B82F6),
+      onInfoSoft: const Color(0xFF1D5BC6),
+      scrim: const Color(0x66121216),
       shimmerBase: g[1],
       shimmerHighlight: g[0],
       chart: [
         a,
-        const Color(0xFF0AB35A),
-        const Color(0xFFE27522),
-        const Color(0xFF966BD1),
-        const Color(0xFF25A7B6),
-        const Color(0xFFC94AA8),
-        const Color(0xFFD1A300),
-        const Color(0xFFDA3A3A),
+        const Color(0xFF2BC9A0),
+        const Color(0xFFF5A524),
+        const Color(0xFFE5484D),
+        const Color(0xFF3B82F6),
+        const Color(0xFFD65DB1),
+        const Color(0xFF8BC34A),
+        const Color(0xFF5E5B70),
       ],
     );
   }
@@ -132,53 +136,53 @@ class UiColors extends ThemeExtension<UiColors> {
   /// lightened when needed so it stays readable on dark surfaces.
   factory UiColors.dark({Color? accent}) {
     const g = grayDark;
-    final a = accent == null ? defaultAccentDark : _tint(accent, minLightness: 0.55);
+    final a = accent == null ? defaultAccentDark : _tint(accent, minLightness: 0.6);
     return UiColors(
       brightness: Brightness.dark,
       background: g[0],
       surface: g[1],
-      surfaceMuted: overlay,
-      surfaceRaised: g[1],
-      surfaceInverse: g[7],
+      surfaceMuted: overlayDark,
+      surfaceRaised: const Color(0xFF201F29),
+      surfaceInverse: g[8],
       onSurfaceInverse: g[0],
-      border: overlay,
+      border: g[2],
       borderStrong: g[3],
       text: g[8],
-      textMuted: g[5],
-      textSubtle: g[4],
-      textDisabled: g[3],
+      textMuted: g[6],
+      textSubtle: g[5],
+      textDisabled: g[4],
       accent: a,
       onAccent: _on(a),
-      accentSoft: a.withValues(alpha: 0.25),
-      onAccentSoft: _tint(a, minLightness: 0.75),
-      success: const Color(0xFF0AB35A),
-      onSuccess: Colors.white,
-      successSoft: const Color(0x4D09A854),
-      onSuccessSoft: const Color(0xFF54C981),
-      warning: const Color(0xFFD69400),
-      onWarning: Colors.white,
-      warningSoft: const Color(0x4DD19000),
-      onWarningSoft: const Color(0xFFF3B344),
-      danger: const Color(0xFFDA3A3A),
-      onDanger: Colors.white,
-      dangerSoft: const Color(0x4DD93535),
-      onDangerSoft: const Color(0xFFEF6262),
-      info: const Color(0xFF25A7B6),
-      onInfo: Colors.white,
-      infoSoft: const Color(0x4D239CAA),
-      onInfoSoft: const Color(0xFF58C0D0),
+      accentSoft: a.withValues(alpha: 0.2),
+      onAccentSoft: _tint(a, minLightness: 0.8),
+      success: const Color(0xFF3CCB8A),
+      onSuccess: g[0],
+      successSoft: const Color(0x333CCB8A),
+      onSuccessSoft: const Color(0xFF75E0AE),
+      warning: const Color(0xFFF5C330),
+      onWarning: g[0],
+      warningSoft: const Color(0x33F5C330),
+      onWarningSoft: const Color(0xFFF8D574),
+      danger: const Color(0xFFF0656A),
+      onDanger: g[0],
+      dangerSoft: const Color(0x33F0656A),
+      onDangerSoft: const Color(0xFFF79A9D),
+      info: const Color(0xFF60A0FA),
+      onInfo: g[0],
+      infoSoft: const Color(0x3360A0FA),
+      onInfoSoft: const Color(0xFF9CC4FC),
       scrim: const Color(0x99000000),
       shimmerBase: g[1],
       shimmerHighlight: g[2],
       chart: [
         a,
-        const Color(0xFF54C981),
-        const Color(0xFFF18D4B),
-        const Color(0xFFB28FE0),
-        const Color(0xFF58C0D0),
-        const Color(0xFFDE6EC6),
-        const Color(0xFFEFCA43),
-        const Color(0xFFEF6262),
+        const Color(0xFF4FD8B4),
+        const Color(0xFFF7B955),
+        const Color(0xFFF0656A),
+        const Color(0xFF60A0FA),
+        const Color(0xFFE283C8),
+        const Color(0xFFA5D46F),
+        const Color(0xFFB9B6C8),
       ],
     );
   }
@@ -267,21 +271,20 @@ class UiColors extends ThemeExtension<UiColors> {
 
   /// The four colors of a [UiStatus].
   UiTone tone(UiStatus status) => switch (status) {
-        UiStatus.neutral => UiTone(color: text, onColor: background, soft: surfaceMuted, onSoft: text),
-        UiStatus.accent => UiTone(color: accent, onColor: onAccent, soft: accentSoft, onSoft: onAccentSoft),
-        UiStatus.info => UiTone(color: info, onColor: onInfo, soft: infoSoft, onSoft: onInfoSoft),
-        UiStatus.success => UiTone(color: success, onColor: onSuccess, soft: successSoft, onSoft: onSuccessSoft),
-        UiStatus.warning => UiTone(color: warning, onColor: onWarning, soft: warningSoft, onSoft: onWarningSoft),
-        UiStatus.danger => UiTone(color: danger, onColor: onDanger, soft: dangerSoft, onSoft: onDangerSoft),
-      };
+    UiStatus.neutral => UiTone(color: text, onColor: background, soft: surfaceMuted, onSoft: text),
+    UiStatus.accent => UiTone(color: accent, onColor: onAccent, soft: accentSoft, onSoft: onAccentSoft),
+    UiStatus.info => UiTone(color: info, onColor: onInfo, soft: infoSoft, onSoft: onInfoSoft),
+    UiStatus.success => UiTone(color: success, onColor: onSuccess, soft: successSoft, onSoft: onSuccessSoft),
+    UiStatus.warning => UiTone(color: warning, onColor: onWarning, soft: warningSoft, onSoft: onWarningSoft),
+    UiStatus.danger => UiTone(color: danger, onColor: onDanger, soft: dangerSoft, onSoft: onDangerSoft),
+  };
 
   /// Series color for chart index [i]; wraps around.
   Color chartColor(int i) => chart[i % chart.length];
 
   static UiColors of(BuildContext context) {
     final theme = Theme.of(context);
-    return theme.extension<UiColors>() ??
-        (theme.brightness == Brightness.dark ? UiColors.dark() : UiColors.light());
+    return theme.extension<UiColors>() ?? (theme.brightness == Brightness.dark ? UiColors.dark() : UiColors.light());
   }
 
   @override
@@ -331,14 +334,13 @@ class UiColors extends ThemeExtension<UiColors> {
       scrim: c(scrim, other.scrim),
       shimmerBase: c(shimmerBase, other.shimmerBase),
       shimmerHighlight: c(shimmerHighlight, other.shimmerHighlight),
-      chart: [
-        for (var i = 0; i < chart.length; i++) c(chart[i], other.chart[i % other.chart.length]),
-      ],
+      chart: [for (var i = 0; i < chart.length; i++) c(chart[i], other.chart[i % other.chart.length])],
     );
   }
 
-  static Color _on(Color c) =>
-      ThemeData.estimateBrightnessForColor(c) == Brightness.dark ? Colors.white : const Color(0xFF0C0C0F);
+  // White on mid-tone accents (coral, violet, blue); near-black only on
+  // really light ones (yellow, mint).
+  static Color _on(Color c) => c.computeLuminance() > 0.45 ? const Color(0xFF121216) : Colors.white;
 
   static Color _shade(Color c, {required double maxLightness}) {
     final hsl = HSLColor.fromColor(c);

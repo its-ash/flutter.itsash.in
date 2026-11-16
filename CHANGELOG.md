@@ -1,3 +1,15 @@
+## 4.0.0
+
+Visual redesign to the **Nova** design system (spec in `DESIGN.md`). No public API is removed; apps only need `flutter pub upgrade theme`, but layouts get taller (48 px buttons and fields) and rounder.
+
+* Fields (text, search, select, OTP, tags) are outline only: page-colored fill, 1 px `borderStrong` outline, 1.5 px accent when focused, no glow or hover ring. Floating `UiBottomNav` uses radius 14 instead of a pill.
+* Colors: coral accent `#FF7E70` (`#FF8F83` in dark), white `onAccent` unless the accent is very light, violet-tinted gray scale, `surfaceMuted` Overlay is now `#6B5FB0` at 10%, `border` is an opaque hairline `#ECEBF2`, new status colors (red `#E5484D`, yellow `#F2B705`, green `#17B26A`, blue `#3B82F6`), and a dark inverse surface `#161616` in light mode.
+* Type: Outfit instead of Inter, weights 400 / 500 / 600, body 15/22, screen titles 32/40.
+* Tokens: radius 6 / 10 / 14 / 24 / 32 / full, page padding 20, `UiSize` 36 / 44 / 52 with icon 16 / 20 / 22 and label 13 / 15 / 17, softer violet-tinted shadows.
+* Components: every button is a pill (40 / 48 / 56) and every icon button a circle; chips 32 / 40 / 48 with a soft fill by default and no check mark; fields 40 / 48 / 56; `UiStepper` is a pill with the body font; outlined `UiCard` is the page color with a hairline border; slider and progress use the accent; list rows 52; dialogs and sheets radius 32.
+* New: `UiPromoCard`, `UiPromoBanner`, `UiMediaCard`, `UiOptionTiles`, `UiColors.overlayDark`.
+* Gallery (`example/`): Android target, new Showcase (shop, product, cart screens) and Sizes tabs. `make android` installs it on a connected phone.
+
 ## 3.0.0
 
 Visual redesign to the Ash Theme Figma file (based on Lucent UI V4). No public API is removed; apps only need `flutter pub upgrade theme`.

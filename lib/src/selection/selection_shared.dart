@@ -3,8 +3,8 @@ part of 'ui_selection.dart';
 /// Opacity of a disabled control.
 const double _kDisabledOpacity = 0.45;
 
-/// Line height of a `bodyMedium` label (14 / 20).
-const double _kLabelLineHeight = 20;
+/// Line height of a `bodyMedium` label (15 / 22).
+const double _kLabelLineHeight = 22;
 
 /// Interaction state of a [_Pressable].
 @immutable

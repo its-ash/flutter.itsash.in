@@ -7,7 +7,8 @@ import 'package:theme/src/foundation/foundation.dart';
 import 'package:theme/src/input/field_style.dart';
 import 'package:theme/src/input/ui_field_label.dart';
 
-/// Compact "− value +" control for numbers. Hold a button to repeat.
+/// Compact "− value +" pill for numbers (the Nova cart quantity). Hold a
+/// button to repeat.
 /// Works with `int` or `double` values. A null [onChanged] disables it.
 ///
 /// ```dart
@@ -180,7 +181,7 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
       onLongPressCancel: _stopRepeat,
       child: IconButton(
         onPressed: can ? () => _bump(dir) : null,
-        icon: Icon(icon, size: 16, semanticLabel: tooltip),
+        icon: Icon(icon, size: s.iconSize - 2, semanticLabel: tooltip),
         color: c.text,
         disabledColor: c.textDisabled,
         style: IconButton.styleFrom(
@@ -188,7 +189,7 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
           minimumSize: Size.square(fieldHeight(s)),
           padding: EdgeInsets.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.md)),
+          shape: const CircleBorder(),
         ),
       ),
     );
@@ -198,9 +199,10 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final s = widget.size;
-    final style = UiTypography.mono(
-      fontSize: s.fontSize + 1,
-      fontWeight: FontWeight.w600,
+    final style = (context.text.labelLarge ?? const TextStyle()).copyWith(
+      fontSize: s.fontSize,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
       color: _enabled ? c.text : c.textDisabled,
     );
     final signed = widget.min == null || widget.min! < 0;
@@ -253,7 +255,7 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
 
     return Container(
       height: fieldHeight(s),
-      decoration: BoxDecoration(color: c.surfaceMuted, borderRadius: UiRadius.all(UiRadius.md)),
+      decoration: BoxDecoration(color: c.surfaceMuted, borderRadius: UiRadius.all(UiRadius.full)),
       child: Row(
         mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
         children: [
@@ -264,7 +266,7 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
             SizedBox(width: 64, child: center)
           else
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 40, maxWidth: 96),
+              constraints: const BoxConstraints(minWidth: 24, maxWidth: 96),
               child: IntrinsicWidth(child: center),
             ),
           _button(Icons.add_rounded, 'Increase', 1, _canInc),

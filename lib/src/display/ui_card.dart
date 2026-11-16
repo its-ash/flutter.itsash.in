@@ -4,7 +4,8 @@ import 'package:theme/src/foundation/foundation.dart';
 
 /// Visual style of a [UiCard].
 enum UiCardVariant {
-  /// Gray-2 surface, radius 12, no border and no shadow. The default.
+  /// Page-colored fill with a 1 px hairline border, radius 24. The default
+  /// (Nova cart item card).
   outlined,
 
   /// Translucent Overlay fill, no border.
@@ -78,11 +79,16 @@ class _UiCardState extends State<UiCard> {
     final selected = widget.selected;
 
     final Color fill = switch (widget.variant) {
-      UiCardVariant.outlined || UiCardVariant.elevated => colors.surface,
+      UiCardVariant.outlined => colors.background,
+      UiCardVariant.elevated => colors.surfaceRaised,
       UiCardVariant.filled => colors.surfaceMuted,
       UiCardVariant.ghost => Colors.transparent,
     };
-    final Color borderColor = selected ? colors.accent : Colors.transparent;
+    final Color borderColor = selected
+        ? colors.accent
+        : widget.variant == UiCardVariant.outlined
+        ? colors.border
+        : Colors.transparent;
 
     final sections = <Widget>[
       if (widget.header != null) ...[Padding(padding: widget.padding, child: widget.header), const Divider(height: 1)],

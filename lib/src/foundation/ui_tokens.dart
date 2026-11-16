@@ -12,23 +12,28 @@ abstract final class UiSpace {
   static const double xxxl = 48;
 
   /// Default horizontal page padding.
-  static const double page = 16;
+  static const double page = 20;
 }
 
-/// Corner radius scale (Ash Theme "Border radius", mobile values).
+/// Corner radius scale (Nova, see `DESIGN.md`). Soft and round: actions are
+/// pills, everything else uses one of these steps.
 abstract final class UiRadius {
-  /// Checkboxes, small tags.
-  static const double xs = 4;
-  static const double sm = 6;
+  /// Checkboxes, small tags, badges.
+  static const double xs = 6;
 
-  /// Buttons, fields, tiles.
-  static const double md = 8;
+  /// Tooltips, menu rows, size tiles in a dense grid.
+  static const double sm = 10;
 
-  /// Cards, sheets, dialogs.
-  static const double lg = 12;
-  static const double xl = 20;
+  /// Fields, option tiles, image thumbnails, list rows.
+  static const double md = 14;
 
-  /// Pills: controls, chips, segmented controls, avatars.
+  /// Cards, promo banners, image tiles, list groups.
+  static const double lg = 24;
+
+  /// Sheets, dialogs, full-bleed panels.
+  static const double xl = 32;
+
+  /// Pills: buttons, chips, segmented controls, steppers, avatars.
   static const double full = 999;
 
   static BorderRadius all(double r) => BorderRadius.all(Radius.circular(r));
@@ -51,36 +56,35 @@ abstract final class UiMotion {
       MediaQuery.maybeDisableAnimationsOf(context) ?? false ? Duration.zero : d;
 }
 
-/// The three shadow levels of the design ("shadow/level 1..3"). Each is a
-/// tight shadow (Shadow2) plus a wide one (Shadow1); both are stronger in
-/// dark mode.
+/// The three shadow levels of the design. Each is a tight shadow plus a wide,
+/// soft one tinted with the violet-gray ink; both are stronger in dark mode.
 abstract final class UiShadows {
-  static Color _s1(Brightness b) => b == Brightness.dark ? const Color(0x80000000) : const Color(0x26000000);
-  static Color _s2(Brightness b) => b == Brightness.dark ? const Color(0x4D000000) : const Color(0x14000000);
+  static Color _s1(Brightness b) => b == Brightness.dark ? const Color(0x80000000) : const Color(0x1F2E2A4D);
+  static Color _s2(Brightness b) => b == Brightness.dark ? const Color(0x4D000000) : const Color(0x0F2E2A4D);
 
   /// Level 1: slider thumbs, small raised controls.
   static List<BoxShadow> sm(Brightness b) => [
-        BoxShadow(color: _s2(b), blurRadius: 4, offset: const Offset(0, 2)),
-        BoxShadow(color: _s1(b), blurRadius: 9, offset: const Offset(0, 3)),
-      ];
+    BoxShadow(color: _s2(b), blurRadius: 4, offset: const Offset(0, 2)),
+    BoxShadow(color: _s1(b), blurRadius: 9, offset: const Offset(0, 3)),
+  ];
 
   /// Level 2: menus, popovers, toasts.
   static List<BoxShadow> md(Brightness b) => [
-        BoxShadow(color: _s2(b), blurRadius: 7, offset: const Offset(0, 4)),
-        BoxShadow(color: _s1(b), blurRadius: 24, offset: const Offset(0, 8)),
-      ];
+    BoxShadow(color: _s2(b), blurRadius: 7, offset: const Offset(0, 4)),
+    BoxShadow(color: _s1(b), blurRadius: 24, offset: const Offset(0, 8)),
+  ];
 
   /// Level 3: dialogs and sheets.
   static List<BoxShadow> lg(Brightness b) => [
-        BoxShadow(color: _s2(b), blurRadius: 32, offset: const Offset(0, 16)),
-        BoxShadow(color: _s1(b), blurRadius: 8, offset: const Offset(0, 4)),
-      ];
+    BoxShadow(color: _s2(b), blurRadius: 32, offset: const Offset(0, 16)),
+    BoxShadow(color: _s1(b), blurRadius: 8, offset: const Offset(0, 4)),
+  ];
 
   /// Hover / focus ring drawn around buttons, controls and fields: a 4 px
   /// outer ring of [color] at 50% (the design's 4 px stroke).
   static List<BoxShadow> ring(Color color) => [
-        BoxShadow(color: color.withValues(alpha: color.a * 0.5), spreadRadius: 4),
-      ];
+    BoxShadow(color: color.withValues(alpha: color.a * 0.5), spreadRadius: 4),
+  ];
 }
 
 /// Window size classes (Material 3 widths).
@@ -100,10 +104,10 @@ enum UiBreakpoint {
   static UiBreakpoint of(double width) => width < 600
       ? compact
       : width < 840
-          ? medium
-          : width < 1200
-              ? expanded
-              : large;
+      ? medium
+      : width < 1200
+      ? expanded
+      : large;
 
   bool operator >=(UiBreakpoint other) => index >= other.index;
   bool operator <(UiBreakpoint other) => index < other.index;

@@ -193,18 +193,9 @@ class _UiTagInputState extends State<UiTagInput> {
             ),
             alignment: AlignmentDirectional.centerStart,
             decoration: BoxDecoration(
-              color: c.surfaceMuted,
+              color: fieldFill(c),
               borderRadius: fieldRadius(hasError: hasError),
-              border: Border.all(
-                color: hasError
-                    ? c.danger
-                    : focused
-                    ? c.accent
-                    : Colors.transparent,
-              ),
-              boxShadow: focused && enabled && !hasError
-                  ? [BoxShadow(color: c.accent.withValues(alpha: 0.5), spreadRadius: 2)]
-                  : null,
+              border: Border.fromBorderSide(fieldBorder(c, focused: focused, hasError: hasError, enabled: enabled)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

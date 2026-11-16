@@ -44,9 +44,9 @@ _Palette _variantPalette(UiColors c, UiButtonVariant v, UiStatus? status, Set<Wi
   const clear = Colors.transparent;
   if (states.contains(WidgetState.disabled)) {
     return switch (v) {
-      UiButtonVariant.primary => _Palette(c.gray(2), c.gray(4), bold: true),
-      UiButtonVariant.danger => _Palette(c.gray(2), c.gray(4), bold: true),
-      UiButtonVariant.secondary || UiButtonVariant.soft => _Palette(c.gray(2), c.gray(4)),
+      UiButtonVariant.primary => _Palette(c.gray(3), c.gray(5), bold: true),
+      UiButtonVariant.danger => _Palette(c.gray(3), c.gray(5), bold: true),
+      UiButtonVariant.secondary || UiButtonVariant.soft => _Palette(c.gray(2), c.gray(5)),
       UiButtonVariant.outline => _Palette(clear, c.gray(3), border: c.gray(3)),
       UiButtonVariant.ghost || UiButtonVariant.link => _Palette(clear, c.gray(4)),
     };
@@ -61,7 +61,11 @@ _Palette _variantPalette(UiColors c, UiButtonVariant v, UiStatus? status, Set<Wi
       bold: true,
     ),
     // Dim.
-    UiButtonVariant.secondary => _Palette(c.surfaceMuted, tone?.color ?? c.gray(7), ring: c.gray(5).withValues(alpha: 0.4)),
+    UiButtonVariant.secondary => _Palette(
+      c.surfaceMuted,
+      tone?.color ?? c.text,
+      ring: c.gray(5).withValues(alpha: 0.4),
+    ),
     UiButtonVariant.soft => _Palette(
       tone?.soft ?? c.accentSoft,
       tone?.onSoft ?? c.onAccentSoft,
@@ -70,11 +74,11 @@ _Palette _variantPalette(UiColors c, UiButtonVariant v, UiStatus? status, Set<Wi
     // Ghost (outlined).
     UiButtonVariant.outline => _Palette(
       clear,
-      tone?.color ?? c.gray(7),
-      border: tone?.color ?? c.borderStrong,
+      tone?.color ?? c.text,
+      border: tone?.color ?? c.border,
       ring: (tone?.color ?? c.gray(3)).withValues(alpha: tone == null ? 1 : 0.4),
     ),
-    UiButtonVariant.ghost => _Palette(clear, tone?.color ?? c.gray(7), ring: c.surfaceMuted),
+    UiButtonVariant.ghost => _Palette(clear, tone?.color ?? c.text, ring: c.surfaceMuted),
     UiButtonVariant.danger => _Palette(c.danger, c.onDanger, ring: c.danger.withValues(alpha: 0.5), bold: true),
     UiButtonVariant.link => _Palette(clear, tone?.color ?? c.accent),
   };
@@ -95,44 +99,44 @@ _Palette _togglePalette(UiColors c, bool selected, Set<WidgetState> states) {
   }
   final base = selected
       ? _Palette(c.accent, c.onAccent, ring: c.accent.withValues(alpha: 0.5), bold: true)
-      : _Palette(c.surfaceMuted, c.gray(7), ring: c.gray(5).withValues(alpha: 0.4));
+      : _Palette(c.surfaceMuted, c.text, ring: c.gray(5).withValues(alpha: 0.4));
   return _interactive(c, base, states);
 }
 
-/// Button height for [size]: 28 / 36 / 44 (Figma button is 36).
+/// Button height for [size]: 40 / 48 / 56 (Nova "Add to Bag" is 56).
+/// Icon-only buttons are circles of the same diameter.
 double _buttonHeight(UiSize size) => switch (size) {
-  UiSize.sm => 28,
-  UiSize.md => 36,
-  UiSize.lg => 44,
+  UiSize.sm => 40,
+  UiSize.md => 48,
+  UiSize.lg => 56,
 };
 
-/// Horizontal button padding for [size] (Figma md: 32).
+/// Horizontal button padding for [size].
 double _buttonPadding(UiSize size) => switch (size) {
-  UiSize.sm => 16,
-  UiSize.md => 32,
-  UiSize.lg => 40,
-};
-
-/// Control (pill) height for [size]: 24 / 28 / 36 (Figma "control":
-/// caption 24, body 28).
-double _controlHeight(UiSize size) => switch (size) {
-  UiSize.sm => 24,
+  UiSize.sm => 20,
   UiSize.md => 28,
-  UiSize.lg => 36,
+  UiSize.lg => 32,
 };
 
-/// Horizontal control padding for [size] (Figma: 8 caption, 12 body).
+/// Control (chip, segment, toggle) height for [size]: 32 / 40 / 48.
+double _controlHeight(UiSize size) => switch (size) {
+  UiSize.sm => 32,
+  UiSize.md => 40,
+  UiSize.lg => 48,
+};
+
+/// Horizontal control padding for [size].
 double _controlPadding(UiSize size) => switch (size) {
-  UiSize.sm => 8,
-  UiSize.md => 12,
-  UiSize.lg => 16,
+  UiSize.sm => 14,
+  UiSize.md => 18,
+  UiSize.lg => 22,
 };
 
-/// Label size for [size]: caption 12 for small, body 14 otherwise.
-double _buttonFont(UiSize size) => size == UiSize.sm ? 12 : 14;
+/// Label size for [size]: 13 / 15 / 17.
+double _buttonFont(UiSize size) => size.fontSize;
 
-/// Icon size inside buttons: 16 (Figma icon frames), 20 for large.
-double _buttonIcon(UiSize size) => size == UiSize.lg ? 20 : 16;
+/// Icon size inside buttons: 16 / 20 / 22.
+double _buttonIcon(UiSize size) => size.iconSize;
 
 /// Hover, focus, press and keyboard handling shared by every button.
 class _Pressable extends StatefulWidget {
@@ -333,11 +337,12 @@ class _ButtonCore extends StatelessWidget {
 
   double get _height => height ?? (control ? _controlHeight(size) : _buttonHeight(size));
 
-  double get _radius => circular || control ? _height / 2 : UiRadius.md;
+  // Every button and control is a pill; icon-only buttons are circles.
+  double get _radius => _height / 2;
 
   double get _padding => control ? _controlPadding(size) : _buttonPadding(size);
 
-  double get _icon => control && size != UiSize.lg ? 16 : _buttonIcon(size);
+  double get _icon => control && size == UiSize.sm ? 16 : _buttonIcon(size);
 
   @override
   Widget build(BuildContext context) {
@@ -362,7 +367,7 @@ class _ButtonCore extends StatelessWidget {
         final ringColor = p.ring ?? (focused ? c.accent.withValues(alpha: 0.5) : null);
         final style = (context.text.labelLarge ?? const TextStyle()).copyWith(
           fontSize: _buttonFont(size),
-          fontWeight: p.bold ? FontWeight.w600 : FontWeight.w400,
+          fontWeight: p.bold ? FontWeight.w500 : FontWeight.w400,
           color: p.fg,
           decoration: underlineOnHover && hovered ? TextDecoration.underline : TextDecoration.none,
           decorationColor: p.fg,
@@ -380,7 +385,7 @@ class _ButtonCore extends StatelessWidget {
           ],
         );
         content = IconTheme.merge(
-          data: IconThemeData(color: p.fg, size: square && !control ? _icon + 4 : _icon),
+          data: IconThemeData(color: p.fg, size: square && !control ? _icon + 2 : _icon),
           child: AnimatedDefaultTextStyle(
             style: style,
             duration: duration,

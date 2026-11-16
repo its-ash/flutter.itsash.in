@@ -11,13 +11,13 @@ enum UiStatus {
 
   /// Default icon for this status (used by alerts, toasts, banners).
   IconData get icon => switch (this) {
-        UiStatus.neutral => Icons.circle_outlined,
-        UiStatus.accent => Icons.auto_awesome_rounded,
-        UiStatus.info => Icons.info_rounded,
-        UiStatus.success => Icons.check_circle_rounded,
-        UiStatus.warning => Icons.warning_rounded,
-        UiStatus.danger => Icons.error_rounded,
-      };
+    UiStatus.neutral => Icons.circle_outlined,
+    UiStatus.accent => Icons.auto_awesome_rounded,
+    UiStatus.info => Icons.info_rounded,
+    UiStatus.success => Icons.check_circle_rounded,
+    UiStatus.warning => Icons.warning_rounded,
+    UiStatus.danger => Icons.error_rounded,
+  };
 }
 
 /// Control size shared by buttons, inputs, chips, avatars and badges.
@@ -26,32 +26,32 @@ enum UiSize {
   md,
   lg;
 
-  /// Height of a single-line control of this size (design buttons and
-  /// fields are 36 at `md`).
+  /// Height of a single-line control of this size: 36 / 44 / 52. Buttons
+  /// are a step taller (40 / 48 / 56), see `DESIGN.md`.
   double get height => switch (this) {
-        UiSize.sm => 28,
-        UiSize.md => 36,
-        UiSize.lg => 44,
-      };
+    UiSize.sm => 36,
+    UiSize.md => 44,
+    UiSize.lg => 52,
+  };
 
   /// Icon size inside a control of this size.
   double get iconSize => switch (this) {
-        UiSize.sm => 16,
-        UiSize.md => 16,
-        UiSize.lg => 20,
-      };
+    UiSize.sm => 16,
+    UiSize.md => 20,
+    UiSize.lg => 22,
+  };
 
   /// Label font size inside a control of this size.
   double get fontSize => switch (this) {
-        UiSize.sm => 12,
-        UiSize.md => 14,
-        UiSize.lg => 16,
-      };
+    UiSize.sm => 13,
+    UiSize.md => 15,
+    UiSize.lg => 17,
+  };
 
   /// Horizontal padding inside a control of this size.
   double get padding => switch (this) {
-        UiSize.sm => 12,
-        UiSize.md => 16,
-        UiSize.lg => 20,
-      };
+    UiSize.sm => 14,
+    UiSize.md => 18,
+    UiSize.lg => 22,
+  };
 }

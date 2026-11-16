@@ -192,7 +192,14 @@ class _ChoiceCard extends StatelessWidget {
           ),
           if (choice.trailing != null) ...[
             const SizedBox(width: UiSpace.sm),
-            Text(choice.trailing!, style: context.text.titleSmall?.copyWith(color: selected ? c.onAccentSoft : c.text)),
+            Flexible(
+              child: Text(
+                choice.trailing!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.titleSmall?.copyWith(color: selected ? c.onAccentSoft : c.text),
+              ),
+            ),
           ],
         ],
       ),

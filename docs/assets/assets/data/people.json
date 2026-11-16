@@ -1,0 +1,8 @@
+[
+  {"id": "u1", "name": "Ana Lee", "handle": "analee", "avatar": "ana", "bio": "Runner, designer, coffee first.", "verified": true},
+  {"id": "u2", "name": "Ben Ortiz", "handle": "benortiz", "avatar": "ben", "bio": "Climbing on weekends.", "verified": false},
+  {"id": "u3", "name": "Cy Ray", "handle": "cyray", "avatar": "cy", "bio": "Photos of places I like.", "verified": false},
+  {"id": "u4", "name": "Dee Park", "handle": "deepark", "avatar": "dee", "bio": "Yoga teacher.", "verified": true},
+  {"id": "u5", "name": "Eli Moss", "handle": "elimoss", "avatar": "eli", "bio": "Lifting and cooking.", "verified": false},
+  {"id": "u6", "name": "Fay Kim", "handle": "faykim", "avatar": "fay", "bio": "Trips, maps, and trains.", "verified": false}
+]
