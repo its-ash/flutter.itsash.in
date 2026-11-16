@@ -193,10 +193,14 @@ class UiListTile extends StatelessWidget {
                 ),
               ),
             ),
+          // Flexible: a wide trailing control (a button with a long label)
+          // shrinks and ellipsizes instead of overflowing on narrow phones.
           if (trailing != null)
-            Padding(
-              padding: const EdgeInsets.only(left: UiSpace.sm),
-              child: trailing,
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: UiSpace.sm),
+                child: trailing,
+              ),
             ),
           if (chevron)
             Padding(
