@@ -129,7 +129,7 @@ void main() {
       await tester.tap(find.byType(UiIconButton));
       await tester.pumpAndSettle();
       expect(taps, 1);
-      expect(tester.getSize(find.byType(UiIconButton)), const Size(44, 44));
+      expect(tester.getSize(find.byType(UiIconButton)), const Size(36, 36));
     });
   });
 

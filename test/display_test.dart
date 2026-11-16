@@ -196,7 +196,7 @@ void main() {
         );
         expect(find.text('AL'), findsOneWidget);
         expect(find.byIcon(Icons.person_rounded), findsOneWidget);
-        expect(tester.getSize(find.byType(UiAvatar).last), const Size(56, 56));
+        expect(tester.getSize(find.byType(UiAvatar).last), const Size(96, 96));
       });
     }
 

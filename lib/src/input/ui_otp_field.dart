@@ -143,9 +143,7 @@ class _UiOtpFieldState extends State<UiOtpField> {
                 ? c.danger
                 : active
                 ? c.accent
-                : filled
-                ? c.borderStrong
-                : c.border;
+                : Colors.transparent;
             return AnimatedContainer(
               duration: context.motion(UiMotion.fast),
               curve: UiMotion.standard,
@@ -153,9 +151,12 @@ class _UiOtpFieldState extends State<UiOtpField> {
               height: boxH,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: widget.enabled ? (filled ? c.surface : c.surfaceMuted) : c.surfaceMuted.withValues(alpha: 0.6),
+                color: c.surfaceMuted,
                 borderRadius: UiRadius.all(UiRadius.md),
-                border: Border.all(color: borderColor, width: active || hasError ? 1.5 : 1),
+                border: Border.all(color: borderColor),
+                boxShadow: active && !hasError
+                    ? [BoxShadow(color: c.accent.withValues(alpha: 0.5), spreadRadius: 2)]
+                    : null,
               ),
               child: filled
                   ? widget.obscure

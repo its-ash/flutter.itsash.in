@@ -39,11 +39,7 @@ class _StateView extends StatelessWidget {
               Container(
                 width: circle,
                 height: circle,
-                decoration: BoxDecoration(
-                  color: tone.soft,
-                  shape: BoxShape.circle,
-                  border: status == UiStatus.neutral ? Border.all(color: c.border) : null,
-                ),
+                decoration: BoxDecoration(color: tone.soft, shape: BoxShape.circle),
                 child: Icon(
                   icon,
                   size: compact ? 22 : 32,
@@ -53,10 +49,10 @@ class _StateView extends StatelessWidget {
               SizedBox(height: compact ? UiSpace.md : UiSpace.lg),
               Semantics(
                 header: true,
-                child: Text(title, textAlign: TextAlign.center, style: compact ? t.titleSmall : t.titleLarge),
+                child: Text(title, textAlign: TextAlign.center, style: compact ? t.titleSmall : t.headlineSmall),
               ),
               if (message != null) ...[
-                const SizedBox(height: UiSpace.xs),
+                SizedBox(height: compact ? UiSpace.xs : UiSpace.sm),
                 Text(
                   message!,
                   textAlign: TextAlign.center,
@@ -144,9 +140,15 @@ class UiErrorState extends StatelessWidget {
     compact: compact,
     action: onRetry == null
         ? null
-        : OutlinedButton.icon(
+        // "Dim" button: Overlay fill, regular label.
+        : FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded, size: 18),
+            style: FilledButton.styleFrom(
+              backgroundColor: context.colors.surfaceMuted,
+              foregroundColor: context.colors.gray(7),
+              textStyle: context.text.bodyMedium,
+            ),
+            icon: const Icon(Icons.refresh_rounded, size: 16),
             label: Text(retryLabel),
           ),
   );
@@ -230,7 +232,6 @@ class UiLoadingOverlay extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: c.surfaceRaised,
                             borderRadius: UiRadius.all(UiRadius.lg),
-                            border: Border.all(color: c.border),
                             boxShadow: context.shadowMd,
                           ),
                           child: Row(
@@ -244,7 +245,7 @@ class UiLoadingOverlay extends StatelessWidget {
                                     message!,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                                    style: t.bodyMedium,
                                   ),
                                 ),
                               ],

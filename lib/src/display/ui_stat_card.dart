@@ -103,7 +103,7 @@ class UiStatCard extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: text.bodyMedium?.copyWith(color: colors.textMuted, fontWeight: FontWeight.w500),
+                  style: text.bodyMedium?.copyWith(color: colors.textSubtle),
                 ),
               ),
               if (icon != null) ...[const SizedBox(width: UiSpace.sm), UiIconBox(icon!, status: iconStatus, size: 28)],
@@ -127,7 +127,7 @@ class UiStatCard extends StatelessWidget {
                   Container(
                     key: const ValueKey('ui-stat-delta'),
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: tone.soft, borderRadius: UiRadius.all(UiRadius.full)),
+                    decoration: BoxDecoration(color: tone.soft, borderRadius: UiRadius.all(2)),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

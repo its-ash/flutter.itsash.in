@@ -76,8 +76,8 @@ abstract final class UiMenu {
             PopupMenuItem<T>(
               value: item.value,
               enabled: item.enabled,
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: UiSpace.md),
+              height: 36,
+              padding: const EdgeInsets.symmetric(horizontal: UiSpace.page),
               child: _MenuRow(item: item),
             ),
       ],
@@ -106,7 +106,7 @@ class _MenuRow extends StatelessWidget {
         : c.textMuted;
     return Row(
       children: [
-        if (item.icon != null) ...[Icon(item.icon, size: 18, color: iconColor), const SizedBox(width: UiSpace.md)],
+        if (item.icon != null) ...[Icon(item.icon, size: 16, color: iconColor), const SizedBox(width: UiSpace.md)],
         Expanded(
           child: Text(
             item.label ?? '',
@@ -117,7 +117,7 @@ class _MenuRow extends StatelessWidget {
         ),
         if (item.shortcut != null) ...[
           const SizedBox(width: UiSpace.lg),
-          Text(item.shortcut!, style: t.labelMedium?.copyWith(color: c.textSubtle)),
+          Text(item.shortcut!, style: t.bodyMedium?.copyWith(color: c.textSubtle)),
         ],
       ],
     );
@@ -168,6 +168,7 @@ class UiMenuButton<T> extends StatelessWidget {
           label: tooltip,
           child: InkWell(
             borderRadius: UiRadius.all(UiRadius.md),
+            hoverColor: context.colors.surfaceMuted,
             onTap: enabled ? () => _open(ctx) : null,
             child: Opacity(opacity: enabled ? 1 : 0.5, child: child),
           ),

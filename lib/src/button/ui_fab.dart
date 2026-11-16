@@ -1,6 +1,6 @@
 part of 'ui_button.dart';
 
-/// Floating action button. Icon only, or extended with a label.
+/// Floating action button: a Primary pill. Icon only, or extended with a label.
 /// Works as `Scaffold.floatingActionButton`.
 ///
 /// ```dart
@@ -33,7 +33,7 @@ class UiFab extends StatelessWidget {
       palette: (c, s) => _variantPalette(c, variant, null, s),
       size: UiSize.lg,
       height: height,
-      radius: UiRadius.lg,
+      circular: true,
       square: !extended,
       shadow: context.shadowMd,
       tooltip: tooltip,

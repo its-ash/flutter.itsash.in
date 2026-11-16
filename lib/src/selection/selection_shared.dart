@@ -3,8 +3,8 @@ part of 'ui_selection.dart';
 /// Opacity of a disabled control.
 const double _kDisabledOpacity = 0.45;
 
-/// Line height of a `bodyMedium` label (14 * 1.5).
-const double _kLabelLineHeight = 21;
+/// Line height of a `bodyMedium` label (14 / 20).
+const double _kLabelLineHeight = 20;
 
 /// Interaction state of a [_Pressable].
 @immutable
@@ -68,9 +68,8 @@ class _PressableState extends State<_Pressable> {
   }
 }
 
-/// Soft accent ring shown around a focused control.
-List<BoxShadow>? _focusRing(UiColors c, bool focused) =>
-    focused ? [BoxShadow(color: c.accent.withValues(alpha: 0.35), spreadRadius: 3)] : null;
+/// 4 px Primary ring (50%) shown around a focused control.
+List<BoxShadow>? _focusRing(UiColors c, bool focused) => focused ? UiShadows.ring(c.accent) : null;
 
 /// A control with an optional label and description to its right.
 /// Always at least 40 x 40 so it is easy to tap.
@@ -114,7 +113,7 @@ class _LabeledRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.text.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 color: enabled ? c.text : c.textDisabled,
               ),
             ),
@@ -123,7 +122,7 @@ class _LabeledRow extends StatelessWidget {
               description!,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: context.text.bodySmall?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+              style: context.text.bodySmall?.copyWith(color: enabled ? c.textSubtle : c.textDisabled),
             ),
         ],
       ),
@@ -145,7 +144,8 @@ class _LabeledRow extends StatelessWidget {
                   padding: EdgeInsets.only(top: controlTop),
                   child: dimmedControl,
                 ),
-                const SizedBox(width: UiSpace.md),
+                // Figma checklist / radio list item: 10 px gap.
+                const SizedBox(width: 10),
                 if (constraints.hasBoundedWidth) Flexible(child: text) else text,
               ],
             ),

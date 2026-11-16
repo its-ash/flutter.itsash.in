@@ -48,11 +48,11 @@ class UiKeyValue extends StatelessWidget {
       label,
       maxLines: stacked ? 1 : 2,
       overflow: TextOverflow.ellipsis,
-      style: text.bodyMedium?.copyWith(color: colors.textMuted),
+      style: text.bodyMedium?.copyWith(color: colors.textSubtle),
     );
     final valueStyle = mono
         ? UiTypography.mono(fontSize: 13.5, color: colors.text)
-        : text.bodyMedium?.copyWith(color: colors.text, fontWeight: FontWeight.w500);
+        : text.bodyMedium?.copyWith(color: colors.text);
     final Widget valueWidget =
         child ??
         Text(

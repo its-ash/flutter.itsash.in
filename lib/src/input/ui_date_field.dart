@@ -295,12 +295,7 @@ class _PickerField<V> extends StatelessWidget {
                   },
             trailing: [
               if (clearable && enabled && value != null)
-                FieldIconButton(
-                  icon: Icons.close_rounded,
-                  tooltip: 'Clear',
-                  size: size.iconSize,
-                  onPressed: () => set(null),
-                )
+                FieldIconButton(icon: Icons.close_rounded, tooltip: 'Clear', onPressed: () => set(null))
               else
                 const SizedBox(width: UiSpace.sm),
             ],

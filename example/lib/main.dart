@@ -15,7 +15,7 @@ import 'pages/selection_page.dart';
 
 void main() => runApp(const GalleryApp());
 
-/// The design system's default accent (indigo).
+/// The design system's default accent (Primary blue).
 final Color defaultAccent = UiColors.light().accent;
 
 /// Accent choices for the theme settings sheet. The first one is the default.
@@ -26,7 +26,7 @@ final galleryAccents = <Color>[
   Colors.orange,
   Colors.green,
   Colors.deepPurple,
-  Colors.blue,
+  const Color(0xFFD1A300), // the design's "Yellow" primary
   Colors.red,
 ];
 
@@ -183,7 +183,7 @@ class _ThemeActions extends StatelessWidget {
             UiColorPicker(
               value: theme.accent ?? defaultAccent,
               colors: galleryAccents,
-              labels: const ['Indigo', 'Teal', 'Pink', 'Orange', 'Green', 'Purple', 'Blue', 'Red'],
+              labels: const ['Blue', 'Teal', 'Pink', 'Orange', 'Green', 'Purple', 'Yellow', 'Red'],
               onChanged: (c) => theme.accent = c == defaultAccent ? null : c,
             ),
           ],

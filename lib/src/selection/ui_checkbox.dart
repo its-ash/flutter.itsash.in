@@ -1,6 +1,7 @@
 part of 'ui_selection.dart';
 
-/// Rounded-square checkbox with an animated check mark, plus an optional
+/// 20 px checkbox (radius 4, gray fill with a 1 px outline; solid Primary
+/// when checked) with an animated check mark, plus an optional
 /// label and description. The whole row is tappable.
 ///
 /// ```dart
@@ -128,7 +129,7 @@ class _CheckboxMark extends StatelessWidget {
             painter: _CheckPainter(
               t: t,
               dash: value == null,
-              background: c.surface,
+              background: c.gray(2),
               border: state.hovered ? c.textSubtle : c.borderStrong,
               fill: c.accent,
               mark: c.onAccent,
@@ -162,10 +163,10 @@ class _CheckPainter extends CustomPainter {
     final rrect = RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(UiRadius.xs));
     canvas.drawRRect(rrect, Paint()..color = Color.lerp(background, fill, t)!);
     canvas.drawRRect(
-      rrect.deflate(0.75),
+      rrect.deflate(0.5),
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5
+        ..strokeWidth = 1
         ..color = Color.lerp(border, fill, t)!,
     );
     if (t <= 0) return;

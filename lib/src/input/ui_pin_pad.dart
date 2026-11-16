@@ -111,22 +111,41 @@ class _UiPinPadState extends State<UiPinPad> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : 320.0;
-          final gapX = (maxW * 0.06).clamp(UiSpace.md, UiSpace.xl);
-          final key = ((maxW - gapX * 2) / 3).clamp(48.0, 76.0);
-          final gapY = (key * 0.22).clamp(UiSpace.sm, UiSpace.lg);
+          // Figma keypad: 46 high keys, radius 6, 6 px gaps.
+          const gapX = 6.0;
+          const gapY = 6.0;
+          final key = ((maxW - gapX * 2) / 3).clamp(64.0, 120.0);
+          const letters = {
+            '2': 'ABC', '3': 'DEF', '4': 'GHI', '5': 'JKL', //
+            '6': 'MNO', '7': 'PQRS', '8': 'TUV', '9': 'WXYZ',
+          };
 
           Widget digit(String d) => _PadKey(
             size: key,
             filled: true,
             onTap: enabled ? () => _press(d) : null,
             semanticLabel: d,
-            child: Text(
-              d,
-              style: context.text.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: key * 0.36,
-                color: enabled ? c.text : c.textDisabled,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  d,
+                  style: context.text.bodyMedium?.copyWith(
+                    fontSize: 25,
+                    height: 1.1,
+                    color: enabled ? c.text : c.textDisabled,
+                  ),
+                ),
+                if (letters[d] != null)
+                  Text(
+                    letters[d]!,
+                    style: context.text.labelSmall?.copyWith(
+                      height: 1,
+                      letterSpacing: 1.5,
+                      color: enabled ? c.text : c.textDisabled,
+                    ),
+                  ),
+              ],
             ),
           );
 
@@ -138,12 +157,12 @@ class _UiPinPadState extends State<UiPinPad> {
           );
 
           final biometric = widget.onBiometric == null
-              ? SizedBox(width: key, height: key)
+              ? SizedBox(width: key, height: _PadKey.height)
               : _PadKey(
                   size: key,
                   onTap: enabled ? widget.onBiometric : null,
                   semanticLabel: 'Use biometrics',
-                  child: Icon(widget.biometricIcon, size: key * 0.4, color: enabled ? c.accent : c.textDisabled),
+                  child: Icon(widget.biometricIcon, size: 24, color: enabled ? c.accent : c.textDisabled),
                 );
           final back = AnimatedOpacity(
             opacity: _pin.isEmpty ? 0.35 : 1,
@@ -158,7 +177,7 @@ class _UiPinPadState extends State<UiPinPad> {
                     }
                   : null,
               semanticLabel: 'Delete',
-              child: Icon(Icons.backspace_outlined, size: key * 0.32, color: enabled ? c.text : c.textDisabled),
+              child: Icon(Icons.backspace_outlined, size: 22, color: enabled ? c.text : c.textDisabled),
             ),
           );
 
@@ -177,15 +196,12 @@ class _UiPinPadState extends State<UiPinPad> {
                           child: AnimatedContainer(
                             duration: context.motion(UiMotion.fast),
                             curve: UiMotion.bounce,
-                            width: i < _pin.length ? 14 : 12,
-                            height: i < _pin.length ? 14 : 12,
+                            width: 12,
+                            height: 12,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: i < _pin.length ? (hasError ? c.danger : c.accent) : Colors.transparent,
-                              border: Border.all(
-                                color: hasError ? c.danger : (i < _pin.length ? c.accent : c.borderStrong),
-                                width: 1.5,
-                              ),
+                              color: i < _pin.length ? (hasError ? c.danger : c.accent) : c.gray(2),
+                              border: i < _pin.length ? null : Border.all(color: hasError ? c.danger : c.borderStrong),
                             ),
                           ),
                         ),
@@ -242,6 +258,9 @@ class _PadKey extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool filled;
 
+  /// Key height (Figma keypad).
+  static const double height = 46;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -253,16 +272,16 @@ class _PadKey extends StatelessWidget {
       onTap: onTap,
       child: Material(
         color: filled ? c.surfaceMuted : Colors.transparent,
-        shape: const CircleBorder(),
+        shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.sm)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
-          customBorder: const CircleBorder(),
-          splashColor: c.accent.withValues(alpha: 0.14),
+          splashColor: c.surfaceMuted,
+          highlightColor: c.surfaceMuted,
           child: SizedBox(
             width: size,
-            height: size,
+            height: height,
             child: Center(child: child),
           ),
         ),

@@ -162,7 +162,7 @@ class _UiSearchFieldState extends State<UiSearchField> {
                     decoration: BoxDecoration(
                       color: c.accent,
                       shape: BoxShape.circle,
-                      border: Border.all(color: c.surfaceMuted, width: 1.5),
+                      border: Border.all(color: c.surfaceMutedSolid, width: 1.5),
                     ),
                   ),
                 ),
@@ -171,24 +171,26 @@ class _UiSearchFieldState extends State<UiSearchField> {
         ],
       ],
     );
-    return TextField(
-      controller: _controller,
-      focusNode: w.focusNode,
-      autofocus: w.autofocus,
+    return FieldFrame(
       enabled: w.enabled,
-      onChanged: _changed,
-      onSubmitted: w.onSubmitted,
-      textInputAction: TextInputAction.search,
-      textAlignVertical: TextAlignVertical.center,
-      style: fieldTextStyle(context, w.size, enabled: w.enabled),
-      decoration: fieldDecoration(
-        context,
-        hint: w.hint,
-        prefixIcon: Icons.search_rounded,
-        suffix: suffix,
-        size: w.size,
+      child: TextField(
+        controller: _controller,
+        focusNode: w.focusNode,
+        autofocus: w.autofocus,
         enabled: w.enabled,
-        radius: UiRadius.full,
+        onChanged: _changed,
+        onSubmitted: w.onSubmitted,
+        textInputAction: TextInputAction.search,
+        textAlignVertical: TextAlignVertical.center,
+        style: fieldTextStyle(context, w.size, enabled: w.enabled),
+        decoration: fieldDecoration(
+          context,
+          hint: w.hint,
+          prefixIcon: Icons.search_rounded,
+          suffix: suffix,
+          size: w.size,
+          enabled: w.enabled,
+        ),
       ),
     );
   }

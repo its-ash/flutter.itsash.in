@@ -8,7 +8,8 @@ String _percent(double v) => '${(v * 100).round()}%';
 
 Color _fill(UiColors c, UiStatus status) => c.tone(status).color;
 
-/// Horizontal progress bar. A null [value] shows an indeterminate bar.
+/// Horizontal progress bar (Figma "progress bar": 2 px, foreground fill on a
+/// gray-3 track). A null [value] shows an indeterminate bar.
 ///
 /// Value changes animate smoothly.
 ///
@@ -19,21 +20,21 @@ class UiProgressBar extends StatelessWidget {
   const UiProgressBar(
     this.value, {
     super.key,
-    this.status = UiStatus.accent,
+    this.status = UiStatus.neutral,
     this.label,
     this.showPercent = false,
-    this.height = 6,
+    this.height = 2,
   });
 
   /// Same as `UiProgressBar(null)`.
-  const UiProgressBar.indeterminate({super.key, this.status = UiStatus.accent, this.label, this.height = 6})
+  const UiProgressBar.indeterminate({super.key, this.status = UiStatus.neutral, this.label, this.height = 2})
     : value = null,
       showPercent = false;
 
   /// Progress from 0 to 1, or null for indeterminate.
   final double? value;
 
-  /// Fill color. Defaults to [UiStatus.accent].
+  /// Fill color. Defaults to [UiStatus.neutral] (the foreground color).
   final UiStatus status;
 
   /// Text above the bar, on the left.
@@ -51,15 +52,11 @@ class UiProgressBar extends StatelessWidget {
     final t = context.text;
     final v = value?.clamp(0.0, 1.0);
     final color = _fill(c, status);
-    final radius = UiRadius.all(UiRadius.full);
+    final radius = height > 2 ? UiRadius.all(UiRadius.full) : BorderRadius.zero;
+    final track = c.gray(3);
 
     final Widget bar = v == null
-        ? LinearProgressIndicator(
-            minHeight: height,
-            color: color,
-            backgroundColor: c.surfaceMuted,
-            borderRadius: radius,
-          )
+        ? LinearProgressIndicator(minHeight: height, color: color, backgroundColor: track, borderRadius: radius)
         : TweenAnimationBuilder<double>(
             tween: Tween(end: v),
             duration: context.motion(UiMotion.slow),
@@ -71,7 +68,7 @@ class UiProgressBar extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    ColoredBox(color: c.surfaceMuted),
+                    ColoredBox(color: track),
                     FractionallySizedBox(
                       alignment: AlignmentDirectional.centerStart,
                       widthFactor: x,
@@ -102,13 +99,13 @@ class UiProgressBar extends StatelessWidget {
                       label ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: t.labelMedium?.copyWith(color: c.textMuted),
+                      style: t.bodySmall?.copyWith(color: c.textSubtle),
                     ),
                   ),
                   if (showPercent && v != null)
                     Text(
                       _percent(v),
-                      style: t.labelMedium?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                      style: t.bodySmall?.copyWith(color: c.text, fontFeatures: const [FontFeature.tabularFigures()]),
                     ),
                 ],
               ),
@@ -132,7 +129,7 @@ class UiProgressRing extends StatelessWidget {
     this.value, {
     super.key,
     this.size = 44,
-    this.stroke = 4,
+    this.stroke = 3,
     this.status = UiStatus.accent,
     this.center,
     this.showPercent = false,
@@ -177,7 +174,7 @@ class UiProgressRing extends StatelessWidget {
         ? CircularProgressIndicator(
             strokeWidth: stroke,
             color: color,
-            backgroundColor: c.surfaceMuted,
+            backgroundColor: c.gray(3),
             strokeCap: StrokeCap.round,
           )
         : TweenAnimationBuilder<double>(
@@ -185,7 +182,7 @@ class UiProgressRing extends StatelessWidget {
             duration: context.motion(UiMotion.slow),
             curve: UiMotion.standard,
             builder: (context, x, _) => CustomPaint(
-              painter: _RingPainter(value: x, color: color, track: c.surfaceMuted, stroke: stroke),
+              painter: _RingPainter(value: x, color: color, track: c.gray(3), stroke: stroke),
             ),
           );
 
@@ -258,7 +255,7 @@ class UiSpinner extends StatelessWidget {
       child: SizedBox.square(
         dimension: size,
         child: CircularProgressIndicator(
-          strokeWidth: strokeWidth ?? (size / 10).clamp(1.5, 4.0),
+          strokeWidth: strokeWidth ?? (size / 10).clamp(1.5, 3.0),
           color: color ?? context.colors.accent,
           strokeCap: StrokeCap.round,
         ),

@@ -209,8 +209,10 @@ class _StepDot extends StatelessWidget {
     final c = context.colors;
     final (Color fill, Color border, Color fg) = switch (state) {
       _StepState.done => (c.accent, c.accent, c.onAccent),
-      _StepState.active => (c.accentSoft, c.accent, c.onAccentSoft),
-      _StepState.todo => (c.surface, c.borderStrong, c.textSubtle),
+      // Like the radio / checkbox: active = Primary outline, todo = gray-2
+      // fill with a gray-4 outline.
+      _StepState.active => (Colors.transparent, c.accent, c.accent),
+      _StepState.todo => (c.gray(2), c.borderStrong, c.textSubtle),
     };
     final Widget child;
     if (state == _StepState.done) {
@@ -218,10 +220,7 @@ class _StepDot extends StatelessWidget {
     } else if (icon != null) {
       child = Icon(icon, size: 16, color: fg);
     } else {
-      child = Text(
-        '$number',
-        style: context.text.labelMedium!.copyWith(color: fg, fontWeight: FontWeight.w700, letterSpacing: 0),
-      );
+      child = Text('$number', style: context.text.labelMedium!.copyWith(color: fg, letterSpacing: 0));
     }
     return AnimatedContainer(
       duration: context.motion(UiMotion.normal),
@@ -232,7 +231,7 @@ class _StepDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         shape: BoxShape.circle,
-        border: Border.all(color: border, width: state == _StepState.active ? 1.5 : 1),
+        border: Border.all(color: border),
       ),
       child: MediaQuery.withNoTextScaling(child: child),
     );
@@ -252,10 +251,10 @@ class _Line extends StatelessWidget {
       child: AnimatedContainer(
         duration: context.motion(UiMotion.normal),
         curve: UiMotion.standard,
-        width: vertical ? 2 : double.infinity,
-        height: vertical ? double.infinity : 2,
+        width: vertical ? 1 : double.infinity,
+        height: vertical ? double.infinity : 1,
         margin: vertical ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: UiSpace.xs),
-        decoration: BoxDecoration(color: active ? c.accent : c.border, borderRadius: UiRadius.all(UiRadius.full)),
+        decoration: BoxDecoration(color: active ? c.accent : c.gray(3)),
       ),
     );
   }

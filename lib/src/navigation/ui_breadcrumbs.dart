@@ -66,8 +66,10 @@ class UiBreadcrumbs extends StatelessWidget {
     final c = context.colors;
     final base = context.text.bodyMedium!;
     final onTap = this.onTap;
-    final style = base.copyWith(color: onTap == null ? c.textSubtle : c.textMuted);
-    final current = base.copyWith(color: c.text, fontWeight: FontWeight.w600);
+    // Figma "link": Primary 14 regular with a chevron; the current page is
+    // plain foreground text.
+    final style = base.copyWith(color: onTap == null ? c.textSubtle : c.accent, fontWeight: FontWeight.w400);
+    final current = base.copyWith(color: c.text, fontWeight: FontWeight.w400);
 
     return LayoutBuilder(
       builder: (context, box) {
@@ -85,7 +87,7 @@ class UiBreadcrumbs extends StatelessWidget {
             children.add(
               SizedBox(
                 width: _separatorWidth,
-                child: Icon(Icons.chevron_right_rounded, size: 16, color: c.textSubtle),
+                child: Icon(Icons.chevron_right_rounded, size: 16, color: onTap == null ? c.textSubtle : c.accent),
               ),
             );
           }

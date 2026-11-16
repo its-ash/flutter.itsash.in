@@ -26,23 +26,24 @@ enum UiSize {
   md,
   lg;
 
-  /// Height of a single-line control of this size.
+  /// Height of a single-line control of this size (design buttons and
+  /// fields are 36 at `md`).
   double get height => switch (this) {
-        UiSize.sm => 36,
-        UiSize.md => 44,
-        UiSize.lg => 52,
+        UiSize.sm => 28,
+        UiSize.md => 36,
+        UiSize.lg => 44,
       };
 
   /// Icon size inside a control of this size.
   double get iconSize => switch (this) {
         UiSize.sm => 16,
-        UiSize.md => 18,
+        UiSize.md => 16,
         UiSize.lg => 20,
       };
 
   /// Label font size inside a control of this size.
   double get fontSize => switch (this) {
-        UiSize.sm => 13,
+        UiSize.sm => 12,
         UiSize.md => 14,
         UiSize.lg => 16,
       };

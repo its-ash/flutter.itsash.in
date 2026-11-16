@@ -181,7 +181,7 @@ class _StrengthMeter extends StatelessWidget {
     final c = context.colors;
     final s = strength;
     final filled = s == null ? 0 : s.index + 1;
-    final color = s == null ? c.border : c.tone(s.status).color;
+    final color = s == null ? c.gray(3) : c.tone(s.status).color;
     return Semantics(
       label: 'Password strength: ${s?.label ?? 'none'}',
       child: Row(
@@ -192,9 +192,9 @@ class _StrengthMeter extends StatelessWidget {
               child: AnimatedContainer(
                 duration: context.motion(UiMotion.normal),
                 curve: UiMotion.standard,
-                height: 4,
+                height: 2,
                 decoration: BoxDecoration(
-                  color: i < filled ? color : c.border,
+                  color: i < filled ? color : c.gray(3),
                   borderRadius: UiRadius.all(UiRadius.full),
                 ),
               ),
@@ -208,7 +208,7 @@ class _StrengthMeter extends StatelessWidget {
               textAlign: TextAlign.end,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.text.labelMedium?.copyWith(color: s == null ? c.textSubtle : color),
+              style: context.text.bodySmall?.copyWith(color: s == null ? c.textSubtle : color),
             ),
           ),
         ],

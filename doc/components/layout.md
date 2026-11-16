@@ -18,6 +18,24 @@ UiScaffold(appBar: const UiAppBar(title: 'Profile'), scrollable: true, maxWidth:
 - `dismissKeyboard`: tap outside closes the keyboard. Default `true`.
 - `onRefresh`: pull to refresh (when `scrollable`).
 
+`scrollable: true` uses a `SingleChildScrollView`, so the whole body is built and laid out at once. That is fine for forms and settings. For long lists (hundreds of items) use `UiScaffold.slivers`:
+
+```dart
+UiScaffold.slivers(
+  appBar: const UiAppBar(title: 'Icons'),
+  gap: UiSpace.lg,
+  slivers: [
+    SliverToBoxAdapter(child: UiSearchField(onChanged: search)),
+    UiSliverResponsiveGrid(minItemWidth: 76, itemCount: icons.length, itemBuilder: (context, i) => IconCell(icons[i])),
+    UiSliverListGroup(header: 'Apps', itemCount: apps.length, itemBuilder: (context, i) => UiListTile(apps[i].name)),
+  ],
+);
+```
+
+- `slivers` (required): a `CustomScrollView` body. Only what is near the screen is built. Wrap plain widgets in `SliverToBoxAdapter`. Group slivers with `SliverMainAxisGroup`.
+- `gap`: space between the slivers. Default `0`.
+- Same `padding`, `maxWidth`, `safeArea`, `dismissKeyboard`, `onRefresh` and bars as `UiScaffold`. It always scrolls.
+
 ### UiContent
 Centers its child with a max width and page padding. The child fills the width up to the max.
 
@@ -107,6 +125,16 @@ UiResponsiveGrid(minItemWidth: 160, children: [for (final p in products) Product
 - `equalHeight`: items in a row match the tallest. Default `false`.
 - `UiResponsiveGrid.columnsFor(width, ...)`: the column count for a width.
 
+### UiSliverResponsiveGrid
+The lazy `UiResponsiveGrid`, as a sliver. It uses the same columns and looks the same, but only the rows near the screen are built. Use it for long grids (hundreds of icons, photos or products) in `UiScaffold.slivers` or a `CustomScrollView`. Items can have different heights: each row is as tall as its tallest item.
+
+```dart
+UiSliverResponsiveGrid(minItemWidth: 76, itemCount: icons.length, itemBuilder: (context, i) => IconCell(icons[i]));
+```
+
+- `itemCount`, `itemBuilder` (required).
+- `minItemWidth`, `spacing`, `runSpacing`, `maxColumns`, `equalHeight`: as in `UiResponsiveGrid`.
+
 ### UiResponsiveLayout
 Shows a different widget per size class (compact, medium, expanded, large). Missing classes fall back to the next smaller one.
 
@@ -135,7 +163,7 @@ UiSplitView(primary: list, secondary: selected == null ? null : Details(selected
 - `divider`: hairline between panes. Default `true`.
 
 ### UiBottomBar
-Sticky bottom action area with a top hairline and surface fill. Stays above the home indicator and the keyboard.
+Sticky bottom action area on the page background with a top Overlay rule. Stays above the home indicator and the keyboard.
 
 ```dart
 UiScaffold(body: form, bottomBar: UiBottomBar(child: FilledButton(onPressed: save, child: const Text('Save'))));
@@ -149,7 +177,7 @@ UiScaffold(body: form, bottomBar: UiBottomBar(child: FilledButton(onPressed: sav
 - `keyboardAware`: moves above the keyboard. Default `true`.
 
 ### UiSurface
-Generic container: surface fill, 1 px border, rounded corners, optional shadow, status tint and tap.
+Generic container: gray-2 surface fill, rounded corners, optional border, shadow, status tint and tap.
 
 ```dart
 UiSurface(tone: UiStatus.success, child: Text('Saved'));
@@ -158,10 +186,10 @@ UiSurface(tone: UiStatus.success, child: Text('Saved'));
 - `child` (required).
 - `padding`: default `EdgeInsets.all(16)`.
 - `margin`: default none.
-- `radius`: default `UiRadius.lg` (18).
+- `radius`: default `UiRadius.lg` (12).
 - `color`: default `colors.surface` (or the tone's soft color).
 - `tone`: `UiStatus` tint for fill and border.
-- `border`: 1 px border. Default `true`. `borderColor` overrides the color.
+- `border`: 1 px border. Default `false`. `borderColor` overrides the color.
 - `shadow`: such as `context.shadowMd`. Default none.
 - `onTap`: makes it tappable with a ripple.
 - `width`, `height`: fixed size.

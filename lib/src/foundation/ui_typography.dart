@@ -3,6 +3,25 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Type scale of the design system.
 ///
+/// Ash Theme type ramp (mobile sizes): two weights, regular 400 and bold 600,
+/// no letter spacing. The design uses SF Pro / Segoe UI, which cannot ship
+/// on Android, so the default font is Inter, the closest open match.
+///
+/// | Style | Design style | Size / line |
+/// |---|---|---|
+/// | displayLarge | display / 50 | 50 / 60 |
+/// | displayMedium | display / 37 | 37 / 44 |
+/// | displaySmall, headlineLarge | H1 | 29 / 36 |
+/// | headlineMedium | H2 | 24 / 32 |
+/// | headlineSmall | H3 | 21 / 24 |
+/// | titleLarge | H4 | 19 / 22 |
+/// | titleMedium | H6 | 17 / 22 |
+/// | titleSmall, labelLarge | body/normal bold | 14 / 20 |
+/// | bodyLarge | medium | 16 / 22 |
+/// | bodyMedium | body/normal regular | 14 / 20 |
+/// | bodySmall, labelMedium | body/small | 12 / 16 |
+/// | labelSmall | body/x_small | 10 / 14 |
+///
 /// The default font is Inter (from `google_fonts`). Pass a `fontFamily` to
 /// `UiTheme.light` / `UiTheme.dark` to use a bundled font instead, or set
 /// [UiTypography.useGoogleFonts] to `false` (tests, offline builds) to fall
@@ -13,31 +32,33 @@ abstract final class UiTypography {
 
   /// Builds the [TextTheme] for one palette.
   static TextTheme textTheme({required Color text, required Color muted, String? fontFamily}) {
-    TextStyle s(double size, FontWeight w, {double height = 1.3, double spacing = 0, Color? color}) => TextStyle(
+    TextStyle s(double size, double line, FontWeight w, {Color? color}) => TextStyle(
           fontFamily: fontFamily,
           fontSize: size,
           fontWeight: w,
-          height: height,
-          letterSpacing: spacing,
+          height: line / size,
+          letterSpacing: 0,
           color: color ?? text,
         );
+    const bold = FontWeight.w600;
+    const regular = FontWeight.w400;
 
     final base = TextTheme(
-      displayLarge: s(48, FontWeight.w700, height: 1.1, spacing: -1.4),
-      displayMedium: s(40, FontWeight.w700, height: 1.1, spacing: -1.1),
-      displaySmall: s(32, FontWeight.w700, height: 1.15, spacing: -0.8),
-      headlineLarge: s(28, FontWeight.w700, height: 1.2, spacing: -0.6),
-      headlineMedium: s(24, FontWeight.w700, height: 1.25, spacing: -0.4),
-      headlineSmall: s(20, FontWeight.w600, height: 1.3, spacing: -0.3),
-      titleLarge: s(18, FontWeight.w600, height: 1.35, spacing: -0.2),
-      titleMedium: s(16, FontWeight.w600, height: 1.4, spacing: -0.1),
-      titleSmall: s(14, FontWeight.w600, height: 1.4),
-      bodyLarge: s(16, FontWeight.w400, height: 1.5),
-      bodyMedium: s(14, FontWeight.w400, height: 1.5),
-      bodySmall: s(12.5, FontWeight.w400, height: 1.45, color: muted),
-      labelLarge: s(14, FontWeight.w600, height: 1.3),
-      labelMedium: s(12.5, FontWeight.w600, height: 1.3),
-      labelSmall: s(11, FontWeight.w600, height: 1.3, spacing: 0.4),
+      displayLarge: s(50, 60, bold),
+      displayMedium: s(37, 44, bold),
+      displaySmall: s(29, 36, bold),
+      headlineLarge: s(29, 36, bold),
+      headlineMedium: s(24, 32, bold),
+      headlineSmall: s(21, 24, bold),
+      titleLarge: s(19, 22, bold),
+      titleMedium: s(17, 22, bold),
+      titleSmall: s(14, 20, bold),
+      bodyLarge: s(16, 22, regular),
+      bodyMedium: s(14, 20, regular),
+      bodySmall: s(12, 16, regular, color: muted),
+      labelLarge: s(14, 20, bold),
+      labelMedium: s(12, 16, bold),
+      labelSmall: s(10, 14, bold),
     );
     if (fontFamily != null || !useGoogleFonts) return base;
     return GoogleFonts.interTextTheme(base);

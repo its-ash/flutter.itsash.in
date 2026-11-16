@@ -186,23 +186,25 @@ class _UiTagInputState extends State<UiTagInput> {
           child: AnimatedContainer(
             duration: context.motion(UiMotion.fast),
             curve: UiMotion.standard,
-            constraints: BoxConstraints(minHeight: size.height),
+            constraints: BoxConstraints(minHeight: fieldHeight(size)),
             padding: EdgeInsets.symmetric(
-              horizontal: w.tags.isEmpty ? size.padding - 2 : UiSpace.sm,
-              vertical: w.tags.isEmpty ? 0 : UiSpace.sm,
+              horizontal: w.tags.isEmpty ? size.padding : UiSpace.sm,
+              vertical: w.tags.isEmpty ? 0 : UiSpace.sm - 2,
             ),
             alignment: AlignmentDirectional.centerStart,
             decoration: BoxDecoration(
-              color: enabled ? c.surfaceMuted : c.surfaceMuted.withValues(alpha: 0.6),
-              borderRadius: UiRadius.all(UiRadius.md),
+              color: c.surfaceMuted,
+              borderRadius: fieldRadius(hasError: hasError),
               border: Border.all(
                 color: hasError
                     ? c.danger
                     : focused
                     ? c.accent
                     : Colors.transparent,
-                width: focused || hasError ? 1.5 : 1,
               ),
+              boxShadow: focused && enabled && !hasError
+                  ? [BoxShadow(color: c.accent.withValues(alpha: 0.5), spreadRadius: 2)]
+                  : null,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -210,8 +212,8 @@ class _UiTagInputState extends State<UiTagInput> {
               children: [
                 if (w.tags.isNotEmpty)
                   Wrap(
-                    spacing: UiSpace.xs + 2,
-                    runSpacing: UiSpace.xs + 2,
+                    spacing: UiSpace.xs,
+                    runSpacing: UiSpace.xs,
                     children: [for (final t in w.tags) _TagPill(label: t, onRemove: enabled ? () => _remove(t) : null)],
                   ),
                 if (!_full)
@@ -246,8 +248,8 @@ class _UiTagInputState extends State<UiTagInput> {
                         child: Padding(
                           padding: const EdgeInsets.only(top: UiSpace.sm),
                           child: Wrap(
-                            spacing: UiSpace.xs + 2,
-                            runSpacing: UiSpace.xs + 2,
+                            spacing: UiSpace.xs,
+                            runSpacing: UiSpace.xs,
                             children: [
                               for (final s in suggestions)
                                 _SuggestionPill(
@@ -281,11 +283,12 @@ class _TagPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final enabled = onRemove != null;
-    final fg = enabled ? c.onAccentSoft : c.textDisabled;
+    // Figma "control" (caption label, solid): 24 high Primary pill.
+    final fg = enabled ? c.onAccent : c.textDisabled;
     return Container(
-      constraints: const BoxConstraints(minHeight: 28),
-      padding: EdgeInsetsDirectional.only(start: UiSpace.sm + 2, end: enabled ? UiSpace.xxs : UiSpace.sm + 2),
-      decoration: BoxDecoration(color: enabled ? c.accentSoft : c.surface, borderRadius: UiRadius.all(UiRadius.full)),
+      constraints: const BoxConstraints(minHeight: 24),
+      padding: EdgeInsetsDirectional.only(start: UiSpace.sm, end: enabled ? UiSpace.xxs : UiSpace.sm),
+      decoration: BoxDecoration(color: enabled ? c.accent : c.surfaceMuted, borderRadius: UiRadius.all(UiRadius.full)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -304,10 +307,10 @@ class _TagPill extends StatelessWidget {
               excludeSemantics: true,
               child: InkResponse(
                 onTap: onRemove,
-                radius: 14,
+                radius: 12,
                 child: Padding(
-                  padding: const EdgeInsets.all(UiSpace.xs + 1),
-                  child: Icon(Icons.close_rounded, size: 14, color: fg),
+                  padding: const EdgeInsets.all(UiSpace.xs),
+                  child: Icon(Icons.close_rounded, size: 12, color: fg),
                 ),
               ),
             ),
@@ -326,28 +329,29 @@ class _SuggestionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // Figma "control" (caption label, ghost): 24 high outlined pill.
     return Material(
-      color: c.surface,
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: UiRadius.all(UiRadius.full),
-        side: BorderSide(color: c.border),
+        side: BorderSide(color: c.borderStrong),
       ),
       child: InkWell(
         onTap: onTap,
         customBorder: const StadiumBorder(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.xs + 2),
+          padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm, vertical: UiSpace.xs),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.add_rounded, size: 14, color: c.textMuted),
+              Icon(Icons.add_rounded, size: 12, color: c.gray(7)),
               const SizedBox(width: UiSpace.xs),
               Flexible(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.labelMedium?.copyWith(color: c.textMuted),
+                  style: context.text.bodySmall?.copyWith(color: c.gray(7)),
                 ),
               ),
             ],

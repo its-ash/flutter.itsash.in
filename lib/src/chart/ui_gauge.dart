@@ -68,7 +68,7 @@ class UiGauge extends StatelessWidget {
                 children: [
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: _GaugePainter(value: t, color: color, track: colors.surfaceMuted, stroke: stroke),
+                      painter: _GaugePainter(value: t, color: color, track: colors.gray(3), stroke: stroke),
                     ),
                   ),
                   SizedBox(

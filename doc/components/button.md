@@ -4,7 +4,7 @@ Buttons, icon buttons, FABs, button bars, segmented controls, toggles, and copy,
 
 ### UiButtonVariant
 
-Visual style shared by every button: `primary` (accent fill), `secondary` (muted fill), `soft` (accent tint), `outline` (1 px border), `ghost` (transparent), `danger` (danger fill), `link` (accent text, underlined on hover).
+Visual style shared by every button, after the Ash Theme "button" component: `primary` (solid: Primary fill, bold label), `secondary` (dim: Overlay fill, regular label), `soft` (Primary tint), `outline` (ghost: 1 px gray outline, regular label), `ghost` (transparent, Overlay fill on hover), `danger` (solid danger fill), `link` (Primary text, underlined on hover). Buttons are 28 / 36 / 44 high for `sm` / `md` / `lg` (36 with 32 px side padding is the design's default), radius 8. Hover and keyboard focus draw a 4 px stroke inside the button (Primary 50% on solid, gray on dim and ghost). Disabled buttons use a gray-2 fill with gray-4 text.
 
 ### UiButton
 
@@ -36,7 +36,7 @@ UiIconButton(Icons.notifications_rounded, tooltip: 'Inbox', badge: 3, onPressed:
 - `tooltip` (required): tooltip and screen-reader label.
 - `onPressed`: null disables.
 - `variant`: `UiButtonVariant.ghost`.
-- `size`: `UiSize.md`. The button is `size.height` square.
+- `size`: `UiSize.md`. The button is a 28 / 36 / 44 square (sm / md / lg), round with `circular: true`.
 - `badge`: null. Count in a small pill. Zero hides it; over 99 shows `99+`.
 - `dot`: `false`. Small dot on the corner.
 - `circular`: `false`.
@@ -56,7 +56,7 @@ floatingActionButton: UiFab(Icons.add_rounded, label: 'New', onPressed: create)
 - `label`: null. Set it to make an extended FAB.
 - `tooltip`: null. Set it for icon-only FABs.
 - `variant`: `UiButtonVariant.primary`.
-- Height is `UiFab.height` (56).
+- Height is `UiFab.height` (56). Always a pill.
 
 ### UiButtonBar
 
@@ -89,7 +89,7 @@ UiSegment('week', label: 'Week', icon: Icons.view_week_rounded)
 
 ### UiSegmentedControl
 
-iOS-style segmented control. A pill slides to the selected segment.
+Segmented control: a gray-2 pill track (2 px inset) with a Primary pill that slides to the selected segment. The selected label is bold and white, the others regular gray. 32 high for `md` (28 for `sm`, 40 for `lg`).
 
 ```dart
 UiSegmentedControl([UiSegment('day', label: 'Day'), UiSegment('week', label: 'Week')],
@@ -104,7 +104,7 @@ UiSegmentedControl([UiSegment('day', label: 'Day'), UiSegment('week', label: 'We
 
 ### UiToggleButton
 
-A button that stays on or off. Selected uses a soft accent tint.
+A pill control (Figma "control") that stays on or off: 24 / 28 / 36 high, dim (Overlay fill) when off, solid Primary with a bold label when on.
 
 ```dart
 UiToggleButton('Bold', selected: bold, onChanged: (v) => setState(() => bold = v))

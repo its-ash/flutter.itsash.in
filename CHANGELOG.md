@@ -1,3 +1,15 @@
+## 3.0.0
+
+Visual redesign to the Ash Theme Figma file (based on Lucent UI V4). No public API is removed; apps only need `flutter pub upgrade theme`.
+
+* Colors: a nine-step gray scale (white/black backgrounds, `#262626`/`#F2F2F2` surfaces), Primary `#3F88E4` in both modes, and new status colors (green `#0AB35A`, mustard `#D69400`, red `#DA3A3A`, turquoise `#25A7B6`). Chart series use the core palette.
+* `surfaceMuted` and `border` are now the translucent Overlay (`#999999` at 20%). `accentSoft` and the `…Soft` status colors are translucent too. Use `surfaceMutedSolid` where an opaque color is needed.
+* Type: two weights (400, 600), no letter spacing, Ash Theme ramp (body 14/20, small 12/16, H1 29/36 …).
+* Radius 4 / 6 / 8 / 12 / 20 / full; page padding 16; buttons and fields 36 high; three design shadow levels.
+* Components restyled to match: solid / dim / ghost buttons, pill controls and chips, Overlay fields with a Primary focus border, 36 px list rows, underline tabs, 2 px slider and progress, Overlay dividers, and gray dialogs.
+* New: `UiColors.gray(n)`, `UiColors.surfaceMutedSolid`, `UiColors.overlay`, `UiColors.grayLight` / `grayDark`, `UiShadows.ring(color)`.
+* Lazy loading for long lists: `UiScaffold.slivers` (a `CustomScrollView` page body), `UiSliverResponsiveGrid` and `UiSliverListGroup`. They build only the rows near the screen. `UiScaffold(scrollable: true)`, `UiResponsiveGrid` and `UiListGroup` still build everything at once.
+
 ## 2.0.0
 
 Breaking: full redesign. All v1 `Ui*` widgets, `UiBrand` presets and domain kits (commerce, fitness, finance, booking, social, auth) are removed.

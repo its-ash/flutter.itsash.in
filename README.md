@@ -4,7 +4,7 @@ A Flutter design system for every app in this workspace.
 
 - One import: `package:theme/theme.dart`.
 - **One light theme and one dark theme.** You can set a custom accent color, and the other colors stay the same.
-- Flat surfaces, 1 px borders, generous radius, soft accent tints. Built-in Material widgets are styled to match.
+- The [Ash Theme](https://www.figma.com/design/CQKE8JPrRnnQXO7AKr9gh3/Ash-Theme) design (based on Lucent UI V4): a nine-step gray scale, translucent Overlay fills, Primary blue, pill controls, compact 36 px buttons and fields. Built-in Material widgets are styled to match.
 - About 190 public `Ui*` APIs in 11 groups. Most widgets need only one to three arguments: `UiButton('Save', onPressed: save)`.
 
 See **[COMPONENTS.md](COMPONENTS.md)** for the full reference.

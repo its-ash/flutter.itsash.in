@@ -53,7 +53,7 @@ class UiPageDots extends StatelessWidget {
                   height: size,
                   margin: EdgeInsets.symmetric(horizontal: size / 2),
                   decoration: BoxDecoration(
-                    color: active ? c.accent : c.borderStrong,
+                    color: active ? c.accent : c.gray(3),
                     borderRadius: UiRadius.all(UiRadius.full),
                   ),
                 );

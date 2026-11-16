@@ -62,7 +62,7 @@ class UiNavRail extends StatelessWidget {
       groupAlignment: -1,
       minWidth: 80,
       minExtendedWidth: 240,
-      backgroundColor: c.surface,
+      backgroundColor: c.background,
       destinations: [
         for (final item in items)
           NavigationRailDestination(
@@ -75,7 +75,7 @@ class UiNavRail extends StatelessWidget {
     );
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: c.surface,
+        color: c.background,
         border: border ? BorderDirectional(end: BorderSide(color: c.border)) : null,
       ),
       child: Padding(

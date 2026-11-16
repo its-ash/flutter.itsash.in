@@ -150,7 +150,7 @@ class UiFileTile extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.3),
+                  style: text.bodyMedium?.copyWith(color: colors.text),
                 ),
                 if (meta.isNotEmpty || p != null)
                   Padding(

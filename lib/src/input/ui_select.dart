@@ -207,10 +207,10 @@ class UiMultiSelect<T> extends StatelessWidget {
               prefixIcon: prefixIcon,
               semanticLabel: label,
               padding: EdgeInsetsDirectional.only(
-                start: selected.isEmpty ? size.padding - 2 : UiSpace.sm,
-                end: UiSpace.xs,
-                top: UiSpace.xs + 2,
-                bottom: UiSpace.xs + 2,
+                start: selected.isEmpty ? size.padding : UiSpace.sm,
+                end: UiSpace.sm,
+                top: UiSpace.xs,
+                bottom: UiSpace.xs,
               ),
               onTap: !enabled
                   ? null
@@ -235,8 +235,8 @@ class UiMultiSelect<T> extends StatelessWidget {
               child: selected.isEmpty
                   ? FieldValueText(hint: hint, enabled: enabled)
                   : Wrap(
-                      spacing: UiSpace.xs + 2,
-                      runSpacing: UiSpace.xs + 2,
+                      spacing: UiSpace.xs,
+                      runSpacing: UiSpace.xs,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         for (final o in shown)
@@ -247,7 +247,7 @@ class UiMultiSelect<T> extends StatelessWidget {
                         if (extra > 0)
                           Text(
                             '+$extra',
-                            style: context.text.labelMedium?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+                            style: context.text.bodySmall?.copyWith(color: enabled ? c.textSubtle : c.textDisabled),
                           ),
                       ],
                     ),
@@ -269,8 +269,8 @@ class _Chevron extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: UiSpace.xs, end: UiSpace.sm),
-      child: Icon(Icons.unfold_more_rounded, size: size.iconSize, color: enabled ? c.textSubtle : c.textDisabled),
+      padding: const EdgeInsetsDirectional.only(start: UiSpace.md),
+      child: Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: enabled ? c.textSubtle : c.textDisabled),
     );
   }
 }
@@ -285,11 +285,12 @@ class _MiniChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final enabled = onRemove != null;
-    final fg = enabled ? c.onAccentSoft : c.textDisabled;
+    // Figma "control" (caption label, solid): 24 high Primary pill.
+    final fg = enabled ? c.onAccent : c.textDisabled;
     return Container(
-      constraints: const BoxConstraints(minHeight: 26),
-      padding: EdgeInsetsDirectional.only(start: UiSpace.sm + 2, end: enabled ? UiSpace.xxs : UiSpace.sm + 2),
-      decoration: BoxDecoration(color: enabled ? c.accentSoft : c.surface, borderRadius: UiRadius.all(UiRadius.full)),
+      constraints: const BoxConstraints(minHeight: 24),
+      padding: EdgeInsetsDirectional.only(start: UiSpace.sm, end: enabled ? UiSpace.xxs : UiSpace.sm),
+      decoration: BoxDecoration(color: enabled ? c.accent : c.surfaceMuted, borderRadius: UiRadius.all(UiRadius.full)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -307,10 +308,10 @@ class _MiniChip extends StatelessWidget {
               label: 'Remove $label',
               child: InkResponse(
                 onTap: onRemove,
-                radius: 14,
+                radius: 12,
                 child: Padding(
                   padding: const EdgeInsets.all(UiSpace.xs),
-                  child: Icon(Icons.close_rounded, size: 14, color: fg),
+                  child: Icon(Icons.close_rounded, size: 12, color: fg),
                 ),
               ),
             ),
@@ -528,7 +529,7 @@ class _OptionsPanelState<T> extends State<_OptionsPanel<T>> {
           )
         : ListView.builder(
             shrinkWrap: true,
-            padding: EdgeInsets.symmetric(horizontal: widget.sheet ? UiSpace.sm : UiSpace.xs, vertical: UiSpace.xs),
+            padding: const EdgeInsets.symmetric(vertical: UiSpace.sm),
             itemCount: visible.length,
             itemBuilder: (context, i) {
               final o = visible[i];
@@ -566,7 +567,6 @@ class _OptionsPanelState<T> extends State<_OptionsPanel<T>> {
                 hint: widget.searchHint,
                 prefixIcon: Icons.search_rounded,
                 size: widget.sheet ? UiSize.md : UiSize.sm,
-                radius: widget.sheet ? UiRadius.full : UiRadius.sm,
               ),
             ),
           ),
@@ -609,14 +609,11 @@ class _OptionsPanelState<T> extends State<_OptionsPanel<T>> {
       );
     }
     return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: UiRadius.all(UiRadius.md), boxShadow: context.shadowMd),
+      decoration: BoxDecoration(borderRadius: UiRadius.all(UiRadius.lg), boxShadow: context.shadowMd),
       child: Material(
         color: c.surfaceRaised,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: UiRadius.all(UiRadius.md),
-          side: BorderSide(color: c.border),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.lg)),
         child: content,
       ),
     );
@@ -638,26 +635,31 @@ class _OptionRow<T> extends StatelessWidget {
     final fg = !enabled
         ? c.textDisabled
         : selected && !multiple
-        ? c.onAccentSoft
+        ? c.onAccent
         : c.text;
+    // Figma "menu item list": 36 high rows, Overlay on hover, solid Primary
+    // when selected.
     return Semantics(
       selected: selected,
       button: true,
       child: Material(
-        color: selected && !multiple ? c.accentSoft : Colors.transparent,
-        borderRadius: UiRadius.all(UiRadius.sm),
+        color: selected && !multiple ? c.accent : Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: UiRadius.all(UiRadius.sm),
+          hoverColor: c.surfaceMuted,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: const BoxConstraints(minHeight: 36),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
+              padding: const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: 6),
               child: Row(
                 children: [
                   if (multiple) ...[_CheckBox(checked: selected, enabled: enabled), const SizedBox(width: UiSpace.md)],
                   if (option.icon != null) ...[
-                    Icon(option.icon, size: 20, color: enabled ? (selected ? fg : c.textMuted) : c.textDisabled),
+                    Icon(
+                      option.icon,
+                      size: 16,
+                      color: enabled ? (selected && !multiple ? fg : c.textMuted) : c.textDisabled,
+                    ),
                     const SizedBox(width: UiSpace.md),
                   ],
                   Expanded(
@@ -669,21 +671,27 @@ class _OptionRow<T> extends StatelessWidget {
                           option.label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: context.text.bodyMedium?.copyWith(color: fg, fontWeight: FontWeight.w500),
+                          style: context.text.bodyMedium?.copyWith(color: fg),
                         ),
                         if (option.subtitle != null)
                           Text(
                             option.subtitle!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: context.text.bodySmall?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+                            style: context.text.bodySmall?.copyWith(
+                              color: !enabled
+                                  ? c.textDisabled
+                                  : selected && !multiple
+                                  ? c.onAccent.withValues(alpha: 0.8)
+                                  : c.textSubtle,
+                            ),
                           ),
                       ],
                     ),
                   ),
                   if (!multiple && selected) ...[
                     const SizedBox(width: UiSpace.sm),
-                    Icon(Icons.check_rounded, size: 18, color: c.accent),
+                    Icon(Icons.check_rounded, size: 16, color: fg),
                   ],
                 ],
               ),
@@ -710,9 +718,9 @@ class _CheckBox extends StatelessWidget {
       width: 20,
       height: 20,
       decoration: BoxDecoration(
-        color: checked ? on : Colors.transparent,
-        borderRadius: UiRadius.all(6),
-        border: Border.all(color: checked ? on : (enabled ? c.borderStrong : c.textDisabled), width: 1.5),
+        color: checked ? on : c.gray(2),
+        borderRadius: UiRadius.all(UiRadius.xs),
+        border: checked ? null : Border.all(color: enabled ? c.borderStrong : c.gray(3)),
       ),
       child: checked ? Icon(Icons.check_rounded, size: 14, color: c.onAccent) : null,
     );

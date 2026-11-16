@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/input/field_style.dart';
 import 'package:theme/src/input/ui_field_label.dart';
 
 /// Compact "− value +" control for numbers. Hold a button to repeat.
@@ -179,15 +180,15 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
       onLongPressCancel: _stopRepeat,
       child: IconButton(
         onPressed: can ? () => _bump(dir) : null,
-        icon: Icon(icon, size: s.iconSize, semanticLabel: tooltip),
+        icon: Icon(icon, size: 16, semanticLabel: tooltip),
         color: c.text,
         disabledColor: c.textDisabled,
         style: IconButton.styleFrom(
-          fixedSize: Size(s.height, s.height - 2),
-          minimumSize: Size(s.height, s.height - 2),
+          fixedSize: Size.square(fieldHeight(s)),
+          minimumSize: Size.square(fieldHeight(s)),
           padding: EdgeInsets.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.md - 1)),
+          shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.md)),
         ),
       ),
     );
@@ -251,12 +252,8 @@ class _UiStepperState<T extends num> extends State<UiStepper<T>> {
     );
 
     return Container(
-      height: s.height,
-      decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: UiRadius.all(UiRadius.md),
-        border: Border.all(color: c.border),
-      ),
+      height: fieldHeight(s),
+      decoration: BoxDecoration(color: c.surfaceMuted, borderRadius: UiRadius.all(UiRadius.md)),
       child: Row(
         mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
         children: [

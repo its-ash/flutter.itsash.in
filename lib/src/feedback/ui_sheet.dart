@@ -81,9 +81,9 @@ class _SheetBody extends StatelessWidget {
         : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (title != null) Semantics(header: true, child: Text(title!, style: t.titleLarge)),
+              if (title != null) Semantics(header: true, child: Text(title!, style: t.headlineSmall)),
               if (subtitle != null) ...[
-                if (title != null) const SizedBox(height: UiSpace.xs),
+                if (title != null) const SizedBox(height: UiSpace.sm),
                 Text(subtitle!, style: t.bodyMedium?.copyWith(color: c.textMuted)),
               ],
             ],
@@ -96,7 +96,7 @@ class _SheetBody extends StatelessWidget {
     // moves.
     final scrollHeader = scrollable && hasHeader && media.viewInsets.bottom > 0;
     final header = hasHeader && !scrollHeader
-        ? Padding(padding: const EdgeInsets.fromLTRB(UiSpace.xl, 0, UiSpace.xl, UiSpace.lg), child: headerContent())
+        ? Padding(padding: const EdgeInsets.fromLTRB(UiSpace.page, 0, UiSpace.page, UiSpace.lg), child: headerContent())
         : null;
     final body = scrollable
         ? SingleChildScrollView(
@@ -105,7 +105,10 @@ class _SheetBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (scrollHeader)
-                  Padding(padding: const EdgeInsets.only(bottom: UiSpace.lg), child: headerContent()),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: UiSpace.lg),
+                    child: headerContent(),
+                  ),
                 KeyedSubtree(key: const ValueKey('ui-sheet-body'), child: child),
               ],
             ),
@@ -131,7 +134,7 @@ class _SheetBody extends StatelessWidget {
                 child: SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(UiSpace.xl, UiSpace.md, UiSpace.xl, UiSpace.md),
+                    padding: const EdgeInsets.fromLTRB(UiSpace.page, UiSpace.lg, UiSpace.page, UiSpace.lg),
                     child: _ActionsBar(actions: actions),
                   ),
                 ),
@@ -170,7 +173,7 @@ class _ActionsBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < stacked.length; i++) ...[if (i > 0) const SizedBox(height: UiSpace.sm), stacked[i]],
+            for (var i = 0; i < stacked.length; i++) ...[if (i > 0) const SizedBox(height: UiSpace.md), stacked[i]],
           ],
         );
       },
@@ -266,13 +269,17 @@ class _ActionSheetBody<T> extends StatelessWidget {
           children: [
             if (hasHeader)
               Padding(
-                padding: const EdgeInsets.fromLTRB(UiSpace.xl, 0, UiSpace.xl, UiSpace.md),
+                padding: const EdgeInsets.fromLTRB(UiSpace.page, 0, UiSpace.page, UiSpace.md),
                 child: Column(
                   children: [
                     if (title != null) Text(title!, textAlign: TextAlign.center, style: t.titleSmall),
                     if (message != null) ...[
                       if (title != null) const SizedBox(height: UiSpace.xxs),
-                      Text(message!, textAlign: TextAlign.center, style: t.bodySmall),
+                      Text(
+                        message!,
+                        textAlign: TextAlign.center,
+                        style: t.bodySmall?.copyWith(color: c.textMuted),
+                      ),
                     ],
                   ],
                 ),
@@ -280,16 +287,21 @@ class _ActionSheetBody<T> extends StatelessWidget {
             Flexible(
               child: ListView(
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm),
+                padding: EdgeInsets.zero,
                 children: [for (final a in actions) _ActionRow<T>(action: a)],
               ),
             ),
             if (cancelLabel != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(UiSpace.lg, UiSpace.sm, UiSpace.lg, UiSpace.lg),
-                child: OutlinedButton(
+                padding: const EdgeInsets.fromLTRB(UiSpace.page, UiSpace.md, UiSpace.page, UiSpace.lg),
+                // "Dim" button: Overlay fill, regular label.
+                child: FilledButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: OutlinedButton.styleFrom(side: BorderSide(color: c.border)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: c.surfaceMuted,
+                    foregroundColor: c.gray(7),
+                    textStyle: t.bodyMedium,
+                  ),
                   child: Text(cancelLabel!),
                 ),
               )
@@ -322,18 +334,19 @@ class _ActionRow<T> extends StatelessWidget {
         : action.destructive
         ? c.danger
         : c.textMuted;
+    // Figma "menu item list" row: Overlay on hover / press.
     return InkWell(
-      borderRadius: UiRadius.all(UiRadius.md),
+      hoverColor: c.surfaceMuted,
       onTap: enabled ? () => Navigator.of(context).pop(action.value) : null,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 52),
+        constraints: const BoxConstraints(minHeight: 44),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
+          padding: const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: 6),
           child: Row(
             children: [
               if (action.icon != null) ...[
-                Icon(action.icon, size: 22, color: iconColor),
-                const SizedBox(width: UiSpace.lg),
+                Icon(action.icon, size: 20, color: iconColor),
+                const SizedBox(width: UiSpace.md),
               ],
               Expanded(
                 child: Column(
@@ -344,14 +357,14 @@ class _ActionRow<T> extends StatelessWidget {
                       action.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: t.bodyLarge?.copyWith(color: fg, fontWeight: FontWeight.w500),
+                      style: t.bodyMedium?.copyWith(color: fg),
                     ),
                     if (action.subtitle != null)
                       Text(
                         action.subtitle!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: t.bodySmall?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+                        style: t.bodySmall?.copyWith(color: enabled ? c.textSubtle : c.textDisabled),
                       ),
                   ],
                 ),

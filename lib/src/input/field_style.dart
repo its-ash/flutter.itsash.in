@@ -3,6 +3,78 @@ import 'package:flutter/material.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
 
+/// Height of a field of [size] (Ash Theme "field": 36 at md).
+double fieldHeight(UiSize size) => switch (size) {
+  UiSize.sm => 32,
+  UiSize.md => 36,
+  UiSize.lg => 44,
+};
+
+/// Corner radius of a field. With an error the bottom corners are square so
+/// the danger caption strip of `UiFieldLabel` joins the field.
+BorderRadius fieldRadius({bool hasError = false, double radius = UiRadius.md}) =>
+    hasError ? BorderRadius.vertical(top: Radius.circular(radius)) : UiRadius.all(radius);
+
+/// Hover and focus halo around a field: a 4 px gray-3 ring on hover, a
+/// Primary 50% glow while focused (the 1 px Primary border comes from the
+/// field itself). Tracks focus of any descendant.
+class FieldFrame extends StatefulWidget {
+  const FieldFrame({
+    super.key,
+    required this.child,
+    this.enabled = true,
+    this.hasError = false,
+    this.radius = UiRadius.md,
+  });
+
+  final Widget child;
+  final bool enabled;
+  final bool hasError;
+  final double radius;
+
+  @override
+  State<FieldFrame> createState() => _FieldFrameState();
+}
+
+class _FieldFrameState extends State<FieldFrame> {
+  bool _hover = false;
+  bool _focus = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final List<BoxShadow> shadows;
+    if (!widget.enabled) {
+      shadows = const [];
+    } else if (_focus) {
+      final glow = widget.hasError ? c.danger : c.accent;
+      shadows = [BoxShadow(color: glow.withValues(alpha: 0.5), spreadRadius: 2)];
+    } else if (_hover) {
+      shadows = [BoxShadow(color: c.gray(3), spreadRadius: 4)];
+    } else {
+      shadows = const [];
+    }
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (f) => setState(() => _focus = f),
+        child: AnimatedContainer(
+          duration: context.motion(UiMotion.fast),
+          curve: UiMotion.standard,
+          decoration: BoxDecoration(
+            borderRadius: fieldRadius(hasError: widget.hasError, radius: widget.radius),
+            boxShadow: shadows,
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Builds the [InputDecoration] used by every text input of the group.
 ///
 /// Errors are shown by `UiFieldLabel`, so this only switches the border to
@@ -19,45 +91,48 @@ InputDecoration fieldDecoration(
   bool multiline = false,
 }) {
   final c = context.colors;
-  OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
-    borderRadius: UiRadius.all(radius),
-    borderSide: BorderSide(color: color, width: width),
+  final height = fieldHeight(size);
+  final shape = fieldRadius(hasError: hasError, radius: radius);
+  OutlineInputBorder border(Color color) => OutlineInputBorder(
+    borderRadius: shape,
+    borderSide: BorderSide(color: color),
   );
-  final vertical = multiline ? UiSpace.md : 0.0;
+  final vertical = multiline ? UiSpace.sm : 0.0;
   return InputDecoration(
     hintText: hint,
-    hintStyle: TextStyle(color: c.textSubtle, fontSize: size.fontSize),
+    hintStyle: TextStyle(color: enabled ? c.textSubtle : c.textDisabled, fontSize: size.fontSize),
     hintMaxLines: multiline ? null : 1,
     filled: true,
-    fillColor: enabled ? c.surfaceMuted : c.surfaceMuted.withValues(alpha: 0.6),
+    fillColor: c.surfaceMuted,
+    hoverColor: Colors.transparent,
     isDense: true,
-    constraints: BoxConstraints(minHeight: size.height),
-    contentPadding: EdgeInsets.symmetric(horizontal: size.padding - 2, vertical: vertical),
+    constraints: BoxConstraints(minHeight: height),
+    contentPadding: EdgeInsets.symmetric(horizontal: size.padding, vertical: vertical),
     prefixIcon: prefixIcon == null
         ? null
         : Padding(
-            padding: EdgeInsetsDirectional.only(start: size.padding - 4, end: UiSpace.sm),
-            child: Icon(prefixIcon, size: size.iconSize),
+            padding: EdgeInsetsDirectional.only(start: size.padding, end: UiSpace.md),
+            child: Icon(prefixIcon, size: 16),
           ),
-    prefixIconConstraints: BoxConstraints(minHeight: size.height, minWidth: size.iconSize),
+    prefixIconConstraints: BoxConstraints(minHeight: height, minWidth: 16),
     prefixIconColor: enabled ? c.textSubtle : c.textDisabled,
     suffixIcon: suffix == null
         ? null
         : Padding(
-            padding: const EdgeInsetsDirectional.only(end: UiSpace.xs),
+            padding: const EdgeInsetsDirectional.only(end: UiSpace.sm),
             child: IconTheme.merge(
-              data: IconThemeData(size: size.iconSize + 2, color: enabled ? c.textMuted : c.textDisabled),
+              data: IconThemeData(size: 16, color: enabled ? c.textSubtle : c.textDisabled),
               child: suffix,
             ),
           ),
-    suffixIconConstraints: BoxConstraints(minHeight: size.height - 8, minWidth: UiSpace.sm),
+    suffixIconConstraints: BoxConstraints(minHeight: height - 8, minWidth: UiSpace.sm),
     counterText: '',
     border: border(hasError ? c.danger : Colors.transparent),
     enabledBorder: border(hasError ? c.danger : Colors.transparent),
     disabledBorder: border(Colors.transparent),
-    focusedBorder: border(hasError ? c.danger : c.accent, 1.5),
+    focusedBorder: border(hasError ? c.danger : c.accent),
     errorBorder: border(c.danger),
-    focusedErrorBorder: border(c.danger, 1.5),
+    focusedErrorBorder: border(c.danger),
   );
 }
 
@@ -66,7 +141,7 @@ TextStyle fieldTextStyle(BuildContext context, UiSize size, {bool enabled = true
   final c = context.colors;
   return (context.text.bodyMedium ?? const TextStyle()).copyWith(
     fontSize: size.fontSize,
-    height: 1.4,
+    height: 20 / 14,
     color: enabled ? c.text : c.textDisabled,
   );
 }
@@ -87,11 +162,11 @@ class FieldIconButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      icon: Icon(icon, size: size ?? 18),
-      color: color ?? c.textMuted,
+      icon: Icon(icon, size: size ?? 16),
+      color: color ?? c.textSubtle,
       disabledColor: c.textDisabled,
       style: IconButton.styleFrom(
-        minimumSize: const Size(40, 40),
+        minimumSize: const Size(32, 32),
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: const CircleBorder(),
@@ -142,47 +217,55 @@ class _FieldBoxState extends State<FieldBox> {
         : _focused
         ? c.accent
         : Colors.transparent;
-    final radius = UiRadius.all(UiRadius.md);
+    final radius = fieldRadius(hasError: widget.hasError);
     return Semantics(
       button: true,
       enabled: enabled,
       label: widget.semanticLabel,
-      child: AnimatedContainer(
-        duration: context.motion(UiMotion.fast),
-        curve: UiMotion.standard,
-        constraints: BoxConstraints(minHeight: widget.size.height),
-        decoration: BoxDecoration(
-          color: enabled ? c.surfaceMuted : c.surfaceMuted.withValues(alpha: 0.6),
-          borderRadius: radius,
-          border: Border.all(color: borderColor, width: _focused || widget.hasError ? 1.5 : 1),
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            focusNode: widget.focusNode,
-            onTap: widget.onTap,
-            onFocusChange: (f) => setState(() => _focused = f),
+      child: FieldFrame(
+        enabled: enabled,
+        hasError: widget.hasError,
+        child: AnimatedContainer(
+          duration: context.motion(UiMotion.fast),
+          curve: UiMotion.standard,
+          constraints: BoxConstraints(minHeight: fieldHeight(widget.size)),
+          decoration: BoxDecoration(
+            color: c.surfaceMuted,
             borderRadius: radius,
-            child: Padding(
-              padding:
-                  widget.padding ??
-                  EdgeInsetsDirectional.only(start: widget.size.padding - 2, end: UiSpace.xs, top: 4, bottom: 4),
-              child: Row(
-                children: [
-                  if (widget.prefixIcon != null) ...[
-                    Icon(widget.prefixIcon, size: widget.size.iconSize, color: enabled ? c.textSubtle : c.textDisabled),
-                    const SizedBox(width: UiSpace.sm),
-                  ],
-                  Expanded(
-                    child: DefaultTextStyle.merge(
-                      style: fieldTextStyle(context, widget.size, enabled: enabled),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      child: widget.child,
+            border: Border.all(color: borderColor),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              focusNode: widget.focusNode,
+              onTap: widget.onTap,
+              onFocusChange: (f) => setState(() => _focused = f),
+              borderRadius: radius,
+              hoverColor: Colors.transparent,
+              child: Padding(
+                padding:
+                    widget.padding ??
+                    EdgeInsetsDirectional.only(start: widget.size.padding, end: UiSpace.sm, top: 2, bottom: 2),
+                child: Row(
+                  children: [
+                    if (widget.prefixIcon != null) ...[
+                      Icon(widget.prefixIcon, size: 16, color: enabled ? c.textSubtle : c.textDisabled),
+                      const SizedBox(width: UiSpace.md),
+                    ],
+                    Expanded(
+                      child: DefaultTextStyle.merge(
+                        style: fieldTextStyle(context, widget.size, enabled: enabled),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: widget.child,
+                      ),
                     ),
-                  ),
-                  ...widget.trailing,
-                ],
+                    IconTheme.merge(
+                      data: IconThemeData(size: 16, color: enabled ? c.textSubtle : c.textDisabled),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: widget.trailing),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

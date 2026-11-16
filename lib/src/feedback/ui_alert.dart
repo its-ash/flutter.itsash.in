@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
 
-/// Border color for a soft status surface: a light tint of the status color.
-Color _softBorder(UiColors c, UiStatus status) {
-  if (status == UiStatus.neutral) return c.border;
-  final tone = c.tone(status);
-  return Color.alphaBlend(tone.color.withValues(alpha: c.isDark ? 0.22 : 0.20), tone.soft);
-}
-
 /// Icon color on a soft status surface.
 Color _softIcon(UiColors c, UiStatus status) => status == UiStatus.neutral ? c.textMuted : c.tone(status).color;
 
@@ -62,19 +55,16 @@ class UiAlert extends StatelessWidget {
       liveRegion: true,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(UiSpace.lg, UiSpace.md, onClose != null ? UiSpace.xs : UiSpace.lg, UiSpace.md),
-        decoration: BoxDecoration(
-          color: tone.soft,
-          borderRadius: UiRadius.all(UiRadius.md),
-          border: Border.all(color: _softBorder(c, status)),
-        ),
+        padding: EdgeInsets.fromLTRB(UiSpace.lg, UiSpace.md, onClose != null ? UiSpace.md : UiSpace.lg, UiSpace.md),
+        // Soft status tint (the design's colored overlays), no border.
+        decoration: BoxDecoration(color: tone.soft, borderRadius: UiRadius.all(UiRadius.md)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (showIcon) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(icon ?? status.icon, size: 18, color: _softIcon(c, status)),
+                child: Icon(icon ?? status.icon, size: 16, color: _softIcon(c, status)),
               ),
               const SizedBox(width: UiSpace.md),
             ],
@@ -86,13 +76,7 @@ class UiAlert extends StatelessWidget {
                     Text(title!, style: t.titleSmall?.copyWith(color: tone.onSoft)),
                     const SizedBox(height: UiSpace.xxs),
                   ],
-                  Text(
-                    message,
-                    style: t.bodyMedium?.copyWith(
-                      color: hasTitle ? tone.onSoft.withValues(alpha: 0.86) : tone.onSoft,
-                      height: 1.45,
-                    ),
-                  ),
+                  Text(message, style: t.bodyMedium?.copyWith(color: hasTitle ? c.textMuted : tone.onSoft)),
                   if (action != null) ...[const SizedBox(height: UiSpace.sm), action!],
                 ],
               ),
@@ -117,15 +101,22 @@ class _CloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Figma "control" (icon, dim): 24 px round Overlay button.
     return SizedBox(
-      width: 40,
-      height: 40,
+      width: 24,
+      height: 24,
       child: IconButton(
         tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
         onPressed: onPressed,
         padding: EdgeInsets.zero,
-        style: IconButton.styleFrom(minimumSize: const Size(40, 40), foregroundColor: color.withValues(alpha: 0.8)),
-        icon: const Icon(Icons.close_rounded, size: 18),
+        style: IconButton.styleFrom(
+          minimumSize: const Size(24, 24),
+          fixedSize: const Size(24, 24),
+          backgroundColor: context.colors.surfaceMuted,
+          foregroundColor: color,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: const Icon(Icons.close_rounded, size: 16),
       ),
     );
   }
@@ -214,16 +205,13 @@ class _UiBannerState extends State<UiBanner> with SingleTickerProviderStateMixin
       padding: EdgeInsets.fromLTRB(
         UiSpace.lg,
         UiSpace.xs,
-        widget.onDismiss != null ? UiSpace.xs : UiSpace.lg,
+        widget.onDismiss != null ? UiSpace.md : UiSpace.lg,
         UiSpace.xs,
       ),
-      decoration: BoxDecoration(
-        color: tone.soft,
-        border: Border(bottom: BorderSide(color: _softBorder(c, widget.status))),
-      ),
+      decoration: BoxDecoration(color: tone.soft),
       child: Row(
         children: [
-          Icon(widget.icon ?? widget.status.icon, size: 18, color: _softIcon(c, widget.status)),
+          Icon(widget.icon ?? widget.status.icon, size: 16, color: _softIcon(c, widget.status)),
           const SizedBox(width: UiSpace.md),
           Expanded(
             child: Padding(
@@ -232,7 +220,7 @@ class _UiBannerState extends State<UiBanner> with SingleTickerProviderStateMixin
                 widget.message,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: t.bodyMedium?.copyWith(color: tone.onSoft, fontWeight: FontWeight.w500),
+                style: t.bodyMedium?.copyWith(color: tone.onSoft),
               ),
             ),
           ),

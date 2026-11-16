@@ -169,7 +169,7 @@ class _UiDonutChartState extends State<UiDonutChart> with SingleTickerProviderSt
                                 values: morph ? uiChartLerp(_from, values, t) : values,
                                 sweep: morph ? 1 : t,
                                 colors: segColors,
-                                track: colors.surfaceMuted,
+                                track: colors.gray(3),
                                 radius: radius,
                                 thickness: thickness,
                                 gap: widget.gap,

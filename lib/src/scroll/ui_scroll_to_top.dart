@@ -98,14 +98,16 @@ class _UiScrollToTopState extends State<UiScrollToTop> {
         excludeSemantics: true,
         child: Material(
           color: colors.surfaceRaised,
-          shape: StadiumBorder(side: BorderSide(color: colors.border)),
+          elevation: 6,
+          shadowColor: Colors.black.withValues(alpha: colors.isDark ? 0.6 : 0.2),
+          shape: const StadiumBorder(),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: _toTop,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: label == null ? UiSpace.sm + 2 : UiSpace.lg),
+                padding: EdgeInsets.symmetric(horizontal: label == null ? UiSpace.sm : UiSpace.md),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +120,7 @@ class _UiScrollToTopState extends State<UiScrollToTop> {
                           label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: context.text.labelLarge?.copyWith(color: colors.text),
+                          style: context.text.bodyMedium?.copyWith(color: colors.text),
                         ),
                       ),
                     ],

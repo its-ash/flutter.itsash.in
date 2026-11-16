@@ -1,6 +1,6 @@
 part of 'ui_selection.dart';
 
-/// Single radio button with an optional label and description. Selected
+/// Single 20 px radio button with an optional label and description. Selected
 /// when [value] equals [groupValue]. Prefer [UiRadioGroup] for a list.
 ///
 /// ```dart
@@ -106,20 +106,22 @@ class _RadioMark extends StatelessWidget {
         tween: Tween(end: selected ? 1 : 0),
         duration: context.motion(UiMotion.normal),
         curve: UiMotion.standard,
+        // Off: gray fill with a 1 px outline. On: 1 px Primary ring with an
+        // 8 px Primary dot (Figma "radio button").
         builder: (context, t, _) => Container(
           width: size,
           height: size,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color.lerp(c.surface, c.accent, t),
-            border: Border.all(color: Color.lerp(border, c.accent, t)!, width: 1.5),
+            color: Color.lerp(c.gray(2), c.gray(2).withValues(alpha: 0), t),
+            border: Border.all(color: Color.lerp(border, c.accent, t)!),
             boxShadow: _focusRing(c, state.focused),
           ),
           child: Container(
             width: 8 * t,
             height: 8 * t,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: c.onAccent),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: c.accent),
           ),
         ),
       ),

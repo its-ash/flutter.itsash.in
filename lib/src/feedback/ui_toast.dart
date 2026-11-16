@@ -122,7 +122,7 @@ extension UiFeedbackContext on BuildContext {
                 if (shownIcon != null) ...[
                   Icon(
                     shownIcon,
-                    size: 18,
+                    size: 16,
                     color: status == null || status == UiStatus.neutral
                         ? c.onSurfaceInverse
                         : inverse.tone(status).color,
@@ -352,7 +352,9 @@ class _ToastCardState extends State<_ToastCard> with SingleTickerProviderStateMi
     final c = context.colors;
     final t = context.text;
     final item = _item;
-    final tone = c.tone(item.status);
+    // The toast sits on the inverse surface, so status colors come from the opposite palette.
+    final inverse = c.isDark ? UiColors.light() : UiColors.dark();
+    final tone = inverse.tone(item.status);
     final isTop = item.position == UiToastPosition.top;
     final icon = item.icon ?? (item.status == UiStatus.neutral ? null : item.status.icon);
     final hasTitle = item.title != null && item.title!.isNotEmpty;
@@ -361,15 +363,14 @@ class _ToastCardState extends State<_ToastCard> with SingleTickerProviderStateMi
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(UiSpace.lg, UiSpace.md, UiSpace.md, UiSpace.md),
       decoration: BoxDecoration(
-        color: c.surfaceRaised,
-        borderRadius: UiRadius.all(UiRadius.lg),
-        border: Border.all(color: c.border),
+        color: c.surfaceInverse,
+        borderRadius: UiRadius.all(UiRadius.md),
         boxShadow: context.shadowMd,
       ),
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: item.status == UiStatus.neutral ? c.textMuted : tone.color),
+            Icon(icon, size: 16, color: item.status == UiStatus.neutral ? c.onSurfaceInverse : tone.color),
             const SizedBox(width: UiSpace.md),
           ],
           Expanded(
@@ -377,12 +378,20 @@ class _ToastCardState extends State<_ToastCard> with SingleTickerProviderStateMi
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (hasTitle) Text(item.title!, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.titleSmall),
+                if (hasTitle)
+                  Text(
+                    item.title!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: t.titleSmall?.copyWith(color: c.onSurfaceInverse),
+                  ),
                 Text(
                   item.message,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: t.bodyMedium?.copyWith(color: hasTitle ? c.textMuted : c.text),
+                  style: t.bodyMedium?.copyWith(
+                    color: hasTitle ? c.onSurfaceInverse.withValues(alpha: 0.7) : c.onSurfaceInverse,
+                  ),
                 ),
               ],
             ),
@@ -397,10 +406,9 @@ class _ToastCardState extends State<_ToastCard> with SingleTickerProviderStateMi
                   widget.layer.close(item);
                 },
                 style: TextButton.styleFrom(
-                  minimumSize: const Size(40, 36),
+                  minimumSize: const Size(40, 32),
                   padding: const EdgeInsets.symmetric(horizontal: UiSpace.md),
-                  backgroundColor: c.surfaceMuted,
-                  foregroundColor: c.text,
+                  foregroundColor: c.accent,
                 ),
                 child: Text(item.actionLabel!, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),

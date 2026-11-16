@@ -213,7 +213,7 @@ class _UiTableState<T> extends State<UiTable<T>> {
         for (var r = 0; r < rows.length; r++)
           TableRow(
             decoration: widget.striped && r.isOdd
-                ? BoxDecoration(color: colors.surfaceMuted.withValues(alpha: colors.isDark ? 0.5 : 0.6))
+                ? BoxDecoration(color: colors.surfaceMuted.withValues(alpha: colors.surfaceMuted.a * 0.5))
                 : null,
             children: [for (final col in columns) cell(col, rows[r])],
           ),
@@ -223,10 +223,7 @@ class _UiTableState<T> extends State<UiTable<T>> {
     return Material(
       color: colors.surface,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: UiRadius.all(UiRadius.lg),
-        side: BorderSide(color: colors.border),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.lg)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

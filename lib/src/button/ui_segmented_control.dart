@@ -14,7 +14,8 @@ class UiSegment<T> {
   final String? tooltip;
 }
 
-/// iOS-style segmented control with a sliding pill on the selected segment.
+/// Segmented control: a gray pill track with a sliding Primary pill on the
+/// selected segment (Figma "segmented control").
 ///
 /// ```dart
 /// UiSegmentedControl([UiSegment('day', label: 'Day'), UiSegment('week', label: 'Week')],
@@ -49,8 +50,9 @@ class UiSegmentedControl<T> extends StatelessWidget {
     final n = segments.length;
     final index = segments.indexWhere((s) => s.value == value);
     const inset = UiSpace.xxs;
-    final outerRadius = size == UiSize.sm ? UiRadius.sm : UiRadius.md;
-    final innerRadius = outerRadius - inset;
+    final height = _controlHeight(size) + inset * 2;
+    const outerRadius = UiRadius.full;
+    const innerRadius = UiRadius.full;
     final enabled = onChanged != null;
 
     final row = Row(
@@ -73,12 +75,11 @@ class UiSegmentedControl<T> extends StatelessWidget {
     );
 
     final body = Container(
-      height: size.height,
+      height: height,
       padding: const EdgeInsets.all(inset),
       decoration: BoxDecoration(
-        color: c.surfaceMuted,
+        color: c.gray(2),
         borderRadius: UiRadius.all(outerRadius),
-        border: Border.all(color: c.border),
       ),
       child: Stack(
         children: [
@@ -93,10 +94,8 @@ class UiSegmentedControl<T> extends StatelessWidget {
                   heightFactor: 1,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: enabled ? (c.isDark ? c.surfaceRaised : c.surface) : c.surfaceMuted,
+                      color: enabled ? c.accent : c.surfaceMuted,
                       borderRadius: UiRadius.all(innerRadius),
-                      border: Border.all(color: c.isDark ? c.borderStrong : c.border),
-                      boxShadow: enabled ? context.shadowSm : null,
                     ),
                   ),
                 ),
@@ -138,20 +137,22 @@ class _SegmentItem extends StatelessWidget {
       tooltip: label == null ? segment.tooltip : null,
       builder: (context, states) {
         final fg = states.contains(WidgetState.disabled)
-            ? c.textDisabled
-            : selected || states.contains(WidgetState.hovered)
+            ? c.gray(4)
+            : selected
+            ? c.onAccent
+            : states.contains(WidgetState.hovered)
             ? c.text
-            : c.textMuted;
+            : c.gray(7);
         final style = (context.text.labelLarge ?? const TextStyle()).copyWith(
-          fontSize: size.fontSize,
+          fontSize: _buttonFont(size),
           color: fg,
-          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
         );
         return Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: size.padding - UiSpace.xs),
+            padding: EdgeInsets.symmetric(horizontal: _controlPadding(size)),
             child: IconTheme.merge(
-              data: IconThemeData(color: fg, size: size.iconSize),
+              data: IconThemeData(color: fg, size: 16),
               child: AnimatedDefaultTextStyle(
                 style: style,
                 duration: context.motion(UiMotion.fast),
@@ -162,7 +163,7 @@ class _SegmentItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (icon != null) Icon(icon),
-                    if (icon != null && label != null) const SizedBox(width: UiSpace.xs + UiSpace.xxs),
+                    if (icon != null && label != null) const SizedBox(width: UiSpace.xs),
                     if (label != null) Flexible(child: Text(label)),
                   ],
                 ),

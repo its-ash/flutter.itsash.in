@@ -180,7 +180,7 @@ class UiSkeletonList extends StatelessWidget {
     this.count = 4,
     this.avatar = true,
     this.lines = 2,
-    this.padding = const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.md),
+    this.padding = const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: UiSpace.md),
   });
 
   /// Number of rows.

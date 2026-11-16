@@ -51,62 +51,79 @@ class UiColors extends ThemeExtension<UiColors> {
     required this.chart,
   });
 
-  /// Default accent for light mode (indigo 600).
-  static const Color defaultAccentLight = Color(0xFF4F46E5);
+  /// Default accent in both modes (Ash Theme "Primary", core/blue).
+  static const Color defaultAccentLight = Color(0xFF3F88E4);
 
-  /// Default accent for dark mode (indigo 400).
-  static const Color defaultAccentDark = Color(0xFF818CF8);
+  /// Same as [defaultAccentLight]: the design keeps one primary in both modes.
+  static const Color defaultAccentDark = Color(0xFF3F88E4);
+
+  /// The neutral "Overlay" fill (#999999 at 20%). Translucent, so it reads
+  /// the same on the background, a card or a dialog.
+  static const Color overlay = Color(0x33999999);
+
+  /// Gray scale of the Figma "Themes" collection, steps 1..9 (light mode).
+  /// 1 is the background, 9 the foreground.
+  static const List<Color> grayLight = [
+    Color(0xFFFFFFFF), Color(0xFFF2F2F2), Color(0xFFE0E0E0), Color(0xFFC4C4C4), Color(0xFF999999), //
+    Color(0xFF707070), Color(0xFF4D4D4D), Color(0xFF262626), Color(0xFF000000),
+  ];
+
+  /// Gray scale steps 1..9 in dark mode.
+  static const List<Color> grayDark = [
+    Color(0xFF000000), Color(0xFF262626), Color(0xFF3B3B3B), Color(0xFF707070), Color(0xFF999999), //
+    Color(0xFFC4C4C4), Color(0xFFE0E0E0), Color(0xFFF2F2F2), Color(0xFFFFFFFF),
+  ];
 
   /// The light palette. Pass [accent] to use a custom brand color.
   factory UiColors.light({Color? accent}) {
-    const surface = Color(0xFFFFFFFF);
+    const g = grayLight;
     final a = accent ?? defaultAccentLight;
     return UiColors(
       brightness: Brightness.light,
-      background: const Color(0xFFF6F6F8),
-      surface: surface,
-      surfaceMuted: const Color(0xFFF0F0F3),
-      surfaceRaised: surface,
-      surfaceInverse: const Color(0xFF18181B),
-      onSurfaceInverse: const Color(0xFFFAFAFA),
-      border: const Color(0xFFE4E4E9),
-      borderStrong: const Color(0xFFCFCFD6),
-      text: const Color(0xFF111114),
-      textMuted: const Color(0xFF55555F),
-      textSubtle: const Color(0xFF8E8E99),
-      textDisabled: const Color(0xFFB8B8C1),
+      background: g[0],
+      surface: g[1],
+      surfaceMuted: overlay,
+      surfaceRaised: g[1],
+      surfaceInverse: g[7],
+      onSurfaceInverse: g[0],
+      border: overlay,
+      borderStrong: g[3],
+      text: g[8],
+      textMuted: g[5],
+      textSubtle: g[4],
+      textDisabled: g[3],
       accent: a,
       onAccent: _on(a),
-      accentSoft: Color.alphaBlend(a.withValues(alpha: 0.10), surface),
+      accentSoft: a.withValues(alpha: 0.2),
       onAccentSoft: _shade(a, maxLightness: 0.38),
-      success: const Color(0xFF16A34A),
+      success: const Color(0xFF0AB35A),
       onSuccess: Colors.white,
-      successSoft: const Color(0xFFE8F7EE),
-      onSuccessSoft: const Color(0xFF166534),
-      warning: const Color(0xFFD97706),
+      successSoft: const Color(0x3309A854),
+      onSuccessSoft: const Color(0xFF037D48),
+      warning: const Color(0xFFD69400),
       onWarning: Colors.white,
-      warningSoft: const Color(0xFFFEF4E2),
-      onWarningSoft: const Color(0xFF92400E),
-      danger: const Color(0xFFDC2626),
+      warningSoft: const Color(0x33D19000),
+      onWarningSoft: const Color(0xFF9E6700),
+      danger: const Color(0xFFDA3A3A),
       onDanger: Colors.white,
-      dangerSoft: const Color(0xFFFDECEC),
-      onDangerSoft: const Color(0xFF991B1B),
-      info: const Color(0xFF2563EB),
+      dangerSoft: const Color(0x33D93535),
+      onDangerSoft: const Color(0xFFA31920),
+      info: const Color(0xFF25A7B6),
       onInfo: Colors.white,
-      infoSoft: const Color(0xFFE9F0FE),
-      onInfoSoft: const Color(0xFF1E40AF),
+      infoSoft: const Color(0x33239CAA),
+      onInfoSoft: const Color(0xFF04677B),
       scrim: const Color(0x66000000),
-      shimmerBase: const Color(0xFFEDEDF1),
-      shimmerHighlight: const Color(0xFFF8F8FA),
+      shimmerBase: g[1],
+      shimmerHighlight: g[0],
       chart: [
         a,
-        const Color(0xFF0EA5E9),
-        const Color(0xFF10B981),
-        const Color(0xFFF59E0B),
-        const Color(0xFFEF4444),
-        const Color(0xFF8B5CF6),
-        const Color(0xFFEC4899),
-        const Color(0xFF14B8A6),
+        const Color(0xFF0AB35A),
+        const Color(0xFFE27522),
+        const Color(0xFF966BD1),
+        const Color(0xFF25A7B6),
+        const Color(0xFFC94AA8),
+        const Color(0xFFD1A300),
+        const Color(0xFFDA3A3A),
       ],
     );
   }
@@ -114,54 +131,54 @@ class UiColors extends ThemeExtension<UiColors> {
   /// The dark palette. Pass [accent] to use a custom brand color; it is
   /// lightened when needed so it stays readable on dark surfaces.
   factory UiColors.dark({Color? accent}) {
-    const surface = Color(0xFF151519);
-    final a = accent == null ? defaultAccentDark : _tint(accent, minLightness: 0.62);
+    const g = grayDark;
+    final a = accent == null ? defaultAccentDark : _tint(accent, minLightness: 0.55);
     return UiColors(
       brightness: Brightness.dark,
-      background: const Color(0xFF0C0C0F),
-      surface: surface,
-      surfaceMuted: const Color(0xFF1D1D22),
-      surfaceRaised: const Color(0xFF202026),
-      surfaceInverse: const Color(0xFFF4F4F5),
-      onSurfaceInverse: const Color(0xFF18181B),
-      border: const Color(0xFF2A2A31),
-      borderStrong: const Color(0xFF3B3B44),
-      text: const Color(0xFFF5F5F7),
-      textMuted: const Color(0xFFA6A6B0),
-      textSubtle: const Color(0xFF75757F),
-      textDisabled: const Color(0xFF4E4E57),
+      background: g[0],
+      surface: g[1],
+      surfaceMuted: overlay,
+      surfaceRaised: g[1],
+      surfaceInverse: g[7],
+      onSurfaceInverse: g[0],
+      border: overlay,
+      borderStrong: g[3],
+      text: g[8],
+      textMuted: g[5],
+      textSubtle: g[4],
+      textDisabled: g[3],
       accent: a,
       onAccent: _on(a),
-      accentSoft: Color.alphaBlend(a.withValues(alpha: 0.16), surface),
-      onAccentSoft: _tint(a, minLightness: 0.78),
-      success: const Color(0xFF34D399),
-      onSuccess: const Color(0xFF052E1B),
-      successSoft: const Color(0xFF12291F),
-      onSuccessSoft: const Color(0xFF86EFAC),
-      warning: const Color(0xFFFBBF24),
-      onWarning: const Color(0xFF3A2503),
-      warningSoft: const Color(0xFF2E2410),
-      onWarningSoft: const Color(0xFFFCD34D),
-      danger: const Color(0xFFF87171),
-      onDanger: const Color(0xFF3B0A0A),
-      dangerSoft: const Color(0xFF331517),
-      onDangerSoft: const Color(0xFFFCA5A5),
-      info: const Color(0xFF60A5FA),
-      onInfo: const Color(0xFF0A1E3F),
-      infoSoft: const Color(0xFF14213A),
-      onInfoSoft: const Color(0xFF93C5FD),
+      accentSoft: a.withValues(alpha: 0.25),
+      onAccentSoft: _tint(a, minLightness: 0.75),
+      success: const Color(0xFF0AB35A),
+      onSuccess: Colors.white,
+      successSoft: const Color(0x4D09A854),
+      onSuccessSoft: const Color(0xFF54C981),
+      warning: const Color(0xFFD69400),
+      onWarning: Colors.white,
+      warningSoft: const Color(0x4DD19000),
+      onWarningSoft: const Color(0xFFF3B344),
+      danger: const Color(0xFFDA3A3A),
+      onDanger: Colors.white,
+      dangerSoft: const Color(0x4DD93535),
+      onDangerSoft: const Color(0xFFEF6262),
+      info: const Color(0xFF25A7B6),
+      onInfo: Colors.white,
+      infoSoft: const Color(0x4D239CAA),
+      onInfoSoft: const Color(0xFF58C0D0),
       scrim: const Color(0x99000000),
-      shimmerBase: const Color(0xFF1D1D22),
-      shimmerHighlight: const Color(0xFF2A2A31),
+      shimmerBase: g[1],
+      shimmerHighlight: g[2],
       chart: [
         a,
-        const Color(0xFF38BDF8),
-        const Color(0xFF34D399),
-        const Color(0xFFFBBF24),
-        const Color(0xFFF87171),
-        const Color(0xFFA78BFA),
-        const Color(0xFFF472B6),
-        const Color(0xFF2DD4BF),
+        const Color(0xFF54C981),
+        const Color(0xFFF18D4B),
+        const Color(0xFFB28FE0),
+        const Color(0xFF58C0D0),
+        const Color(0xFFDE6EC6),
+        const Color(0xFFEFCA43),
+        const Color(0xFFEF6262),
       ],
     );
   }
@@ -174,7 +191,9 @@ class UiColors extends ThemeExtension<UiColors> {
   /// Cards, sheets, app bars, list groups.
   final Color surface;
 
-  /// Subtle fills: inputs, hovered rows, tracks, secondary buttons.
+  /// Subtle fills: inputs, hovered rows, tracks, "dim" buttons and controls.
+  /// Translucent (the design's Overlay), so it works on any surface. Use
+  /// `Color.alphaBlend(surfaceMuted, surface)` where an opaque color is needed.
   final Color surfaceMuted;
 
   /// Floating layers: menus, popovers, dialogs.
@@ -184,7 +203,7 @@ class UiColors extends ThemeExtension<UiColors> {
   final Color surfaceInverse;
   final Color onSurfaceInverse;
 
-  /// Hairline borders and dividers.
+  /// Hairline borders and dividers (translucent Overlay).
   final Color border;
 
   /// Borders of interactive controls (checkbox, outline button).
@@ -237,6 +256,14 @@ class UiColors extends ThemeExtension<UiColors> {
   final List<Color> chart;
 
   bool get isDark => brightness == Brightness.dark;
+
+  /// Step [step] (1..9) of the design's gray scale for this mode: 1 is the
+  /// background, 9 the foreground. Use it for the few spots the semantic
+  /// colors do not cover (tracks, keys, rest bars).
+  Color gray(int step) => (isDark ? grayDark : grayLight)[(step - 1).clamp(0, 8)];
+
+  /// Opaque version of [surfaceMuted] on [surface].
+  Color get surfaceMutedSolid => Color.alphaBlend(surfaceMuted, surface);
 
   /// The four colors of a [UiStatus].
   UiTone tone(UiStatus status) => switch (status) {

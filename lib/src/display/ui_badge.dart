@@ -31,8 +31,9 @@ class UiCountBadge extends StatelessWidget {
       label: '$count',
       excludeSemantics: true,
       child: Container(
-        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        // Figma "badge" bubble: 20 px round, 10 px regular number.
+        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
           color: tone.color,
           borderRadius: UiRadius.all(UiRadius.full),
@@ -46,9 +47,9 @@ class UiCountBadge extends StatelessWidget {
             maxLines: 1,
             textScaler: TextScaler.noScaling,
             style: TextStyle(
-              fontSize: 11,
-              height: 1.2,
-              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
               color: tone.onColor,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -213,13 +214,17 @@ class _UiStatusPillState extends State<UiStatusPill> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // Figma "badge": radius 2, 12 px label. Neutral is the "dim" style
+    // (gray-2 fill, gray-6 text); other statuses use their soft tint.
+    final neutral = widget.status == UiStatus.neutral;
     final tone = colors.tone(widget.status);
-    final fg = widget.status == UiStatus.neutral ? colors.textMuted : tone.onSoft;
-    final dotColor = widget.status == UiStatus.neutral ? colors.textSubtle : tone.color;
+    final fg = neutral ? colors.gray(6) : tone.onSoft;
+    final bg = neutral ? colors.gray(2) : tone.soft;
+    final dotColor = neutral ? colors.textSubtle : tone.color;
     final (height, font, pad) = switch (widget.size) {
-      UiSize.sm => (22.0, 11.5, 8.0),
-      UiSize.md => (26.0, 12.5, 10.0),
-      UiSize.lg => (30.0, 13.5, 12.0),
+      UiSize.sm => (20.0, 12.0, 8.0),
+      UiSize.md => (24.0, 12.0, 10.0),
+      UiSize.lg => (28.0, 14.0, 12.0),
     };
 
     Widget? lead;
@@ -261,7 +266,7 @@ class _UiStatusPillState extends State<UiStatusPill> with TickerProviderStateMix
     return Container(
       height: height,
       padding: EdgeInsets.symmetric(horizontal: pad),
-      decoration: BoxDecoration(color: tone.soft, borderRadius: UiRadius.all(UiRadius.full)),
+      decoration: BoxDecoration(color: bg, borderRadius: UiRadius.all(2)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -271,7 +276,7 @@ class _UiStatusPillState extends State<UiStatusPill> with TickerProviderStateMix
               widget.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: font, fontWeight: FontWeight.w600, color: fg, height: 1.2),
+              style: TextStyle(fontSize: font, fontWeight: FontWeight.w400, color: fg, height: 1.3),
             ),
           ),
         ],
@@ -315,16 +320,17 @@ class UiTag extends StatelessWidget {
       bg = tone.soft;
       fg = tone.onSoft;
     } else {
-      bg = colors.surfaceMuted;
-      fg = colors.textMuted;
-      border = colors.border;
+      // Figma "badge ghost": 1 px gray-5 outline and gray-5 text.
+      bg = Colors.transparent;
+      fg = colors.textSubtle;
+      border = colors.textSubtle;
     }
     return Container(
-      height: 24,
+      height: 20,
       padding: EdgeInsets.only(left: UiSpace.sm, right: onRemove == null ? UiSpace.sm : UiSpace.xxs),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: UiRadius.all(UiRadius.xs),
+        borderRadius: UiRadius.all(2),
         border: border == null ? null : Border.all(color: border),
       ),
       child: Row(
@@ -336,7 +342,7 @@ class UiTag extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: fg, height: 1.2),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: fg, height: 1.3),
             ),
           ),
           if (onRemove != null)
@@ -375,10 +381,9 @@ class UiKbd extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: UiRadius.all(UiRadius.xs),
-        border: Border.all(color: colors.border),
-        boxShadow: [BoxShadow(color: colors.border, offset: const Offset(0, 1))],
+        color: colors.gray(3),
+        borderRadius: UiRadius.all(UiRadius.sm),
+        boxShadow: [BoxShadow(color: colors.surfaceMuted, offset: const Offset(0, 1))],
       ),
       child: Center(
         widthFactor: 1,

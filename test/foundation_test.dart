@@ -17,7 +17,7 @@ void main() {
       const brand = Color(0xFF0F5132); // very dark green
       expect(UiColors.light(accent: brand).accent, brand);
       final dark = UiColors.dark(accent: brand).accent;
-      expect(HSLColor.fromColor(dark).lightness, greaterThanOrEqualTo(0.6));
+      expect(HSLColor.fromColor(dark).lightness, greaterThanOrEqualTo(0.54));
     });
 
     test('onAccent contrasts with accent', () {

@@ -60,7 +60,7 @@ class UiBottomBar extends StatelessWidget {
         );
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: c.surface,
+        color: c.background,
         border: border ? Border(top: BorderSide(color: c.border)) : null,
       ),
       child: Padding(

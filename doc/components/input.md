@@ -2,6 +2,8 @@
 
 Labelled text inputs, pickers and keypads. Every field shows its label above the input and its helper or error text below. Fields with a `validator` work inside a `Form`.
 
+Field look (Ash Theme "field"): 36 high at `md` (32 `sm`, 44 `lg`), radius 8, translucent Overlay fill, no border at rest, 16 px side padding, 16 px gray icons. Hover adds a 4 px gray-3 ring; focus adds a 1 px Primary border with a soft Primary glow. An error turns the border red and shows a solid red caption strip (white 12 px text with a warning icon) joined under the field.
+
 ### UiFieldLabel
 Frames any control with a label row above and a helper/error line below.
 ```dart
@@ -12,7 +14,7 @@ UiFieldLabel(label: 'Email', isRequired: true, trailing: forgotLink, error: err,
 - `isRequired`: adds a red `*`. Default `false`.
 - `trailing`: widget at the end of the label row. Default `null`.
 - `helper`: text below. Default `null`.
-- `error`: replaces `helper` in the danger color. Default `null`.
+- `error`: shown as a solid danger strip joined under the control; hides `helper`. Default `null`.
 - `counter`: small text at the end of the helper row, e.g. `3 / 20`. Default `null`.
 - `enabled`: disabled label color when false. Default `true`.
 
@@ -56,7 +58,7 @@ UiPasswordField(showStrength: true, validator: UiValidators.minLength(8))
 - `UiPasswordStrength.of(text)` scores any string (null when empty).
 
 ### UiSearchField
-Pill-shaped search input with a clear button and optional debounce and filter button.
+Search input (field style, radius 8) with a clear button and optional debounce and filter button.
 ```dart
 UiSearchField(onChanged: search, debounce: const Duration(milliseconds: 300), onFilter: openFilters)
 ```
@@ -100,7 +102,7 @@ UiOtpField(onCompleted: verify)
 - `onCompleted`: called once all boxes are filled. `onChanged`. Default `null`.
 - `obscure`: dots instead of digits. Default `false`.
 - `digitsOnly`: when false, accepts letters (upper-cased). Default `true`.
-- `error`: red borders plus text. `label`, `helper`. Default `null`.
+- `error`: red border plus the red caption strip. `label`, `helper`. Default `null`.
 - `controller`, `focusNode`. Default `null`.
 - `autofocus` `false`, `enabled` `true`.
 

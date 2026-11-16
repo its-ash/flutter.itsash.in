@@ -647,7 +647,6 @@ class UiVideoThumbnail extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.45),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
                     ),
                     child: const Padding(
                       padding: EdgeInsets.all(UiSpace.md),
@@ -663,10 +662,10 @@ class UiVideoThumbnail extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.65),
-                      borderRadius: UiRadius.all(UiRadius.xs),
+                      borderRadius: UiRadius.all(UiRadius.full),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: UiSpace.xs + 2, vertical: UiSpace.xxs),
+                      padding: const EdgeInsets.symmetric(horizontal: UiSpace.sm, vertical: UiSpace.xxs),
                       child: Text(
                         _format(duration!),
                         style: context.text.labelSmall?.copyWith(

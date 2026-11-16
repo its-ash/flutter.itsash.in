@@ -74,7 +74,7 @@ class UiRating extends StatelessWidget {
               child: Stack(
                 alignment: AlignmentDirectional.centerStart,
                 children: [
-                  Icon(icon, size: _star, color: c.borderStrong),
+                  Icon(icon, size: _star, color: c.gray(3)),
                   ClipRect(
                     child: Align(
                       alignment: AlignmentDirectional.centerStart,

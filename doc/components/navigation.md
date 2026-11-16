@@ -36,7 +36,7 @@ UiShell(items: items, index: tab, onChanged: (i) => setState(() => tab = i), pag
 - Page state survives tab switches and window resizes.
 
 ### UiBottomNav
-Bottom navigation bar with an animated selected pill and badges. `floating` gives a rounded pill that floats above the content.
+Bottom navigation bar on the page background with badges; the selected item is Primary, the rest gray-5 (no indicator pill). `floating` gives a rounded pill that floats above the content.
 
 ```dart
 UiBottomNav(items: items, index: tab, onChanged: (i) => setState(() => tab = i), floating: true);
@@ -76,7 +76,7 @@ UiSidebar(sections: [UiSidebarSection(title: 'Workspace', items)], index: i, onC
 - `border`: hairline on the trailing edge. Default `true`.
 
 ### UiDrawer
-Navigation drawer with a header slot, sectioned items and a soft selected pill. Closes after a tap.
+Navigation drawer with a header slot, sectioned items and a solid Primary selected row (radius 8). Closes after a tap.
 
 ```dart
 Scaffold(drawer: UiDrawer(items: items, index: page, onChanged: (i) => setState(() => page = i)));
@@ -119,7 +119,7 @@ CustomScrollView(slivers: [const UiSliverAppBar(title: 'Inbox'), SliverList.list
 - `floating`: bar comes back on scroll up. Default `false`.
 
 ### UiTabs
-Tab bar in three styles: underline, pill (accent pill slides in a muted track), segment (iOS segmented control).
+Tab bar in three styles: underline (regular labels, 1 px foreground bar under the active tab, gray-3 rule), pill and segment (both the Figma segmented control: gray-2 pill track, Primary pill on the selected tab; `segment` is never scrollable).
 
 ```dart
 UiTabs(tabs: const ['Day', 'Week', 'Month'], index: i, onChanged: (v) => setState(() => i = v));

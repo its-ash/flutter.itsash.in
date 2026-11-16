@@ -1,7 +1,8 @@
 part of 'ui_selection.dart';
 
-/// iOS-style switch with an animated thumb and an accent track, plus an
-/// optional label and description. The whole row is tappable.
+/// Switch with an animated white thumb: Primary track when on, gray-3 when
+/// off. Not in the Figma kit; it uses the same tokens as the checkbox.
+/// Optional label and description. The whole row is tappable.
 ///
 /// ```dart
 /// UiSwitch(wifi, label: 'Wi-Fi', onChanged: (v) => setState(() => wifi = v))
@@ -53,8 +54,8 @@ class _SwitchTrack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final thumbColor = c.isDark ? c.text : c.surface;
-    final off = state.hovered ? c.textSubtle : c.borderStrong;
+    final thumbColor = c.isDark ? c.text : c.background;
+    final off = state.hovered ? c.gray(4) : c.gray(3);
     return TweenAnimationBuilder<double>(
       tween: Tween(end: value ? 1 : 0),
       duration: context.motion(UiMotion.normal),

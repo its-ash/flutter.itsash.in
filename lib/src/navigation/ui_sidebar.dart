@@ -105,7 +105,7 @@ class _UiSidebarState extends State<UiSidebar> {
       width: _collapsed ? UiSidebar.collapsedWidth : widget.width,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: c.surface,
+        color: c.background,
         border: widget.border ? BorderDirectional(end: BorderSide(color: c.border)) : null,
       ),
       child: Material(
@@ -323,17 +323,18 @@ class _SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final enabled = onTap != null;
+    // Selected row: solid Primary, radius 8 (Figma "menu item list", selected).
     final iconColor = !enabled
         ? c.textDisabled
         : selected
-        ? c.onAccentSoft
+        ? c.onAccent
         : c.textMuted;
     final labelColor = !enabled
         ? c.textDisabled
         : selected
-        ? c.onAccentSoft
+        ? c.onAccent
         : c.text;
-    final radius = UiRadius.all(UiRadius.sm);
+    final radius = UiRadius.all(UiRadius.md);
 
     Widget content;
     if (compact) {
@@ -350,10 +351,7 @@ class _SidebarItem extends StatelessWidget {
               item.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.text.bodyMedium!.copyWith(
-                color: labelColor,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-              ),
+              style: context.text.bodyMedium!.copyWith(color: labelColor, fontWeight: FontWeight.w400),
             ),
           ),
           if (item.hasBadge) ...[const SizedBox(width: UiSpace.sm), _SidebarBadge(item: item, selected: selected)],
@@ -363,10 +361,10 @@ class _SidebarItem extends StatelessWidget {
 
     content = AnimatedContainer(
       duration: context.motion(UiMotion.fast),
-      height: 40,
+      height: 36,
       padding: EdgeInsets.symmetric(horizontal: compact ? 0 : UiSpace.md),
       decoration: BoxDecoration(
-        color: selected ? (enabled ? c.accentSoft : c.surfaceMuted) : c.accentSoft.withValues(alpha: 0),
+        color: selected ? (enabled ? c.accent : c.gray(3)) : c.accent.withValues(alpha: 0),
         borderRadius: radius,
       ),
       child: content,
@@ -404,14 +402,15 @@ class _SidebarBadge extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 22),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      decoration: BoxDecoration(
-        color: selected ? c.surface : c.surfaceMuted,
-        borderRadius: UiRadius.all(UiRadius.full),
-      ),
+      decoration: BoxDecoration(color: selected ? c.onAccent : c.gray(2), borderRadius: UiRadius.all(UiRadius.full)),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: context.text.labelSmall!.copyWith(color: selected ? c.onAccentSoft : c.textMuted, letterSpacing: 0),
+        style: context.text.labelSmall!.copyWith(
+          color: selected ? c.accent : c.gray(6),
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0,
+        ),
       ),
     );
   }

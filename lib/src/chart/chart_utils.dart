@@ -106,18 +106,18 @@ class UiChartTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final on = colors.onSurfaceInverse;
-    final base = context.text.labelMedium?.copyWith(color: on, fontFeatures: const [FontFeature.tabularFigures()]);
+    final on = colors.text;
+    final base = context.text.bodySmall?.copyWith(color: on, fontFeatures: const [FontFeature.tabularFigures()]);
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 240),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceInverse,
-          borderRadius: UiRadius.all(UiRadius.sm),
+          color: colors.surfaceRaised,
+          borderRadius: UiRadius.all(UiRadius.md),
           boxShadow: context.shadowMd,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md - 2, vertical: UiSpace.sm),
+          padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +129,7 @@ class UiChartTooltip extends StatelessWidget {
                     title!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: base?.copyWith(color: on.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
+                    style: base?.copyWith(color: colors.textSubtle),
                   ),
                 ),
               for (final r in rows)
@@ -151,12 +151,12 @@ class UiChartTooltip extends StatelessWidget {
                             r.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: base?.copyWith(color: on.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
+                            style: base?.copyWith(color: colors.textMuted),
                           ),
                         ),
                         const SizedBox(width: UiSpace.md),
                       ],
-                      Text(r.value, style: base),
+                      Text(r.value, style: base?.copyWith(fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),

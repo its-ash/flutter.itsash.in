@@ -1,28 +1,42 @@
 part of 'ui_button.dart';
 
 /// Resolved colors of a button for one set of states.
+///
+/// Follows the Ash Theme "button" / "control" components: solid (Primary
+/// fill, bold label), dim (Overlay fill, regular label) and ghost (1 px
+/// outline, regular label). Hover and keyboard focus draw a 4 px inner [ring].
 class _Palette {
-  const _Palette(this.bg, this.fg, {this.border = Colors.transparent});
+  const _Palette(this.bg, this.fg, {this.border = Colors.transparent, this.ring, this.bold = false});
 
   final Color bg;
   final Color fg;
   final Color border;
+
+  /// Color of the 4 px hover / focus ring. Null draws no ring.
+  final Color? ring;
+
+  /// Bold label (solid styles).
+  final bool bold;
 }
 
 typedef _PaletteResolver = _Palette Function(UiColors c, Set<WidgetState> states);
 
-/// Adds the hover / press tint on top of [base].
-_Palette _interactive(_Palette base, Set<WidgetState> states, {Color? hoverBorder}) {
-  final overlay = states.contains(WidgetState.pressed)
-      ? 0.12
-      : states.contains(WidgetState.hovered)
-      ? 0.07
-      : 0.0;
-  if (overlay == 0) return base;
+bool _highlighted(Set<WidgetState> s) => s.contains(WidgetState.hovered) || s.contains(WidgetState.focused);
+
+/// Applies hover (ring + strong label) and press (slight tint) to [base].
+_Palette _interactive(UiColors c, _Palette base, Set<WidgetState> states, {bool strongOnHover = true}) {
+  final highlight = _highlighted(states);
+  final pressed = states.contains(WidgetState.pressed);
+  if (!highlight && !pressed) return _Palette(base.bg, base.fg, border: base.border, bold: base.bold);
+  final bg = pressed
+      ? Color.alphaBlend(base.fg.withValues(alpha: 0.12), base.bg == Colors.transparent ? c.surfaceMuted : base.bg)
+      : base.bg;
   return _Palette(
-    Color.alphaBlend(base.fg.withValues(alpha: overlay), base.bg),
-    base.fg,
-    border: hoverBorder ?? base.border,
+    bg,
+    strongOnHover && base.fg == c.gray(7) ? c.text : base.fg,
+    border: base.border,
+    ring: highlight ? base.ring : null,
+    bold: base.bold,
   );
 }
 
@@ -30,42 +44,95 @@ _Palette _variantPalette(UiColors c, UiButtonVariant v, UiStatus? status, Set<Wi
   const clear = Colors.transparent;
   if (states.contains(WidgetState.disabled)) {
     return switch (v) {
-      UiButtonVariant.primary ||
-      UiButtonVariant.secondary ||
-      UiButtonVariant.soft ||
-      UiButtonVariant.danger => _Palette(c.surfaceMuted, c.textDisabled),
-      UiButtonVariant.outline => _Palette(clear, c.textDisabled, border: c.border),
-      UiButtonVariant.ghost || UiButtonVariant.link => _Palette(clear, c.textDisabled),
+      UiButtonVariant.primary => _Palette(c.gray(2), c.gray(4), bold: true),
+      UiButtonVariant.danger => _Palette(c.gray(2), c.gray(4), bold: true),
+      UiButtonVariant.secondary || UiButtonVariant.soft => _Palette(c.gray(2), c.gray(4)),
+      UiButtonVariant.outline => _Palette(clear, c.gray(3), border: c.gray(3)),
+      UiButtonVariant.ghost || UiButtonVariant.link => _Palette(clear, c.gray(4)),
     };
   }
   final tone = status == null ? null : c.tone(status);
   final base = switch (v) {
-    UiButtonVariant.primary => _Palette(tone?.color ?? c.accent, tone?.onColor ?? c.onAccent),
-    UiButtonVariant.secondary => _Palette(c.surfaceMuted, tone?.color ?? c.text),
-    UiButtonVariant.soft => _Palette(tone?.soft ?? c.accentSoft, tone?.onSoft ?? c.onAccentSoft),
+    // Solid.
+    UiButtonVariant.primary => _Palette(
+      tone?.color ?? c.accent,
+      tone?.onColor ?? c.onAccent,
+      ring: (tone?.color ?? c.accent).withValues(alpha: 0.5),
+      bold: true,
+    ),
+    // Dim.
+    UiButtonVariant.secondary => _Palette(c.surfaceMuted, tone?.color ?? c.gray(7), ring: c.gray(5).withValues(alpha: 0.4)),
+    UiButtonVariant.soft => _Palette(
+      tone?.soft ?? c.accentSoft,
+      tone?.onSoft ?? c.onAccentSoft,
+      ring: (tone?.color ?? c.accent).withValues(alpha: 0.3),
+    ),
+    // Ghost (outlined).
     UiButtonVariant.outline => _Palette(
       clear,
-      tone?.color ?? c.text,
-      border: tone?.color.withValues(alpha: 0.5) ?? c.border,
+      tone?.color ?? c.gray(7),
+      border: tone?.color ?? c.borderStrong,
+      ring: (tone?.color ?? c.gray(3)).withValues(alpha: tone == null ? 1 : 0.4),
     ),
-    UiButtonVariant.ghost => _Palette(clear, tone?.color ?? c.text),
-    UiButtonVariant.danger => _Palette(c.danger, c.onDanger),
+    UiButtonVariant.ghost => _Palette(clear, tone?.color ?? c.gray(7), ring: c.surfaceMuted),
+    UiButtonVariant.danger => _Palette(c.danger, c.onDanger, ring: c.danger.withValues(alpha: 0.5), bold: true),
     UiButtonVariant.link => _Palette(clear, tone?.color ?? c.accent),
   };
   if (v == UiButtonVariant.link) return base;
-  return _interactive(base, states, hoverBorder: v == UiButtonVariant.outline ? (tone?.color ?? c.borderStrong) : null);
+  final p = _interactive(c, base, states);
+  // Ghost (borderless) shows the Overlay fill on hover instead of a ring.
+  if (v == UiButtonVariant.ghost && _highlighted(states)) {
+    return _Palette(c.surfaceMuted, p.fg, border: p.border, bold: p.bold);
+  }
+  return p;
 }
 
-/// Colors of a selectable (toggle) button.
+/// Colors of a selectable (toggle) control: dim when off, solid Primary
+/// when on.
 _Palette _togglePalette(UiColors c, bool selected, Set<WidgetState> states) {
   if (states.contains(WidgetState.disabled)) {
-    return _Palette(selected ? c.surfaceMuted : Colors.transparent, c.textDisabled, border: c.border);
+    return _Palette(c.surfaceMuted, c.gray(4), bold: selected);
   }
   final base = selected
-      ? _Palette(c.accentSoft, c.onAccentSoft, border: c.accent.withValues(alpha: 0.45))
-      : _Palette(Colors.transparent, c.textMuted, border: c.border);
-  return _interactive(base, states, hoverBorder: selected ? null : c.borderStrong);
+      ? _Palette(c.accent, c.onAccent, ring: c.accent.withValues(alpha: 0.5), bold: true)
+      : _Palette(c.surfaceMuted, c.gray(7), ring: c.gray(5).withValues(alpha: 0.4));
+  return _interactive(c, base, states);
 }
+
+/// Button height for [size]: 28 / 36 / 44 (Figma button is 36).
+double _buttonHeight(UiSize size) => switch (size) {
+  UiSize.sm => 28,
+  UiSize.md => 36,
+  UiSize.lg => 44,
+};
+
+/// Horizontal button padding for [size] (Figma md: 32).
+double _buttonPadding(UiSize size) => switch (size) {
+  UiSize.sm => 16,
+  UiSize.md => 32,
+  UiSize.lg => 40,
+};
+
+/// Control (pill) height for [size]: 24 / 28 / 36 (Figma "control":
+/// caption 24, body 28).
+double _controlHeight(UiSize size) => switch (size) {
+  UiSize.sm => 24,
+  UiSize.md => 28,
+  UiSize.lg => 36,
+};
+
+/// Horizontal control padding for [size] (Figma: 8 caption, 12 body).
+double _controlPadding(UiSize size) => switch (size) {
+  UiSize.sm => 8,
+  UiSize.md => 12,
+  UiSize.lg => 16,
+};
+
+/// Label size for [size]: caption 12 for small, body 14 otherwise.
+double _buttonFont(UiSize size) => size == UiSize.sm ? 12 : 14;
+
+/// Icon size inside buttons: 16 (Figma icon frames), 20 for large.
+double _buttonIcon(UiSize size) => size == UiSize.lg ? 20 : 16;
 
 /// Hover, focus, press and keyboard handling shared by every button.
 class _Pressable extends StatefulWidget {
@@ -79,7 +146,11 @@ class _Pressable extends StatefulWidget {
     this.selected,
     this.toggled,
     this.onHighlightChanged,
+    this.focusRing = true,
   });
+
+  /// Draws the accent focus ring. Off when the child draws its own ring.
+  final bool focusRing;
 
   /// Null means disabled.
   final VoidCallback? onTap;
@@ -131,32 +202,34 @@ class _PressableState extends State<_Pressable> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final states = _states;
-    final ring = widget.focusRadius + 3;
-    Widget child = Stack(
-      fit: StackFit.passthrough,
-      clipBehavior: Clip.none,
-      children: [
-        widget.builder(context, states),
-        Positioned(
-          left: -3,
-          top: -3,
-          right: -3,
-          bottom: -3,
-          child: IgnorePointer(
-            child: AnimatedOpacity(
-              opacity: states.contains(WidgetState.focused) ? 1 : 0,
-              duration: context.motion(UiMotion.fast),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: UiRadius.all(ring),
-                  border: Border.all(color: c.accent.withValues(alpha: 0.6), width: 2),
+    final ring = widget.focusRadius + 4;
+    Widget child = !widget.focusRing
+        ? widget.builder(context, states)
+        : Stack(
+            fit: StackFit.passthrough,
+            clipBehavior: Clip.none,
+            children: [
+              widget.builder(context, states),
+              Positioned(
+                left: -4,
+                top: -4,
+                right: -4,
+                bottom: -4,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    opacity: states.contains(WidgetState.focused) ? 1 : 0,
+                    duration: context.motion(UiMotion.fast),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: UiRadius.all(ring),
+                        border: Border.all(color: c.accent.withValues(alpha: 0.5), width: 4),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ],
-    );
+            ],
+          );
     child = AnimatedScale(
       scale: states.contains(WidgetState.pressed) ? widget.pressScale : 1,
       duration: context.motion(UiMotion.fast),
@@ -221,7 +294,6 @@ class _ButtonCore extends StatelessWidget {
     this.flat = false,
     this.underlineOnHover = false,
     this.height,
-    this.radius,
     this.shadow,
     this.tooltip,
     this.selected,
@@ -230,7 +302,12 @@ class _ButtonCore extends StatelessWidget {
     this.underlay,
     this.onHighlightChanged,
     this.pressScale = 0.97,
+    this.control = false,
   });
+
+  /// Uses the pill "control" metrics (24 / 28 / 36 high) instead of the
+  /// button metrics (28 / 36 / 44).
+  final bool control;
 
   final VoidCallback? onPressed;
   final _PaletteResolver palette;
@@ -245,7 +322,6 @@ class _ButtonCore extends StatelessWidget {
   final bool flat;
   final bool underlineOnHover;
   final double? height;
-  final double? radius;
   final List<BoxShadow>? shadow;
   final String? tooltip;
   final bool? selected;
@@ -255,9 +331,13 @@ class _ButtonCore extends StatelessWidget {
   final ValueChanged<bool>? onHighlightChanged;
   final double pressScale;
 
-  double get _height => height ?? size.height;
+  double get _height => height ?? (control ? _controlHeight(size) : _buttonHeight(size));
 
-  double get _radius => radius ?? (circular ? _height / 2 : (size == UiSize.sm ? UiRadius.sm : UiRadius.md));
+  double get _radius => circular || control ? _height / 2 : UiRadius.md;
+
+  double get _padding => control ? _controlPadding(size) : _buttonPadding(size);
+
+  double get _icon => control && size != UiSize.lg ? 16 : _buttonIcon(size);
 
   @override
   Widget build(BuildContext context) {
@@ -270,19 +350,24 @@ class _ButtonCore extends StatelessWidget {
       toggled: toggled,
       pressScale: pressScale,
       focusRadius: _radius,
+      focusRing: false,
       onHighlightChanged: onHighlightChanged,
       builder: (context, states) {
         final p = palette(c, states);
         final enabled = !states.contains(WidgetState.disabled);
         final hovered = states.contains(WidgetState.hovered);
+        final focused = states.contains(WidgetState.focused);
         final duration = context.motion(UiMotion.fast);
+        // Keyboard focus always shows a ring, even on styles without one.
+        final ringColor = p.ring ?? (focused ? c.accent.withValues(alpha: 0.5) : null);
         final style = (context.text.labelLarge ?? const TextStyle()).copyWith(
-          fontSize: size.fontSize,
+          fontSize: _buttonFont(size),
+          fontWeight: p.bold ? FontWeight.w600 : FontWeight.w400,
           color: p.fg,
           decoration: underlineOnHover && hovered ? TextDecoration.underline : TextDecoration.none,
           decorationColor: p.fg,
         );
-        final gap = size == UiSize.sm ? UiSpace.xs + UiSpace.xxs : UiSpace.sm;
+        final gap = size == UiSize.sm || control ? UiSpace.xs : UiSpace.sm;
         Widget content = Row(
           mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -295,7 +380,7 @@ class _ButtonCore extends StatelessWidget {
           ],
         );
         content = IconTheme.merge(
-          data: IconThemeData(color: p.fg, size: square ? size.iconSize + 2 : size.iconSize),
+          data: IconThemeData(color: p.fg, size: square && !control ? _icon + 4 : _icon),
           child: AnimatedDefaultTextStyle(
             style: style,
             duration: duration,
@@ -309,7 +394,7 @@ class _ButtonCore extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             AnimatedOpacity(opacity: loading ? 0 : 1, duration: duration, child: content),
-            if (loading) _Spinner(size: size.iconSize, color: p.fg),
+            if (loading) _Spinner(size: _icon, color: p.fg),
           ],
         );
         Widget box = AnimatedContainer(
@@ -325,12 +410,20 @@ class _ButtonCore extends StatelessWidget {
             border: Border.all(color: p.border),
             boxShadow: enabled ? shadow : null,
           ),
+          // The design's 4 px hover stroke is drawn inside the button, so it
+          // never changes the layout.
+          foregroundDecoration: ringColor == null
+              ? null
+              : BoxDecoration(
+                  borderRadius: UiRadius.all(_radius),
+                  border: Border.all(color: ringColor, width: 4),
+                ),
           child: Stack(
             alignment: Alignment.center,
             children: [
               if (underlay != null) Positioned.fill(child: underlay!),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: square ? 0 : (flat ? UiSpace.xs : size.padding)),
+                padding: EdgeInsets.symmetric(horizontal: square ? 0 : (flat ? UiSpace.xs : _padding)),
                 child: content,
               ),
             ],

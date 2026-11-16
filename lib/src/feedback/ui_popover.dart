@@ -178,8 +178,7 @@ class _PopoverCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.surfaceRaised,
           borderRadius: UiRadius.all(UiRadius.lg),
-          border: Border.all(color: c.border),
-          boxShadow: context.shadowLg,
+          boxShadow: context.shadowMd,
         ),
         child: Material(
           type: MaterialType.transparency,

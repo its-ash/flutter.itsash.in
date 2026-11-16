@@ -253,7 +253,7 @@ class _UiCarouselDots extends StatelessWidget {
                     width: i == current ? 20 : 6,
                     height: 6,
                     decoration: BoxDecoration(
-                      color: i == current ? colors.accent : colors.borderStrong,
+                      color: i == current ? colors.accent : colors.gray(3),
                       borderRadius: UiRadius.all(UiRadius.full),
                     ),
                   ),

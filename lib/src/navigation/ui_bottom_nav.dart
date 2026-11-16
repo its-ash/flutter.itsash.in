@@ -7,7 +7,8 @@ import 'package:theme/src/navigation/ui_nav_item.dart';
 
 /// Bottom navigation bar for phones.
 ///
-/// The standard bar sits flush at the bottom with a top hairline. The
+/// The standard bar sits flush at the bottom on the page background with a
+/// top Overlay rule; the selected item is Primary, the rest gray-5. The
 /// [floating] variant is a rounded pill with a shadow, inset from the screen
 /// edges and lifted above the home indicator. Set `extendBody: true` on the
 /// `Scaffold` so content scrolls behind a floating bar (`UiShell` does this).
@@ -45,7 +46,7 @@ class UiBottomNav extends StatelessWidget {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final onChanged = this.onChanged;
     final row = SizedBox(
-      height: showLabels ? 64 : 56,
+      height: showLabels ? 60 : 52,
       child: Row(
         children: [
           for (var i = 0; i < items.length; i++)
@@ -74,7 +75,6 @@ class UiBottomNav extends StatelessWidget {
               decoration: BoxDecoration(
                 color: c.surfaceRaised,
                 borderRadius: UiRadius.all(UiRadius.full),
-                border: Border.all(color: c.border),
                 boxShadow: context.shadowMd,
               ),
               child: Material(
@@ -91,7 +91,7 @@ class UiBottomNav extends StatelessWidget {
     } else {
       bar = DecoratedBox(
         decoration: BoxDecoration(
-          color: c.surface,
+          color: c.background,
           border: Border(top: BorderSide(color: c.border)),
         ),
         child: Material(
@@ -119,17 +119,14 @@ class _BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final enabled = onTap != null;
+    // No indicator pill: the selected item is Primary, the rest gray-5.
     final iconColor = !enabled
         ? c.textDisabled
         : selected
-        ? c.onAccentSoft
-        : c.textMuted;
-    final labelColor = !enabled
-        ? c.textDisabled
-        : selected
-        ? c.text
-        : c.textMuted;
-    final pillColor = selected ? (enabled ? c.accentSoft : c.surfaceMuted) : c.accentSoft.withValues(alpha: 0);
+        ? c.accent
+        : c.textSubtle;
+    final labelColor = iconColor;
+    const pillColor = Colors.transparent;
     final d = context.motion(UiMotion.normal);
 
     Widget content = LayoutBuilder(
@@ -141,14 +138,14 @@ class _BottomNavItem extends StatelessWidget {
             AnimatedContainer(
               duration: d,
               curve: UiMotion.emphasized,
-              width: math.min(selected ? 56.0 : 32.0, maxPill),
-              height: 32,
+              width: math.min(32.0, maxPill),
+              height: 28,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: pillColor, borderRadius: UiRadius.all(UiRadius.full)),
               child: item.buildIcon(context, selected: selected, color: iconColor, size: 22),
             ),
             if (showLabels) ...[
-              const SizedBox(height: UiSpace.xs),
+              const SizedBox(height: UiSpace.xxs),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: UiSpace.xs),
                 child: AnimatedDefaultTextStyle(
@@ -156,7 +153,7 @@ class _BottomNavItem extends StatelessWidget {
                   style: context.text.labelSmall!.copyWith(
                     color: labelColor,
                     letterSpacing: 0,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
                   child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                 ),

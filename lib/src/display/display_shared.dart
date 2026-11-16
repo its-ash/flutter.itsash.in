@@ -23,7 +23,7 @@ class DisplayDividerScope extends InheritedWidget {
 
 /// Soft background for an arbitrary [color] on the current surface.
 Color displaySoft(UiColors colors, Color color) =>
-    Color.alphaBlend(color.withValues(alpha: colors.isDark ? 0.18 : 0.12), colors.surface);
+    Color.alphaBlend(color.withValues(alpha: colors.isDark ? 0.3 : 0.2), colors.surface);
 
 /// Readable foreground for an arbitrary [color] on its soft background.
 Color displayOnSoft(UiColors colors, Color color) => Color.lerp(color, colors.text, colors.isDark ? 0.1 : 0.3)!;

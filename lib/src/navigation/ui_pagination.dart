@@ -170,14 +170,14 @@ class _PageButton extends StatelessWidget {
     } else {
       fg = enabled ? c.text : c.textDisabled;
     }
-    final shape = RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.sm));
+    final shape = RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.full));
     Widget button = AnimatedContainer(
       duration: context.motion(UiMotion.fast),
       width: _buttonSize,
       height: _buttonSize,
       decoration: ShapeDecoration(
         shape: shape,
-        color: selected ? (enabled ? c.accent : c.surfaceMuted) : c.accent.withValues(alpha: 0),
+        color: selected ? (enabled ? c.accent : c.gray(3)) : c.accent.withValues(alpha: 0),
       ),
       child: Material(
         type: MaterialType.transparency,

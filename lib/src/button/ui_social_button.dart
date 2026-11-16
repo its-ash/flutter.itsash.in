@@ -48,7 +48,7 @@ class UiSocialButton extends StatelessWidget {
       onPressed: onPressed,
       palette: (c, s) {
         final p = _variantPalette(c, UiButtonVariant.outline, null, s);
-        return _Palette(Color.alphaBlend(p.bg, c.surface), p.fg, border: p.border);
+        return _Palette(p.bg, p.fg, border: p.border, ring: p.ring, bold: p.bold);
       },
       size: size,
       expand: expand,
@@ -56,7 +56,7 @@ class UiSocialButton extends StatelessWidget {
       leading: lead == null
           ? null
           : SizedBox.square(
-              dimension: size.iconSize + 2,
+              dimension: _buttonIcon(size) + 2,
               child: Center(child: lead),
             ),
       label: Text(label ?? 'Continue with $provider'),

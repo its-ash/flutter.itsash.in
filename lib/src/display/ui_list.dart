@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:theme/src/display/display_shared.dart';
+import 'package:theme/src/display/ui_key_value.dart';
 import 'package:theme/src/foundation/foundation.dart';
 
 /// An icon in a tinted rounded square, used as a list or card leading.
@@ -50,7 +51,7 @@ class UiIconBox extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: bg, borderRadius: UiRadius.all(size * 0.3)),
+      decoration: BoxDecoration(color: bg, borderRadius: UiRadius.all(size >= 32 ? UiRadius.md : UiRadius.sm)),
       child: Icon(icon, size: size * 0.56, color: fg),
     );
   }
@@ -125,12 +126,21 @@ class UiListTile extends StatelessWidget {
     final text = context.text;
     final divider = DisplayDividerScope.of(context);
 
+    // Figma "menu item list": regular 14 title, 12 gray-5 captions, gray-5
+    // value and 16 px chevron; solid Primary row when selected.
     final titleColor = !enabled
         ? colors.textDisabled
+        : selected
+        ? colors.onAccent
         : destructive
         ? colors.danger
         : colors.text;
-    final iconSize = dense ? 28.0 : 32.0;
+    final mutedColor = !enabled
+        ? colors.textDisabled
+        : selected
+        ? colors.onAccent.withValues(alpha: 0.8)
+        : colors.textSubtle;
+    final iconSize = dense ? 24.0 : 28.0;
 
     Widget? lead = leading;
     if (lead == null && icon != null) {
@@ -143,11 +153,7 @@ class UiListTile extends StatelessWidget {
     }
 
     final body = Padding(
-      padding: EdgeInsets.only(
-        right: UiSpace.lg,
-        top: dense ? UiSpace.sm : UiSpace.md,
-        bottom: dense ? UiSpace.sm : UiSpace.md,
-      ),
+      padding: EdgeInsets.only(right: UiSpace.page, top: dense ? 6 : UiSpace.sm, bottom: dense ? 6 : UiSpace.sm),
       child: Row(
         children: [
           Expanded(
@@ -159,11 +165,7 @@ class UiListTile extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: (dense ? text.bodyMedium : text.bodyLarge)?.copyWith(
-                    color: titleColor,
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
+                  style: text.bodyMedium?.copyWith(color: titleColor),
                 ),
                 if (subtitle != null)
                   Padding(
@@ -172,7 +174,7 @@ class UiListTile extends StatelessWidget {
                       subtitle!,
                       maxLines: maxSubtitleLines,
                       overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall?.copyWith(color: enabled ? colors.textMuted : colors.textDisabled),
+                      style: text.bodySmall?.copyWith(color: mutedColor),
                     ),
                   ),
               ],
@@ -187,7 +189,7 @@ class UiListTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.end,
-                  style: text.bodyMedium?.copyWith(color: enabled ? colors.textMuted : colors.textDisabled),
+                  style: text.bodyMedium?.copyWith(color: mutedColor),
                 ),
               ),
             ),
@@ -198,22 +200,18 @@ class UiListTile extends StatelessWidget {
             ),
           if (chevron)
             Padding(
-              padding: const EdgeInsets.only(left: UiSpace.xs),
-              child: Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: enabled ? colors.textSubtle : colors.textDisabled,
-              ),
+              padding: const EdgeInsets.only(left: UiSpace.sm),
+              child: Icon(Icons.chevron_right_rounded, size: 16, color: mutedColor),
             ),
         ],
       ),
     );
 
     Widget row = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: dense ? 44 : 52),
+      constraints: BoxConstraints(minHeight: dense ? 36 : 44),
       child: Row(
         children: [
-          const SizedBox(width: UiSpace.lg),
+          const SizedBox(width: UiSpace.page),
           if (lead != null)
             Padding(
               padding: const EdgeInsets.only(right: UiSpace.md),
@@ -233,7 +231,7 @@ class UiListTile extends StatelessWidget {
     final interactive = enabled && (onTap != null || onLongPress != null);
     row = Material(
       type: selected ? MaterialType.canvas : MaterialType.transparency,
-      color: selected ? colors.accentSoft : null,
+      color: selected ? colors.accent : null,
       child: InkWell(onTap: interactive ? onTap : null, onLongPress: interactive ? onLongPress : null, child: row),
     );
 
@@ -274,50 +272,153 @@ class UiListGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final text = context.text;
-    final rows = <Widget>[];
-    for (var i = 0; i < children.length; i++) {
-      final child = children[i];
-      final divide = dividers && i < children.length - 1;
-      if (child is UiListTile) {
-        rows.add(DisplayDividerScope(divider: divide, child: child));
-      } else {
-        rows.add(DisplayDividerScope(divider: false, child: child));
-        if (divide) rows.add(const Divider(height: 1, indent: UiSpace.lg));
-      }
-    }
+    final rows = [
+      for (var i = 0; i < children.length; i++) ..._groupRow(children[i], divide: dividers && i < children.length - 1),
+    ];
 
-    final captionPad = EdgeInsets.symmetric(horizontal: inset ? UiSpace.lg : UiSpace.page);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (header != null)
-          Padding(
-            padding: captionPad.copyWith(bottom: UiSpace.sm),
-            child: Text(
-              header!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: text.labelMedium?.copyWith(color: colors.textMuted),
-            ),
-          ),
+        if (header != null) _GroupHeader(header!),
         Material(
-          color: colors.surface,
+          color: inset ? colors.surface : Colors.transparent,
           clipBehavior: Clip.antiAlias,
           shape: inset
-              ? RoundedRectangleBorder(
-                  borderRadius: UiRadius.all(UiRadius.lg),
-                  side: BorderSide(color: colors.border),
-                )
+              ? RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.lg))
               : Border.symmetric(horizontal: BorderSide(color: colors.border)),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
         ),
+        if (footer != null) _GroupFooter(footer!, style: text.bodySmall?.copyWith(color: colors.textSubtle)),
+      ],
+    );
+  }
+}
+
+/// Lazy [UiListGroup] for long lists, as a sliver: only the rows near the
+/// screen are built. Same look: header, rounded surface, dividers, footer.
+///
+/// Put it in a `CustomScrollView` or `UiScaffold.slivers`.
+///
+/// ```dart
+/// UiSliverListGroup(header: 'Apps', itemCount: apps.length, itemBuilder: (context, i) => UiListTile(apps[i].name))
+/// ```
+class UiSliverListGroup extends StatelessWidget {
+  const UiSliverListGroup({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.header,
+    this.footer,
+    this.inset = true,
+    this.dividers = true,
+  });
+
+  final int itemCount;
+
+  /// Builds row `index`. Called only when it comes near the screen.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// Caption above the group.
+  final String? header;
+
+  /// Caption below the group (help text).
+  final String? footer;
+
+  /// Rounded, bordered card. When false the group is full-bleed with top and
+  /// bottom borders only.
+  final bool inset;
+  final bool dividers;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final last = itemCount - 1;
+    final radius = Radius.circular(UiRadius.lg);
+    final side = BorderSide(color: colors.border);
+
+    Widget row(BuildContext context, int i) {
+      final first = i == 0;
+      final end = i == last;
+      return Material(
+        color: inset ? colors.surface : Colors.transparent,
+        clipBehavior: first || end ? Clip.antiAlias : Clip.none,
+        shape: inset
+            ? RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: first ? radius : Radius.zero,
+                  bottom: end ? radius : Radius.zero,
+                ),
+              )
+            : Border(top: first ? side : BorderSide.none, bottom: end ? side : BorderSide.none),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: _groupRow(itemBuilder(context, i), divide: dividers && !end),
+        ),
+      );
+    }
+
+    return SliverMainAxisGroup(
+      slivers: [
+        if (header != null) SliverToBoxAdapter(child: _GroupHeader(header!)),
+        SliverList.builder(itemCount: itemCount, itemBuilder: row),
         if (footer != null)
-          Padding(
-            padding: captionPad.copyWith(top: UiSpace.sm),
-            child: Text(footer!, style: text.bodySmall?.copyWith(color: colors.textSubtle)),
+          SliverToBoxAdapter(
+            child: _GroupFooter(footer!, style: context.text.bodySmall?.copyWith(color: colors.textSubtle)),
           ),
       ],
+    );
+  }
+}
+
+/// One row of a list group, plus its divider when it needs one.
+List<Widget> _groupRow(Widget child, {required bool divide}) {
+  if (child is UiListTile) return [DisplayDividerScope(divider: divide, child: child)];
+  // Key-value rows have no horizontal padding of their own: inset them
+  // like a UiListTile so the text does not touch the card edge.
+  final padded = child is UiKeyValue || child is UiKeyValueList
+      ? Padding(
+          padding: const EdgeInsets.symmetric(horizontal: UiSpace.page),
+          child: child,
+        )
+      : child;
+  return [
+    DisplayDividerScope(divider: false, child: padded),
+    if (divide) const Divider(height: 1, indent: UiSpace.page),
+  ];
+}
+
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(UiSpace.page, 0, UiSpace.page, UiSpace.sm),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.text.labelLarge?.copyWith(color: context.colors.text),
+      ),
+    );
+  }
+}
+
+class _GroupFooter extends StatelessWidget {
+  const _GroupFooter(this.text, {this.style});
+
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(UiSpace.page, UiSpace.sm, UiSpace.page, 0),
+      child: Text(text, style: style),
     );
   }
 }

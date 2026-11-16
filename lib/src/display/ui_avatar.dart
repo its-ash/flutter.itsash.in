@@ -8,8 +8,8 @@ enum UiAvatarShape { circle, rounded }
 
 /// A user or entity picture with initials fallback and optional status dot.
 ///
-/// The background tint is picked from the chart palette by [name], so the
-/// same name always gets the same color.
+/// Without a picture it is the design's "empty avatar": a gray-2 circle with
+/// bold gray-5 initials. Pass [color] for a tinted background instead.
 ///
 /// ```dart
 /// UiAvatar(name: 'Ada Lovelace', status: UiStatus.success)
@@ -37,7 +37,8 @@ class UiAvatar extends StatelessWidget {
   /// Shown when there is no [name] (defaults to a person icon).
   final IconData? icon;
 
-  /// `sm` 32, `md` 40, `lg` 56 px. Ignored when [diameter] is set.
+  /// `sm` 24, `md` 48, `lg` 96 px (Figma small / medium / large). Ignored
+  /// when [diameter] is set.
   final UiSize size;
 
   /// Exact size in px.
@@ -54,9 +55,9 @@ class UiAvatar extends StatelessWidget {
 
   /// Pixel size for a [UiSize].
   static double sizeOf(UiSize size) => switch (size) {
-    UiSize.sm => 32,
-    UiSize.md => 40,
-    UiSize.lg => 56,
+    UiSize.sm => 24,
+    UiSize.md => 48,
+    UiSize.lg => 96,
   };
 
   /// Up to two uppercase initials of [name]: "Ada Lovelace" → "AL".
@@ -71,7 +72,7 @@ class UiAvatar extends StatelessWidget {
     return first(parts.first) + first(parts.last);
   }
 
-  /// Stable palette index for [name].
+  /// Stable palette index for [name] (kept for apps that tint by name).
   static int colorIndexOf(String name) {
     var h = 0;
     for (final c in name.trim().toLowerCase().codeUnits) {
@@ -99,9 +100,9 @@ class UiAvatar extends StatelessWidget {
     final d = diameter ?? sizeOf(size);
     final n = name?.trim() ?? '';
     final initials = n.isEmpty ? '' : initialsOf(n);
-    final tint = color ?? (n.isEmpty ? null : colors.chartColor(colorIndexOf(n)));
-    final bg = tint == null ? colors.surfaceMuted : displaySoft(colors, tint);
-    final fg = tint == null ? colors.textMuted : displayOnSoft(colors, tint);
+    final tint = color;
+    final bg = tint == null ? colors.gray(2) : displaySoft(colors, tint);
+    final fg = tint == null ? colors.textSubtle : displayOnSoft(colors, tint);
     final radius = shape == UiAvatarShape.circle ? UiRadius.all(d / 2) : UiRadius.all(d * 0.28);
 
     final fallback = Container(
@@ -116,7 +117,7 @@ class UiAvatar extends StatelessWidget {
               maxLines: 1,
               textScaler: TextScaler.noScaling,
               style: TextStyle(
-                fontSize: d * (initials.length > 1 ? 0.36 : 0.42),
+                fontSize: d * (initials.length > 1 ? 0.3 : 0.36),
                 fontWeight: FontWeight.w600,
                 color: fg,
                 height: 1,
@@ -228,7 +229,7 @@ class UiAvatarGroup extends StatelessWidget {
                     width: d,
                     height: d,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(color: colors.surfaceMuted, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: colors.gray(2), shape: BoxShape.circle),
                     child: Text(
                       '+$rest',
                       maxLines: 1,
@@ -236,7 +237,7 @@ class UiAvatarGroup extends StatelessWidget {
                       style: TextStyle(
                         fontSize: d * (rest > 99 ? 0.28 : 0.34),
                         fontWeight: FontWeight.w600,
-                        color: colors.textMuted,
+                        color: colors.textSubtle,
                       ),
                     ),
                   ),

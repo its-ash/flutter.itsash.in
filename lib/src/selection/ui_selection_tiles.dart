@@ -175,32 +175,34 @@ class _SelectionTile extends StatelessWidget {
       builder: (context, state) => AnimatedContainer(
         duration: context.motion(UiMotion.fast),
         curve: UiMotion.standard,
-        constraints: const BoxConstraints(minHeight: 56),
-        padding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.md),
+        // Figma "menu item list" row: page-edge side padding, regular title,
+        // Overlay fill on hover.
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: UiSpace.sm),
         decoration: BoxDecoration(
           color: state.pressed
-              ? c.surfaceMuted
+              ? Color.alphaBlend(c.surfaceMuted, c.surfaceMuted)
               : state.hovered
-              ? c.surfaceMuted.withValues(alpha: 0.6)
+              ? c.surfaceMuted
               : c.surfaceMuted.withValues(alpha: 0),
         ),
         foregroundDecoration: state.focused
             ? BoxDecoration(
-                border: Border.all(color: c.accent, width: 2),
-                borderRadius: UiRadius.all(UiRadius.sm),
+                border: Border.all(color: c.accent.withValues(alpha: 0.5), width: 4),
+                borderRadius: UiRadius.all(UiRadius.md),
               )
             : null,
         child: Row(
           children: [
             if (icon != null) ...[
               Container(
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: enabled ? tone.soft : c.surfaceMuted,
-                  borderRadius: UiRadius.all(UiRadius.sm),
+                  borderRadius: UiRadius.all(UiRadius.full),
                 ),
-                child: Icon(icon, size: 20, color: enabled ? tone.onSoft : c.textDisabled),
+                child: Icon(icon, size: 16, color: enabled ? tone.onSoft : c.textDisabled),
               ),
               const SizedBox(width: UiSpace.md),
             ],
@@ -213,17 +215,14 @@ class _SelectionTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: context.text.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: enabled ? c.text : c.textDisabled,
-                    ),
+                    style: context.text.bodyMedium?.copyWith(color: enabled ? c.text : c.textDisabled),
                   ),
                   if (subtitle != null)
                     Text(
                       subtitle!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: context.text.bodySmall?.copyWith(color: enabled ? c.textMuted : c.textDisabled),
+                      style: context.text.bodySmall?.copyWith(color: enabled ? c.textSubtle : c.textDisabled),
                     ),
                 ],
               ),

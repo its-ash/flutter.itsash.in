@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:theme/src/foundation/foundation.dart';
+import 'package:theme/src/display/display.dart';
 import 'package:theme/src/layout/layout.dart';
 
 Widget _app(Widget home, {ThemeMode mode = ThemeMode.light}) =>
@@ -391,4 +392,111 @@ void main() {
       }
     });
   });
+
+  group('Lazy slivers', () {
+    testWidgets('UiScaffold.slivers builds only the grid and group rows on screen', (tester) async {
+      _size(tester, 400);
+      for (final mode in _modes) {
+        var gridBuilds = 0;
+        var rowBuilds = 0;
+        await tester.pumpWidget(
+          _app(
+            UiScaffold.slivers(
+              key: ValueKey(mode), // fresh scroll position per mode
+              appBar: AppBar(title: const Text('Lazy')),
+              gap: UiSpace.lg,
+              maxWidth: 720,
+              slivers: [
+                const SliverToBoxAdapter(child: Text('Top')),
+                UiSliverResponsiveGrid(
+                  minItemWidth: 76,
+                  itemCount: 1000,
+                  itemBuilder: (context, i) {
+                    gridBuilds++;
+                    return SizedBox(height: 80, child: Text('Cell $i'));
+                  },
+                ),
+                UiSliverListGroup(
+                  header: 'Rows',
+                  footer: 'End',
+                  itemCount: 500,
+                  itemBuilder: (context, i) {
+                    rowBuilds++;
+                    return UiListTile('Row $i');
+                  },
+                ),
+              ],
+            ),
+            mode: mode,
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.text('Top'), findsOneWidget);
+        expect(find.text('Cell 0'), findsOneWidget);
+        // 400 - 2 * 16 padding = 368 wide: 4 columns of at least 76.
+        expect(find.text('Cell 3'), findsOneWidget);
+        expect(find.text('Cell 999'), findsNothing);
+        expect(gridBuilds, lessThan(100));
+        // An off-screen sliver still lays out its first row to measure itself.
+        expect(rowBuilds, lessThanOrEqualTo(1));
+
+        final position = tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+        for (var step = 0; step < 100 && find.text('Row 0').evaluate().isEmpty; step++) {
+          position.jumpTo(position.pixels + 1000);
+          await tester.pump();
+        }
+        expect(find.text('Row 0'), findsOneWidget);
+        expect(find.text('Rows'), findsOneWidget);
+        expect(rowBuilds, lessThan(100));
+        expect(find.text('Row 499'), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('UiSliverResponsiveGrid uses the same columns as UiResponsiveGrid', (tester) async {
+      _size(tester, 400);
+      await tester.pumpWidget(
+        _app(
+          Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                UiSliverResponsiveGrid(
+                  minItemWidth: 160,
+                  spacing: 16,
+                  itemCount: 3,
+                  itemBuilder: (context, i) => SizedBox(height: 50, child: Text('G$i')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      // 400 wide, 160 min, 16 gap: 2 columns; item 2 starts a second row.
+      expect(UiResponsiveGrid.columnsFor(400, minItemWidth: 160, spacing: 16), 2);
+      expect(tester.getTopLeft(find.text('G1')).dy, tester.getTopLeft(find.text('G0')).dy);
+      expect(tester.getTopLeft(find.text('G2')).dy, greaterThan(tester.getTopLeft(find.text('G0')).dy));
+      expect(tester.getSize(find.text('G0').first).width, lessThanOrEqualTo(192));
+    });
+
+    testWidgets('UiSliverListGroup with no rows and with non-tile rows', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                const UiSliverListGroup(header: 'Empty', itemCount: 0, itemBuilder: _never),
+                UiSliverListGroup(inset: false, itemCount: 2, itemBuilder: (context, i) => Text('Plain $i')),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Empty'), findsOneWidget);
+      expect(find.text('Plain 1'), findsOneWidget);
+      expect(find.byType(Divider), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
+
+Widget _never(BuildContext context, int i) => throw StateError('built row $i');

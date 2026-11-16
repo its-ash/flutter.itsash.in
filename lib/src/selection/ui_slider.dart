@@ -1,6 +1,8 @@
 part of 'ui_selection.dart';
 
-/// Slider with an optional label row and the current value on the end side.
+/// Slider (2 px gray track filled with the foreground color, 16 px thumb;
+/// styled by the theme's `sliderTheme`) with an optional label row and the
+/// current value on the end side.
 ///
 /// ```dart
 /// UiSlider(value: volume, label: 'Volume', onChanged: (v) => setState(() => volume = v))
@@ -150,7 +152,7 @@ class _SliderFrame extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.text.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                         color: enabled ? c.text : c.textDisabled,
                       ),
                     ),
@@ -160,8 +162,8 @@ class _SliderFrame extends StatelessWidget {
               Text(
                 valueText!,
                 style: context.text.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: enabled ? c.textMuted : c.textDisabled,
+                  fontWeight: FontWeight.w400,
+                  color: enabled ? c.textSubtle : c.textDisabled,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),

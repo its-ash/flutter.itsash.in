@@ -1,18 +1,20 @@
 part of 'ui_selection.dart';
 
-/// Look of an unselected [UiChip]. Selected chips always use the accent tint.
+/// Look of an unselected [UiChip]. Selected chips are always solid Primary
+/// with a bold label (Figma "control", style=solid).
 enum UiChipVariant {
-  /// Surface fill with a 1 px border.
+  /// Transparent with a 1 px outline (Figma "ghost" control).
   outline,
 
-  /// Tinted fill from the chip's status, no border.
+  /// Tinted fill from the chip's status, no border (Figma "dim" control for
+  /// the neutral status).
   soft,
 
   /// Solid fill from the chip's status.
   filled,
 }
 
-/// Pill chip for tags, filters and choices.
+/// Pill chip for tags, filters and choices: 24 / 28 / 36 high (sm / md / lg).
 ///
 /// With [onTap] it is a toggle or action; with [onDeleted] it shows a remove
 /// button. With neither it is a static label. Set [enabled] to false to grey
@@ -66,13 +68,13 @@ class UiChip extends StatelessWidget {
   final bool showCheck;
 
   double get _height => switch (size) {
-    UiSize.sm => 28,
-    UiSize.md => 34,
-    UiSize.lg => 40,
+    UiSize.sm => 24,
+    UiSize.md => 28,
+    UiSize.lg => 36,
   };
 
   double get _hPad => switch (size) {
-    UiSize.sm => UiSpace.sm + 2,
+    UiSize.sm => UiSpace.sm,
     UiSize.md => UiSpace.md,
     UiSize.lg => UiSpace.lg,
   };
@@ -81,29 +83,43 @@ class UiChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final tone = c.tone(status);
-    final iconSize = size.iconSize - 2;
+    final neutral = status == UiStatus.neutral;
+    final iconSize = size == UiSize.sm ? 14.0 : 16.0;
     final tap = enabled ? onTap : null;
+    const clear = Colors.transparent;
 
     return _Pressable(
       onTap: tap,
       builder: (context, state) {
+        final highlight = state.hovered || state.pressed;
         final (Color bg, Color fg, Color border) = switch ((selected, variant)) {
-          (true, UiChipVariant.filled) => (c.accent, c.onAccent, c.accent),
-          (true, _) => (c.accentSoft, c.onAccentSoft, c.accent),
+          (true, _) => (c.accent, c.onAccent, clear),
           (false, UiChipVariant.outline) => (
-            state.hovered || state.pressed ? c.surfaceMuted : c.surface,
-            status == UiStatus.neutral ? c.text : tone.onSoft,
-            status == UiStatus.neutral ? (state.hovered ? c.borderStrong : c.border) : tone.color,
+            highlight ? c.surfaceMuted : clear,
+            neutral ? (highlight ? c.text : c.gray(7)) : tone.onSoft,
+            neutral ? (highlight ? c.textSubtle : c.borderStrong) : tone.color,
           ),
-          (false, UiChipVariant.soft) => (tone.soft, tone.onSoft, tone.soft),
-          (false, UiChipVariant.filled) => (tone.color, tone.onColor, tone.color),
+          (false, UiChipVariant.soft) => (
+            tone.soft,
+            neutral ? (highlight ? c.text : c.gray(7)) : tone.onSoft,
+            clear,
+          ),
+          (false, UiChipVariant.filled) => (tone.color, tone.onColor, clear),
         };
+        // The design's hover stroke: 4 px, inside the pill.
+        final ring = !highlight
+            ? null
+            : selected
+            ? c.accent.withValues(alpha: 0.5)
+            : variant == UiChipVariant.outline
+            ? null
+            : c.gray(5).withValues(alpha: 0.4);
         final duration = context.motion(UiMotion.fast);
 
         Widget? leading;
         if (avatar != null) {
           leading = SizedBox.square(
-            dimension: _height - 10,
+            dimension: _height - 4,
             child: ClipOval(child: avatar),
           );
         } else if (icon != null) {
@@ -113,7 +129,7 @@ class UiChip extends StatelessWidget {
         final content = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[leading, const SizedBox(width: UiSpace.xs + 2)],
+            if (leading != null) ...[leading, const SizedBox(width: UiSpace.xs)],
             if (leading == null && showCheck)
               AnimatedSize(
                 duration: duration,
@@ -132,8 +148,9 @@ class UiChip extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: context.text.labelLarge?.copyWith(
                   color: fg,
-                  fontSize: size.fontSize - 1,
-                  fontWeight: FontWeight.w500,
+                  fontSize: size == UiSize.sm ? 12 : 14,
+                  height: size == UiSize.sm ? 16 / 12 : 20 / 14,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),
@@ -168,8 +185,8 @@ class UiChip extends StatelessWidget {
                 curve: UiMotion.standard,
                 height: _height,
                 padding: EdgeInsetsDirectional.only(
-                  start: leading is SizedBox ? 4 : _hPad,
-                  end: onDeleted != null ? _hPad - 6 : _hPad,
+                  start: leading is SizedBox ? UiSpace.xxs : _hPad,
+                  end: onDeleted != null ? UiSpace.xs : _hPad,
                 ),
                 decoration: BoxDecoration(
                   color: bg,
@@ -177,6 +194,12 @@ class UiChip extends StatelessWidget {
                   border: Border.all(color: border),
                   boxShadow: _focusRing(c, state.focused),
                 ),
+                foregroundDecoration: ring == null
+                    ? null
+                    : BoxDecoration(
+                        borderRadius: UiRadius.all(UiRadius.full),
+                        border: Border.all(color: ring, width: 4),
+                      ),
                 child: content,
               ),
             ),

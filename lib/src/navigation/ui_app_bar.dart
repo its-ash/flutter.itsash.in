@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:theme/src/foundation/foundation.dart';
 
-const double _toolbarHeight = 60;
+const double _toolbarHeight = 56;
 
 /// Back (or close, for full-screen dialogs) button. Null when there is
 /// nothing to go back to and [back] is not forced.
@@ -13,7 +13,7 @@ Widget? _backButton(BuildContext context, {bool? back, VoidCallback? onBack}) {
   final close = route is PageRoute && route.fullscreenDialog;
   final l = MaterialLocalizations.of(context);
   return IconButton(
-    icon: Icon(close ? Icons.close_rounded : Icons.arrow_back_rounded),
+    icon: Icon(close ? Icons.close_rounded : Icons.arrow_back_ios_new_rounded, size: close ? 22 : 18),
     tooltip: close ? l.closeButtonTooltip : l.backButtonTooltip,
     onPressed: onBack ?? () => Navigator.maybePop(context),
   );
@@ -23,7 +23,8 @@ List<Widget>? _withEndGap(List<Widget>? actions) =>
     actions == null || actions.isEmpty ? actions : [...actions, const SizedBox(width: UiSpace.sm)];
 
 /// Top app bar with title, optional subtitle, actions and an automatic back
-/// button. [large] adds an iOS-style large title under the toolbar.
+/// button. [large] adds the Figma "title bar" big title (H1, 29 / 36
+/// semibold) under the toolbar.
 ///
 /// ```dart
 /// Scaffold(appBar: UiAppBar(title: 'Settings', actions: [IconButton(...)]));
@@ -76,7 +77,7 @@ class UiAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool border;
   final Color? backgroundColor;
 
-  double get _largeHeight => subtitle == null ? 52 : 72;
+  double get _largeHeight => subtitle == null ? 56 : 76;
 
   @override
   Size get preferredSize =>
@@ -108,7 +109,7 @@ class UiAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   if (text != null)
                     DefaultTextStyle.merge(
-                      style: t.headlineMedium,
+                      style: t.displaySmall,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       child: text,
@@ -118,7 +119,7 @@ class UiAppBar extends StatelessWidget implements PreferredSizeWidget {
                       subtitle!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: t.bodyMedium!.copyWith(color: c.textMuted),
+                      style: t.bodyMedium!.copyWith(color: c.textSubtle),
                     ),
                 ],
               ),
@@ -134,7 +135,12 @@ class UiAppBar extends StatelessWidget implements PreferredSizeWidget {
         crossAxisAlignment: centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
           if (text != null) DefaultTextStyle.merge(style: t.titleMedium, child: text),
-          Text(subtitle!, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.bodySmall),
+          Text(
+            subtitle!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: t.bodySmall!.copyWith(color: c.textSubtle),
+          ),
         ],
       );
     } else {
@@ -210,7 +216,7 @@ class UiSliverAppBar extends StatelessWidget {
         pinned: pinned,
         floating: floating,
         toolbarHeight: _toolbarHeight,
-        expandedHeight: 124 + (bottom?.preferredSize.height ?? 0),
+        expandedHeight: 128 + (bottom?.preferredSize.height ?? 0),
         backgroundColor: backgroundColor,
       );
     }

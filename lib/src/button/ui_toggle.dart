@@ -1,6 +1,6 @@
 part of 'ui_button.dart';
 
-/// A button that stays on or off. Selected uses a soft accent tint.
+/// A pill control that stays on or off: dim when off, solid Primary when on.
 ///
 /// ```dart
 /// UiToggleButton('Bold', selected: bold, onChanged: (v) => setState(() => bold = v))
@@ -50,6 +50,7 @@ class UiToggleButton extends StatelessWidget {
       onPressed: onChanged == null ? null : () => onChanged(!selected),
       palette: (c, s) => _togglePalette(c, selected, s),
       size: size,
+      control: true,
       expand: expand,
       square: label == null,
       toggled: selected,
@@ -117,6 +118,7 @@ class UiToggleGroup<T> extends StatelessWidget {
       onPressed: onChanged == null ? null : () => _tap(item.value),
       palette: (c, s) => _togglePalette(c, isSelected, s),
       size: size,
+      control: true,
       expand: expand,
       square: item.label == null,
       selected: isSelected,

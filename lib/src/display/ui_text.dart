@@ -158,11 +158,7 @@ class UiCodeText extends StatelessWidget {
     final colors = context.colors;
     final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: colors.surfaceMuted,
-        borderRadius: UiRadius.all(UiRadius.xs),
-        border: Border.all(color: colors.border),
-      ),
+      decoration: BoxDecoration(color: colors.surfaceMuted, borderRadius: UiRadius.all(UiRadius.xs)),
       child: Text(
         code,
         maxLines: 1,
@@ -214,11 +210,7 @@ class UiCodeBlock extends StatelessWidget {
     );
     final hasBar = title != null;
     return Container(
-      decoration: BoxDecoration(
-        color: colors.surfaceMuted,
-        borderRadius: UiRadius.all(UiRadius.md),
-        border: Border.all(color: colors.border),
-      ),
+      decoration: BoxDecoration(color: colors.surfaceMuted, borderRadius: UiRadius.all(UiRadius.md)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

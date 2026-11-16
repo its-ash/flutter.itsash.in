@@ -19,7 +19,7 @@ const UiChoice('pro', 'Pro', description: 'For teams', icon: Icons.bolt_rounded,
 
 ### UiCheckbox
 
-Rounded-square checkbox with an animated check. The label and description sit on the right, and the whole row is tappable.
+20 px checkbox (radius 4, gray-2 fill with a 1 px gray-4 outline; solid Primary with a white check when on). Radios match: gray-2 with a 1 px outline when off, a 1 px Primary ring with an 8 px Primary dot when on. The label and description sit on the right, and the whole row is tappable.
 
 ```dart
 UiCheckbox(agree, label: 'I agree', onChanged: (v) => setState(() => agree = v!))
@@ -46,7 +46,7 @@ UiCheckboxGroup(values: picked, options: opts, onChanged: (s) => setState(() => 
 
 ### UiSwitch
 
-iOS-style switch with an animated thumb and an accent track. Optional label on the right.
+Switch with an animated white thumb: Primary track when on, gray-3 when off. (The Figma kit has no switch; it uses the checkbox tokens.) Optional label on the right.
 
 ```dart
 UiSwitch(wifi, label: 'Wi-Fi', onChanged: (v) => setState(() => wifi = v))
@@ -99,7 +99,7 @@ UiRadioTile('Dark', value: ThemeMode.dark, groupValue: mode, onChanged: (v) => s
 
 ### UiChoiceCards
 
-Selectable cards with an icon, title, description and trailing text (such as a price). A selected card gets an accent border, a soft accent tint and a check badge. Use it for plan pickers and onboarding questions.
+Selectable cards with an icon, title, description and trailing text (such as a price). Cards are gray (no outline); a selected card gets a 1 px Primary border, a Primary tint and a check badge. Use it for plan pickers and onboarding questions.
 
 ```dart
 UiChoiceCards(options: plans, value: plan, onChanged: (v) => setState(() => plan = v))
@@ -123,11 +123,11 @@ UiChip('flutter', onDeleted: () => remove('flutter'))
 
 - `label` (positional).
 - `icon`: default `null`. `avatar`: a widget clipped to a circle. Default `null`.
-- `selected`: accent tint, accent border and a check mark. Default `false`.
+- `selected`: solid Primary fill, bold white label and a check mark. Default `false`.
 - `onTap`, `onDeleted`: default `null`.
 - `status`: color of an unselected chip. Default `UiStatus.neutral`.
-- `variant`: `UiChipVariant.outline` (default), `.soft` or `.filled`.
-- `size`: default `UiSize.md` (heights 28 / 34 / 40).
+- `variant`: `UiChipVariant.outline` (default, 1 px gray outline), `.soft` (Overlay fill for neutral) or `.filled`. Chips are 24 / 28 / 36 high pills (sm / md / lg).
+- `size`: default `UiSize.md` (heights 24 / 28 / 36).
 - `enabled`: `false` greys the chip out. Default `true`.
 - `showCheck`: show a check when selected and there is no icon. Default `true`.
 

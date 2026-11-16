@@ -126,9 +126,10 @@ class _UiTabsState extends State<UiTabs> with TickerProviderStateMixin {
     final variant = widget.variant;
     final scrollable = widget.scrollable && variant != UiTabsVariant.segment;
     final label = context.text.labelLarge!;
+    final regular = label.copyWith(fontWeight: FontWeight.w400);
     final onTap = widget.onChanged;
 
-    final double tabHeight = variant == UiTabsVariant.underline ? 44 : 36;
+    final double tabHeight = variant == UiTabsVariant.underline ? 36 : 28;
     final children = [
       for (final t in tabs)
         Tab(
@@ -147,61 +148,55 @@ class _UiTabsState extends State<UiTabs> with TickerProviderStateMixin {
           onTap: onTap,
           isScrollable: scrollable,
           tabAlignment: align,
-          indicator: UnderlineTabIndicator(
-            borderSide: BorderSide(color: enabled ? c.accent : c.textDisabled, width: 2),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          indicatorAnimation: TabIndicatorAnimation.elastic,
+          // Figma "tab": regular labels, active = foreground with a 1 px bar,
+          // rest gray-5 over a 1 px gray-3 rule.
+          indicator: UnderlineTabIndicator(borderSide: BorderSide(color: enabled ? c.text : c.textDisabled, width: 1)),
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorAnimation: TabIndicatorAnimation.linear,
           labelColor: enabled ? c.text : c.textDisabled,
-          unselectedLabelColor: enabled ? c.textMuted : c.textDisabled,
-          labelStyle: label,
-          unselectedLabelStyle: label.copyWith(fontWeight: FontWeight.w500),
-          dividerColor: c.border,
+          unselectedLabelColor: enabled ? c.textSubtle : c.textDisabled,
+          labelStyle: regular,
+          unselectedLabelStyle: regular,
+          dividerColor: c.gray(3),
           dividerHeight: 1,
-          labelPadding: const EdgeInsets.symmetric(horizontal: UiSpace.md),
+          labelPadding: const EdgeInsets.symmetric(horizontal: UiSpace.sm),
           splashBorderRadius: UiRadius.all(UiRadius.sm),
         );
       case UiTabsVariant.pill:
       case UiTabsVariant.segment:
-        final pill = variant == UiTabsVariant.pill;
-        final outer = pill ? UiRadius.full : UiRadius.md;
-        final inner = pill ? UiRadius.full : UiRadius.md - UiSpace.xs;
+        // Figma "segmented control": gray-2 pill track, 2 px inset, the
+        // selected segment a Primary pill with a bold label. Both variants
+        // share it; `segment` stays full width (not scrollable).
+        const outer = UiRadius.full;
+        const inner = UiRadius.full;
         final Color thumb;
         final Color selectedText;
         if (!enabled) {
-          thumb = c.border;
+          thumb = c.gray(3);
           selectedText = c.textDisabled;
-        } else if (pill) {
+        } else {
           thumb = c.accent;
           selectedText = c.onAccent;
-        } else {
-          thumb = c.isDark ? c.border : c.surface;
-          selectedText = c.text;
         }
         bar = DecoratedBox(
-          decoration: BoxDecoration(color: c.surfaceMuted, borderRadius: UiRadius.all(outer)),
+          decoration: BoxDecoration(color: c.gray(2), borderRadius: UiRadius.all(outer)),
           child: Padding(
-            padding: const EdgeInsets.all(UiSpace.xs),
+            padding: const EdgeInsets.all(UiSpace.xxs),
             child: TabBar(
               controller: controller,
               tabs: children,
               onTap: onTap,
               isScrollable: scrollable,
               tabAlignment: align,
-              indicator: BoxDecoration(
-                color: thumb,
-                borderRadius: UiRadius.all(inner),
-                boxShadow: pill || !enabled ? null : context.shadowSm,
-              ),
+              indicator: BoxDecoration(color: thumb, borderRadius: UiRadius.all(inner)),
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: selectedText,
-              unselectedLabelColor: enabled ? c.textMuted : c.textDisabled,
+              unselectedLabelColor: enabled ? c.gray(7) : c.textDisabled,
               labelStyle: label,
-              unselectedLabelStyle: label.copyWith(fontWeight: FontWeight.w500),
+              unselectedLabelStyle: regular,
               dividerHeight: 0,
-              dividerColor: c.border.withValues(alpha: 0),
-              labelPadding: const EdgeInsets.symmetric(horizontal: UiSpace.lg),
+              dividerColor: Colors.transparent,
+              labelPadding: const EdgeInsets.symmetric(horizontal: UiSpace.md),
               splashFactory: NoSplash.splashFactory,
               splashBorderRadius: UiRadius.all(inner),
             ),
@@ -243,7 +238,7 @@ class _TabCount extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minWidth: 20),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: UiRadius.all(UiRadius.full)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: UiRadius.all(UiRadius.full)),
       child: Text(
         count > 999 ? '999+' : '$count',
         textAlign: TextAlign.center,

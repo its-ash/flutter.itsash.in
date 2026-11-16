@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:theme/src/foundation/foundation.dart';
 
 /// Grid that picks its column count from the available width, so items are
-/// never narrower than [minItemWidth] and nothing overflows. Not lazy: use it
-/// for dozens of items, not thousands.
+/// never narrower than [minItemWidth] and nothing overflows. Not lazy: every
+/// child is built at once. Use it for a few dozen items; for long lists use
+/// [UiSliverResponsiveGrid], which builds only the rows on screen.
 ///
 /// ```dart
 /// UiResponsiveGrid(minItemWidth: 160, children: [for (final p in products) ProductCard(p)]);
@@ -65,24 +66,109 @@ class UiResponsiveGrid extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var r = 0; r < rows; r++) ...[if (r > 0) SizedBox(height: run), _row(r, cols)],
+            for (var r = 0; r < rows; r++) ...[
+              if (r > 0) SizedBox(height: run),
+              _gridRow(
+                cols: cols,
+                spacing: spacing,
+                equalHeight: equalHeight,
+                cell: (c) => r * cols + c < children.length ? children[r * cols + c] : null,
+              ),
+            ],
           ],
         );
       },
     );
   }
+}
 
-  Widget _row(int r, int cols) {
-    final row = Row(
-      crossAxisAlignment: equalHeight ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
-      children: [
-        for (var c = 0; c < cols; c++) ...[
-          if (c > 0) SizedBox(width: spacing),
-          Expanded(child: r * cols + c < children.length ? children[r * cols + c] : const SizedBox.shrink()),
-        ],
+/// One row of [cols] equal-width cells. A null cell leaves its slot empty.
+Widget _gridRow({
+  required int cols,
+  required double spacing,
+  required bool equalHeight,
+  required Widget? Function(int column) cell,
+}) {
+  final row = Row(
+    crossAxisAlignment: equalHeight ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
+    children: [
+      for (var c = 0; c < cols; c++) ...[
+        if (c > 0) SizedBox(width: spacing),
+        Expanded(child: cell(c) ?? const SizedBox.shrink()),
       ],
+    ],
+  );
+  return equalHeight ? IntrinsicHeight(child: row) : row;
+}
+
+/// Lazy [UiResponsiveGrid] for long lists, as a sliver: only the rows near
+/// the screen are built. Same column rule and look; items may have different
+/// heights (each row is as tall as its tallest item).
+///
+/// Put it in a `CustomScrollView` or `UiScaffold.slivers`.
+///
+/// ```dart
+/// UiSliverResponsiveGrid(minItemWidth: 76, itemCount: icons.length, itemBuilder: (context, i) => IconCell(icons[i]))
+/// ```
+class UiSliverResponsiveGrid extends StatelessWidget {
+  const UiSliverResponsiveGrid({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.minItemWidth = 160,
+    this.spacing = UiSpace.md,
+    this.runSpacing,
+    this.maxColumns,
+    this.equalHeight = false,
+  });
+
+  final int itemCount;
+
+  /// Builds item `index`. Called only when its row comes near the screen.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// Smallest width of one item. Always at least one column.
+  final double minItemWidth;
+
+  /// Space between columns.
+  final double spacing;
+
+  /// Space between rows. Defaults to [spacing].
+  final double? runSpacing;
+
+  /// Upper limit of columns.
+  final int? maxColumns;
+
+  /// Stretches items in a row to the tallest one.
+  final bool equalHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final run = runSpacing ?? spacing;
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final cols = UiResponsiveGrid.columnsFor(
+          constraints.crossAxisExtent,
+          minItemWidth: minItemWidth,
+          spacing: spacing,
+          maxColumns: maxColumns,
+        );
+        final rows = (itemCount / cols).ceil();
+        return SliverList.separated(
+          itemCount: rows,
+          separatorBuilder: (context, _) => SizedBox(height: run),
+          itemBuilder: (context, r) => _gridRow(
+            cols: cols,
+            spacing: spacing,
+            equalHeight: equalHeight,
+            cell: (c) {
+              final i = r * cols + c;
+              return i < itemCount ? itemBuilder(context, i) : null;
+            },
+          ),
+        );
+      },
     );
-    return equalHeight ? IntrinsicHeight(child: row) : row;
   }
 }
 

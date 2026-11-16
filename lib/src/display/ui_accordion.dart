@@ -18,7 +18,8 @@ class UiAccordionItem {
   final bool initiallyExpanded;
 }
 
-/// Collapsible sections in a bordered group, with a rotating chevron.
+/// Collapsible sections between 1 px Overlay rules, with a rotating chevron
+/// (Figma "accordion": gray-6 title when closed, foreground when open).
 ///
 /// ```dart
 /// UiAccordion(items: [UiAccordionItem('Shipping', Text('2–4 days'))])
@@ -80,9 +81,9 @@ class _UiAccordionState extends State<UiAccordion> {
         child: InkWell(
           onTap: () => _toggle(i),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 52),
+            constraints: const BoxConstraints(minHeight: 56),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.md),
+              padding: const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: UiSpace.md),
               child: Row(
                 children: [
                   if (item.icon != null) ...[UiIconBox(item.icon!, size: 28), const SizedBox(width: UiSpace.md)],
@@ -95,7 +96,7 @@ class _UiAccordionState extends State<UiAccordion> {
                           item.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500, height: 1.3),
+                          style: text.bodyMedium?.copyWith(color: open ? colors.text : colors.textMuted),
                         ),
                         if (item.subtitle != null)
                           Padding(
@@ -104,7 +105,7 @@ class _UiAccordionState extends State<UiAccordion> {
                               item.subtitle!,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: text.bodySmall?.copyWith(color: colors.textMuted),
+                              style: text.bodySmall?.copyWith(color: colors.textSubtle),
                             ),
                           ),
                       ],
@@ -115,7 +116,7 @@ class _UiAccordionState extends State<UiAccordion> {
                     turns: open ? 0.5 : 0,
                     duration: duration,
                     curve: UiMotion.standard,
-                    child: Icon(Icons.expand_more_rounded, size: 20, color: colors.textSubtle),
+                    child: Icon(Icons.expand_more_rounded, size: 20, color: open ? colors.text : colors.textMuted),
                   ),
                 ],
               ),
@@ -139,13 +140,13 @@ class _UiAccordionState extends State<UiAccordion> {
               ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            item.icon != null ? UiSpace.lg + 28 + UiSpace.md : UiSpace.lg,
+            item.icon != null ? UiSpace.page + 28 + UiSpace.md : UiSpace.page,
             0,
-            UiSpace.lg,
+            UiSpace.page,
             UiSpace.lg,
           ),
           child: DefaultTextStyle.merge(
-            style: text.bodyMedium?.copyWith(color: colors.textMuted),
+            style: text.bodyMedium?.copyWith(color: colors.gray(7)),
             child: item.child,
           ),
         ),
@@ -159,17 +160,13 @@ class _UiAccordionState extends State<UiAccordion> {
     }
 
     return Material(
-      color: colors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: UiRadius.all(UiRadius.lg),
-        side: BorderSide(color: colors.border),
-      ),
+      type: MaterialType.transparency,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (var i = 0; i < items.length; i++) ...[if (i > 0) const Divider(height: 1), section(i)],
+          const Divider(height: 1),
+          for (var i = 0; i < items.length; i++) ...[section(i), const Divider(height: 1)],
         ],
       ),
     );

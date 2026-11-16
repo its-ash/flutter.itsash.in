@@ -3,7 +3,7 @@
 Alerts, toasts, dialogs, sheets, menus, popovers, progress, skeletons and empty/error states. Import `package:theme/theme.dart`.
 
 ### UiAlert
-Inline callout box with a soft status tint.
+Inline callout box with a soft status tint (the design's colored overlays), radius 8, no border.
 ```dart
 UiAlert('Your trial ends in 3 days.', title: 'Heads up', status: UiStatus.warning)
 ```
@@ -28,7 +28,7 @@ UiBanner("You're offline", visible: offline, status: UiStatus.warning, actionLab
 - `onDismiss` — shows a close button when set.
 
 ### UiToast
-Floating notification cards on the app overlay. They slide in, stack (max 3), auto-dismiss and can be swiped away. Returns a `Future` that completes on dismiss.
+Floating notification cards on the app overlay, on the inverse surface (radius 8). They slide in, stack (max 3), auto-dismiss and can be swiped away. Returns a `Future` that completes on dismiss.
 ```dart
 UiToast.show(context, 'Saved', status: UiStatus.success);
 context.showToast('Deleted', actionLabel: 'Undo', onAction: undo);
@@ -58,7 +58,7 @@ context.showSnack('Archived', action: 'Undo', onAction: undo, status: UiStatus.s
 - `persist` — Flutter default (stays open when it has an action).
 
 ### UiDialog
-Centered modal dialogs. Icon in a tinted circle, centered title and message. Buttons sit in a row when they fit, else stack full width with the main action on top.
+Centered modal dialogs (Ash Theme "dialog"): gray-2 surface, radius 12, level 3 shadow, 24 padding. A round close control sits top right when the dialog is dismissible. Optional icon in a tinted circle, left-aligned H3 title and gray message. Buttons stack full width, 36 high, the main (Primary) action on top and the others as dim (Overlay) buttons.
 ```dart
 final ok = await UiDialog.confirm(context, title: 'Delete note?', destructive: true);
 final name = await UiDialog.prompt(context, title: 'Rename', initialValue: note.title);
@@ -174,10 +174,10 @@ UiProgressBar(0.4, label: 'Uploading', showPercent: true)
 const UiProgressBar(null)
 ```
 - `value` (positional) — 0 to 1, or `null`.
-- `status` — fill color. Default `accent`.
+- `status` — fill color. Default `neutral` (the foreground color, as in the design's 2 px progress bar on a gray-3 track).
 - `label` — text above, left. Default none.
 - `showPercent` — percent above, right. Default `false`.
-- `height` — default `6`.
+- `height` — default `2` (square ends; taller bars get round ends).
 - `UiProgressBar.indeterminate({status, label, height})` — same as `UiProgressBar(null)`.
 
 ### UiProgressRing
@@ -186,7 +186,7 @@ Circular progress. `null` value spins.
 UiProgressRing(0.72, showPercent: true, size: 64)
 ```
 - `value` (positional) — 0 to 1, or `null`.
-- `size` — default `44`. `stroke` — default `4`.
+- `size` — default `44`. `stroke` — default `3`. Track is gray-3.
 - `status` — default `accent`.
 - `center` — widget in the middle. Default none.
 - `showPercent` — percent in the middle when `center` is null. Default `false`.
@@ -205,8 +205,8 @@ const UiSkeleton.text(lines: 2)
 const UiSkeleton.circle(size: 48)
 const UiSkeleton.box(height: 160)
 ```
-- `UiSkeleton({width, height = 14, radius = 6})` — one bar. Null width fills.
-- `UiSkeleton.box({width, height = 120, radius = 14})` — a block.
+- `UiSkeleton({width, height = 14, radius = 4})` — one bar. Null width fills.
+- `UiSkeleton.box({width, height = 120, radius = 8})` — a block.
 - `UiSkeleton.text({lines = 3, height = 12})` — paragraph; last line is shorter.
 - `UiSkeleton.circle({size = 40})` — avatar.
 

@@ -46,6 +46,7 @@ abstract final class UiDialog {
       builder: (ctx) => _DialogFrame(
         icon: icon,
         status: status,
+        closable: dismissible,
         title: title,
         message: message,
         content: content,
@@ -181,10 +182,10 @@ class _IconBadge extends StatelessWidget {
     final c = context.colors;
     final tone = c.tone(status);
     return Container(
-      width: 52,
-      height: 52,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(color: tone.soft, shape: BoxShape.circle),
-      child: Icon(icon, size: 26, color: status == UiStatus.neutral ? c.textMuted : tone.color),
+      child: Icon(icon, size: 20, color: status == UiStatus.neutral ? c.textMuted : tone.color),
     );
   }
 }
@@ -197,6 +198,7 @@ class _DialogFrame extends StatelessWidget {
     this.message,
     this.content,
     this.buttons = const [],
+    this.closable = false,
   });
 
   final IconData? icon;
@@ -206,59 +208,67 @@ class _DialogFrame extends StatelessWidget {
   final Widget? content;
   final List<Widget> buttons;
 
+  /// Shows the round close control in the top row.
+  final bool closable;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    // Figma "dialog": gray-2 surface, radius 12, level 3 shadow, 24 padding,
+    // left-aligned H3 title and gray-6 description, stacked full-width buttons.
     return Dialog(
-      backgroundColor: c.surfaceRaised,
-      shape: RoundedRectangleBorder(
-        borderRadius: UiRadius.all(UiRadius.xl),
-        side: BorderSide(color: c.border),
-      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        child: Padding(
-          padding: const EdgeInsets.all(UiSpace.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (icon != null) ...[
-                        Center(
-                          child: _IconBadge(icon: icon!, status: status),
-                        ),
-                        const SizedBox(height: UiSpace.lg),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surfaceRaised,
+            borderRadius: UiRadius.all(UiRadius.lg),
+            boxShadow: context.shadowLg,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(UiSpace.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (closable)
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: _CloseControl(onTap: () => Navigator.of(context).maybePop()),
+                  ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (icon != null) ...[
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: _IconBadge(icon: icon!, status: status),
+                          ),
+                          const SizedBox(height: UiSpace.lg),
+                        ],
+                        if (title != null) Semantics(header: true, child: Text(title!, style: t.headlineSmall)),
+                        if (message != null) ...[
+                          if (title != null) const SizedBox(height: UiSpace.md),
+                          Text(message!, style: t.bodyMedium?.copyWith(color: c.textMuted)),
+                        ],
+                        if (content != null) ...[
+                          if (title != null || message != null) const SizedBox(height: UiSpace.lg),
+                          content!,
+                        ],
                       ],
-                      if (title != null)
-                        Semantics(
-                          header: true,
-                          child: Text(title!, textAlign: TextAlign.center, style: t.titleLarge),
-                        ),
-                      if (message != null) ...[
-                        if (title != null) const SizedBox(height: UiSpace.sm),
-                        Text(
-                          message!,
-                          textAlign: TextAlign.center,
-                          style: t.bodyMedium?.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                      if (content != null) ...[
-                        if (title != null || message != null) const SizedBox(height: UiSpace.lg),
-                        content!,
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              if (buttons.isNotEmpty) ...[const SizedBox(height: UiSpace.xl), _DialogButtons(buttons: buttons)],
-            ],
+                if (buttons.isNotEmpty) ...[const SizedBox(height: UiSpace.xl), _DialogButtons(buttons: buttons)],
+              ],
+            ),
           ),
         ),
       ),
@@ -266,8 +276,33 @@ class _DialogFrame extends StatelessWidget {
   }
 }
 
-/// Lays buttons out in a row when there is room, else stacked full width
-/// with the main action on top.
+/// The 24 px round Overlay close control of the dialog's top row.
+class _CloseControl extends StatelessWidget {
+  const _CloseControl({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      button: true,
+      label: MaterialLocalizations.of(context).closeButtonTooltip,
+      excludeSemantics: true,
+      child: Material(
+        color: c.surfaceMuted,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox.square(dimension: 24, child: Icon(Icons.close_rounded, size: 16, color: c.textMuted)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stacks the buttons full width with the main action (the last one) on top.
 class _DialogButtons extends StatelessWidget {
   const _DialogButtons({required this.buttons});
 
@@ -275,28 +310,13 @@ class _DialogButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final row = buttons.length <= 2 && constraints.maxWidth >= 300;
-        if (row) {
-          return Row(
-            children: [
-              for (var i = 0; i < buttons.length; i++) ...[
-                if (i > 0) const SizedBox(width: UiSpace.sm),
-                Expanded(child: buttons[i]),
-              ],
-            ],
-          );
-        }
-        final stacked = buttons.reversed.toList();
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < stacked.length; i++) ...[if (i > 0) const SizedBox(height: UiSpace.sm), stacked[i]],
-          ],
-        );
-      },
+    final stacked = buttons.reversed.toList();
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < stacked.length; i++) ...[if (i > 0) const SizedBox(height: UiSpace.lg), stacked[i]],
+      ],
     );
   }
 }
@@ -320,11 +340,13 @@ class _DialogButton extends StatelessWidget {
         child: text,
       );
     }
-    return OutlinedButton(
+    // "Dim" button: Overlay fill, regular label.
+    return FilledButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: destructive ? c.danger : c.text,
-        side: BorderSide(color: c.border),
+      style: FilledButton.styleFrom(
+        backgroundColor: c.surfaceMuted,
+        foregroundColor: destructive ? c.danger : c.gray(7),
+        textStyle: context.text.bodyMedium,
       ),
       child: text,
     );

@@ -18,7 +18,7 @@ class UiSurface extends StatelessWidget {
     this.radius = UiRadius.lg,
     this.color,
     this.tone,
-    this.border = true,
+    this.border = false,
     this.borderColor,
     this.shadow,
     this.onTap,
@@ -37,7 +37,8 @@ class UiSurface extends StatelessWidget {
   /// Tints the fill and border with a status color.
   final UiStatus? tone;
 
-  /// Draws a 1 px border.
+  /// Draws a 1 px border. Off by default: surfaces are separated by fill
+  /// (gray-2 on the page background), not by outlines.
   final bool border;
   final Color? borderColor;
 

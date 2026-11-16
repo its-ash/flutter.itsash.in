@@ -10,8 +10,8 @@ UiCard(onTap: open, child: Text('Hello'))
 - `child` (required)
 - `padding` = `EdgeInsets.all(UiSpace.lg)`
 - `onTap`, `onLongPress`: null means not tappable
-- `variant` = `UiCardVariant.outlined` (`outlined`, `filled`, `elevated`, `ghost`)
-- `selected` = `false`: accent border and soft ring
+- `variant` = `UiCardVariant.outlined` (`outlined`: gray-2 surface, radius 12, no border; `filled`: Overlay fill; `elevated`: surface with a level 2 shadow; `ghost`)
+- `selected` = `false`: Primary border and 4 px ring
 - `header`, `footer`: shown with a divider
 - `radius` = `UiRadius.lg`, `semanticLabel`
 
@@ -38,24 +38,34 @@ UiIconBox(Icons.bolt_rounded, status: UiStatus.warning)
 - `size` = `32`, `solid` = `false`
 
 ### UiListGroup
-An iOS-style grouped list: a rounded surface with hairline dividers and captions. Good for settings screens.
+A grouped list: rows (Figma "menu item list": 14 regular title, 12 gray-5 captions, gray-5 value, 16 px chevron; solid Primary when `selected`) with 1 px Overlay dividers and a 14 bold header. Good for settings screens.
 ```dart
 UiListGroup(header: 'Account', children: [UiListTile('Profile', chevron: true, onTap: open)])
 ```
 - `children` (required)
 - `header`, `footer`: caption text
-- `inset` = `true`: rounded card. False means full width with top and bottom borders only
+- `inset` = `true`: gray-2 card, radius 12, no border. False means full width on the page background with top and bottom rules only
 - `dividers` = `true`
+- `UiKeyValue` and `UiKeyValueList` children get the same horizontal inset as tiles; other custom children add their own padding
+- Builds every row at once. For long lists use `UiSliverListGroup`
+
+### UiSliverListGroup
+The lazy `UiListGroup`, as a sliver. It looks the same, but only the rows near the screen are built. Use it for long lists in `UiScaffold.slivers` or a `CustomScrollView`.
+```dart
+UiSliverListGroup(header: 'Apps', itemCount: apps.length, itemBuilder: (context, i) => UiListTile(apps[i].name))
+```
+- `itemCount`, `itemBuilder` (required)
+- `header`, `footer`, `inset` = `true`, `dividers` = `true`: as in `UiListGroup`
 
 ### UiAvatar
-A picture, initials or icon, with an optional status dot. The tint comes from the name, so it is always the same for the same name.
+A picture, initials or icon, with an optional status dot. Without a picture it is the "empty avatar": gray-2 circle, bold gray-5 initials.
 ```dart
 UiAvatar(name: 'Ada Lovelace', image: NetworkImage(url), status: UiStatus.success)
 ```
-- `name`: gives the initials and the tint
+- `name`: gives the initials
 - `image`: shows initials while it loads and if it fails
 - `icon`: used when there is no name (default person icon)
-- `size` = `UiSize.md` (32 / 40 / 56), or `diameter` in px
+- `size` = `UiSize.md` (24 / 48 / 96), or `diameter` in px
 - `status`: `success` online, `warning` away, `danger` busy, `neutral` offline
 - `shape` = `UiAvatarShape.circle` (`circle`, `rounded`)
 - `color`: custom tint. `semanticLabel`
@@ -81,14 +91,14 @@ UiBadge(count: unread, child: Icon(Icons.notifications_rounded))
 - `UiBadge.standalone(count: 3)` gives an inline badge (or a dot)
 
 ### UiCountBadge
-An inline count pill, e.g. next to a menu label.
+An inline count bubble (20 px, 10 px number), e.g. next to a menu label.
 ```dart
 UiCountBadge(5)
 ```
 - `count` (positional), `status` = `UiStatus.danger`, `max` = `99`, `ring` = `false`
 
 ### UiStatusPill
-A soft tinted pill for a state, with an optional pulsing dot or icon.
+A badge (radius 2, 20 high at `sm`, 12 px regular label) for a state, with an optional pulsing dot or icon. Neutral is the dim style (gray-2 fill, gray-6 text); other statuses use their soft tint.
 ```dart
 UiStatusPill('Online', status: UiStatus.success, pulse: true)
 ```
@@ -102,7 +112,7 @@ A small rectangular label, can be removable.
 UiTag('Design', color: Colors.purple, onRemove: () => remove('Design'))
 ```
 - `label` (positional)
-- `color` (custom tint) or `status`. Neither gives a neutral outlined tag
+- `color` (custom tint) or `status`. Neither gives the ghost tag: 1 px gray-5 outline, gray-5 text. Radius 2, 20 high
 - `icon`, `onRemove`
 
 ### UiKbd
@@ -141,7 +151,7 @@ UiKeyValueList([UiKeyValue('Status', 'Paid'), UiKeyValue('Total', '\$42.00')])
 - `UiKeyValueList.map({'Status': 'Paid'})`
 
 ### UiTable
-A bordered data table with sortable headers, row taps and striped rows. It scrolls sideways when it is wider than the screen.
+A data table on a gray-2 card (radius 12, no border) with sortable headers, row taps and striped rows. It scrolls sideways when it is wider than the screen.
 ```dart
 UiTable<User>(columns: [UiTableColumn('Name', text: (u) => u.name, sortBy: (u) => u.name)], rows: users)
 ```

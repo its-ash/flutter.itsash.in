@@ -261,7 +261,7 @@ class _UiAutocompleteState<T extends Object> extends State<UiAutocomplete<T>> {
     } else {
       body = ListView.builder(
         shrinkWrap: true,
-        padding: const EdgeInsets.all(UiSpace.xs),
+        padding: const EdgeInsets.symmetric(vertical: UiSpace.sm),
         itemCount: _results.length,
         itemBuilder: (context, i) {
           final item = _results[i];
@@ -269,24 +269,28 @@ class _UiAutocompleteState<T extends Object> extends State<UiAutocomplete<T>> {
           final active = i == _highlight;
           return Material(
             color: active ? c.surfaceMuted : Colors.transparent,
-            borderRadius: UiRadius.all(UiRadius.sm),
             child: InkWell(
-              borderRadius: UiRadius.all(UiRadius.sm),
+              hoverColor: Colors.transparent,
               onTap: () => _select(item),
               onHover: (h) {
                 if (h && _highlight != i) setState(() => _highlight = i);
               },
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 40),
+                constraints: const BoxConstraints(minHeight: 36),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.md, vertical: UiSpace.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.page, vertical: 6),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Highlighted(text: _display(item), query: _query),
                       if (sub != null)
-                        Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.bodySmall),
+                        Text(
+                          sub,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.text.bodySmall?.copyWith(color: c.textSubtle),
+                        ),
                     ],
                   ),
                 ),
@@ -297,21 +301,19 @@ class _UiAutocompleteState<T extends Object> extends State<UiAutocomplete<T>> {
       );
     }
     return DecoratedBox(
-      decoration: BoxDecoration(borderRadius: UiRadius.all(UiRadius.md), boxShadow: context.shadowMd),
+      decoration: BoxDecoration(borderRadius: UiRadius.all(UiRadius.lg), boxShadow: context.shadowMd),
       child: Material(
         color: c.surfaceRaised,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: UiRadius.all(UiRadius.md),
-          side: BorderSide(color: c.border),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: UiRadius.all(UiRadius.lg)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 280),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_loading && _results.isNotEmpty) LinearProgressIndicator(minHeight: 2, color: c.accent),
+              if (_loading && _results.isNotEmpty)
+                LinearProgressIndicator(minHeight: 2, color: c.accent, backgroundColor: c.gray(3)),
               Flexible(child: body),
             ],
           ),
@@ -356,23 +358,27 @@ class _UiAutocompleteState<T extends Object> extends State<UiAutocomplete<T>> {
                     canRequestFocus: false,
                     skipTraversal: true,
                     onKeyEvent: _onKey,
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focus,
+                    child: FieldFrame(
                       enabled: widget.enabled,
-                      onChanged: (v) {
-                        field.didChange(v);
-                        _onText(v);
-                      },
-                      textAlignVertical: TextAlignVertical.center,
-                      style: fieldTextStyle(context, widget.size, enabled: widget.enabled),
-                      decoration: fieldDecoration(
-                        context,
-                        hint: widget.hint,
-                        prefixIcon: widget.prefixIcon,
-                        size: widget.size,
-                        hasError: err != null,
+                      hasError: err != null,
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focus,
                         enabled: widget.enabled,
+                        onChanged: (v) {
+                          field.didChange(v);
+                          _onText(v);
+                        },
+                        textAlignVertical: TextAlignVertical.center,
+                        style: fieldTextStyle(context, widget.size, enabled: widget.enabled),
+                        decoration: fieldDecoration(
+                          context,
+                          hint: widget.hint,
+                          prefixIcon: widget.prefixIcon,
+                          size: widget.size,
+                          hasError: err != null,
+                          enabled: widget.enabled,
+                        ),
                       ),
                     ),
                   ),
@@ -411,7 +417,7 @@ class _Highlighted extends StatelessWidget {
           TextSpan(text: text.substring(0, i)),
           TextSpan(
             text: text.substring(i, i + query.length),
-            style: TextStyle(color: c.text, fontWeight: FontWeight.w700),
+            style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
           ),
           TextSpan(text: text.substring(i + query.length)),
         ],

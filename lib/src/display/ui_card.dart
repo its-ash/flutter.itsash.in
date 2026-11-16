@@ -4,13 +4,13 @@ import 'package:theme/src/foundation/foundation.dart';
 
 /// Visual style of a [UiCard].
 enum UiCardVariant {
-  /// Surface with a 1 px border. The default.
+  /// Gray-2 surface, radius 12, no border and no shadow. The default.
   outlined,
 
-  /// Muted fill, no border.
+  /// Translucent Overlay fill, no border.
   filled,
 
-  /// Surface with a border and a soft shadow.
+  /// Surface with a level 2 shadow.
   elevated,
 
   /// No fill and no border; only shows feedback when tapped.
@@ -82,12 +82,7 @@ class _UiCardState extends State<UiCard> {
       UiCardVariant.filled => colors.surfaceMuted,
       UiCardVariant.ghost => Colors.transparent,
     };
-    final Color borderColor = selected
-        ? colors.accent
-        : switch (widget.variant) {
-            UiCardVariant.outlined || UiCardVariant.elevated => colors.border,
-            UiCardVariant.filled || UiCardVariant.ghost => Colors.transparent,
-          };
+    final Color borderColor = selected ? colors.accent : Colors.transparent;
 
     final sections = <Widget>[
       if (widget.header != null) ...[Padding(padding: widget.padding, child: widget.header), const Divider(height: 1)],
@@ -120,7 +115,7 @@ class _UiCardState extends State<UiCard> {
 
     final shadows = <BoxShadow>[
       if (widget.variant == UiCardVariant.elevated) ...context.shadowMd,
-      if (selected) BoxShadow(color: colors.accent.withValues(alpha: 0.18), spreadRadius: 3),
+      if (selected) ...UiShadows.ring(colors.accent),
     ];
     card = AnimatedContainer(
       duration: context.motion(UiMotion.normal),

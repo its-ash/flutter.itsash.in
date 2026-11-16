@@ -134,20 +134,16 @@ class _ChoiceCard extends StatelessWidget {
                 duration: duration,
                 curve: UiMotion.standard,
                 padding: const EdgeInsets.all(UiSpace.lg),
+                // Gray card with no outline; selected gets a Primary tint and
+                // a 1 px Primary border.
                 decoration: BoxDecoration(
                   color: selected
-                      ? c.accentSoft
+                      ? Color.alphaBlend(c.accentSoft, c.surface)
                       : state.hovered
-                      ? c.surfaceMuted
+                      ? c.surfaceMutedSolid
                       : c.surface,
                   borderRadius: UiRadius.all(UiRadius.lg),
-                  border: Border.all(
-                    color: selected
-                        ? c.accent
-                        : state.hovered
-                        ? c.borderStrong
-                        : c.border,
-                  ),
+                  border: Border.all(color: selected ? c.accent : Colors.transparent),
                   boxShadow: _focusRing(c, state.focused),
                 ),
                 child: Row(
@@ -160,7 +156,7 @@ class _ChoiceCard extends StatelessWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           color: selected ? c.accent : c.surfaceMuted,
-                          borderRadius: UiRadius.all(UiRadius.md),
+                          borderRadius: UiRadius.all(UiRadius.full),
                         ),
                         child: Icon(choice.icon, size: 20, color: selected ? c.onAccent : c.textMuted),
                       ),
@@ -206,7 +202,7 @@ class _ChoiceCard extends StatelessWidget {
           choice.description!,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: context.text.bodySmall?.copyWith(color: c.textMuted),
+          style: context.text.bodySmall?.copyWith(color: c.textSubtle),
         ),
       ],
     ],
@@ -231,9 +227,9 @@ class _CardBadge extends StatelessWidget {
       width: 20,
       height: 20,
       decoration: BoxDecoration(
-        color: selected ? c.accent : c.surface,
+        color: selected ? c.accent : c.gray(2),
         borderRadius: UiRadius.all(multi ? UiRadius.xs : UiRadius.full),
-        border: Border.all(color: selected ? c.accent : c.borderStrong, width: 1.5),
+        border: Border.all(color: selected ? c.accent : c.borderStrong),
       ),
       child: AnimatedScale(
         scale: selected ? 1 : 0,

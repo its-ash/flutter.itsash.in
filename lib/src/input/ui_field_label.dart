@@ -50,9 +50,9 @@ class UiFieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final hasError = error != null && error!.isNotEmpty;
-    final bottomText = hasError ? error : helper;
+    final bottomText = hasError ? null : helper;
     final showBottom = (bottomText != null && bottomText.isNotEmpty) || counter != null;
-    final small = context.text.bodySmall ?? const TextStyle(fontSize: 12.5);
+    final small = context.text.bodySmall ?? const TextStyle(fontSize: 12);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -60,7 +60,7 @@ class UiFieldLabel extends StatelessWidget {
       children: [
         if (label != null || trailing != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: UiSpace.sm - 2),
+            padding: const EdgeInsets.only(bottom: UiSpace.xs + 2),
             child: Row(
               children: [
                 Expanded(
@@ -79,20 +79,49 @@ class UiFieldLabel extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: context.text.labelLarge?.copyWith(
-                            color: enabled ? c.text : c.textDisabled,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: small.copyWith(color: enabled ? c.textMuted : c.textDisabled),
                         ),
                 ),
                 if (trailing != null) ...[
                   const SizedBox(width: UiSpace.sm),
-                  DefaultTextStyle.merge(style: context.text.labelMedium, child: trailing!),
+                  DefaultTextStyle.merge(
+                    style: small.copyWith(color: c.accent),
+                    child: trailing!,
+                  ),
                 ],
               ],
             ),
           ),
         child,
+        // Error: a solid danger caption strip joined to the bottom of the field.
+        AnimatedSize(
+          duration: context.motion(UiMotion.fast),
+          curve: UiMotion.standard,
+          alignment: Alignment.topCenter,
+          child: !hasError
+              ? const SizedBox(width: double.infinity)
+              : Container(
+                  key: ValueKey('error_$error'),
+                  padding: const EdgeInsets.symmetric(horizontal: UiSpace.lg, vertical: UiSpace.xs),
+                  decoration: BoxDecoration(
+                    color: c.danger,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(UiRadius.md)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Icon(Icons.warning_rounded, size: 12, color: c.onDanger),
+                      ),
+                      const SizedBox(width: UiSpace.sm),
+                      Expanded(
+                        child: Text(error!, style: small.copyWith(color: c.onDanger)),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
         AnimatedSize(
           duration: context.motion(UiMotion.fast),
           curve: UiMotion.standard,
@@ -104,13 +133,6 @@ class UiFieldLabel extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (hasError) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Icon(Icons.error_outline_rounded, size: 14, color: c.danger),
-                        ),
-                        const SizedBox(width: UiSpace.xs),
-                      ],
                       Expanded(
                         child: AnimatedSwitcher(
                           duration: context.motion(UiMotion.fast),
@@ -118,8 +140,8 @@ class UiFieldLabel extends StatelessWidget {
                               Stack(alignment: AlignmentDirectional.topStart, children: [...previous, ?current]),
                           child: Text(
                             bottomText ?? '',
-                            key: ValueKey('${hasError}_$bottomText'),
-                            style: small.copyWith(color: hasError ? c.danger : c.textSubtle),
+                            key: ValueKey('helper_$bottomText'),
+                            style: small.copyWith(color: c.textSubtle),
                           ),
                         ),
                       ),
